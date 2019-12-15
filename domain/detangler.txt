@@ -1,0 +1,36 @@
+{
+  reportDir domain/target/detangled
+  searchPaths
+  [
+    ./domain/target/kotlin-tryme-domain-0.1.0.jar
+  ]
+  level 2
+  startsWith
+  {
+    include
+    [
+      [
+        com
+        seanshubin
+        kotlin
+        tryme
+      ]
+    ]
+    exclude []
+    drop
+    [
+      [
+        com
+        seanshubin
+        kotlin
+        tryme
+      ]
+    ]
+  }
+  ignoreFiles []
+  canFailBuild true
+  ignoreJavadoc true
+  logTiming true
+  logEffectiveConfiguration true
+  allowedInCycle domain/detangler-allowed-in-cycle.txt
+}
