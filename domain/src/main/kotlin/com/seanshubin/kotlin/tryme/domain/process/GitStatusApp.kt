@@ -8,54 +8,7 @@ import java.nio.file.Paths
 import java.util.function.Predicate
 import java.util.stream.Collectors
 
-interface Command {
-    fun runInDirectory(processRunner: ProcessRunner, directory: Path): CommandResult
-}
-
-class CommandResult(val isSuccessful: Boolean, val input: ProcessInput, val output: ProcessOutput) {
-    fun toMultipleLineString(): List<String> = listOf("CommandResult") + compose().indent()
-    private fun compose(): List<String> = listOf("isSuccessful = $isSuccessful") + composeInput() + composeOutput()
-    private fun composeInput(): List<String> = input.toMultipleLineString()
-    private fun composeOutput(): List<String> = output.toMultipleLineString()
-}
-
-fun expectZeroExitCode(input: ProcessInput, output: ProcessOutput) = CommandResult(output.exitCode == 0, input, output)
-fun expectNoOutputLines(input: ProcessInput, output: ProcessOutput) =
-    CommandResult(output.exitCode == 0 && output.outputLines.isEmpty(), input, output)
-
-object GitFetch : Command {
-    override fun runInDirectory(processRunner: ProcessRunner, directory: Path): CommandResult {
-        val input = ProcessInput(listOf("git", "fetch"), directory)
-        val output = processRunner.run(input)
-        return expectZeroExitCode(input, output)
-    }
-}
-
-object GitStatus : Command {
-    override fun runInDirectory(processRunner: ProcessRunner, directory: Path): CommandResult {
-        val input = ProcessInput(listOf("git", "status", "-s"), directory)
-        val output = processRunner.run(input)
-        return expectNoOutputLines(input, output)
-    }
-}
-
-object GitLocalChanges : Command {
-    override fun runInDirectory(processRunner: ProcessRunner, directory: Path): CommandResult {
-        val input = ProcessInput(listOf("git", "log", "--oneline", "@{u}.."), directory)
-        val output = processRunner.run(input)
-        return expectNoOutputLines(input, output)
-    }
-}
-
-object GitUnmergedChanges : Command {
-    override fun runInDirectory(processRunner: ProcessRunner, directory: Path): CommandResult {
-        val input = ProcessInput(listOf("git", "log", "--oneline", "..@{u}"), directory)
-        val output = processRunner.run(input)
-        return expectNoOutputLines(input, output)
-    }
-}
-
-class DirectoryResult(val directory: Path, val commandResults: List<CommandResult>) {
+class DirectoryResult(val directory: Path, val commandResults: List<Command.CommandResult>) {
     fun toMultipleLineString(): List<String> = listOf("DirectoryResult") + compose().indent()
     fun hasUnsuccessfulCommand(): Boolean = commandResults.any { !it.isSuccessful }
     private fun compose(): List<String> = listOf("directory = $directory") + composeCommandResults()
@@ -78,8 +31,13 @@ fun getDirectories(basePath: Path): List<Path> {
     return Files.list(basePath).filter(AcceptDirectory).filter(notIgnored).collect(Collectors.toList())
 }
 
-fun getCommands(): List<Command> = listOf(GitFetch, GitStatus, GitLocalChanges, GitUnmergedChanges)
-fun runCommandInDirectory(processRunner: ProcessRunner, command: Command, directory: Path): CommandResult =
+fun getCommands(): List<Command> = listOf(
+        Command.GitFetch,
+        Command.GitStatus,
+        Command.GitLocalChanges,
+        Command.GitUnmergedChanges)
+
+fun runCommandInDirectory(processRunner: ProcessRunner, command: Command, directory: Path): Command.CommandResult =
     command.runInDirectory(processRunner, directory)
 
 fun runCommandsInDirectory(processRunner: ProcessRunner, commands: List<Command>, directory: Path): DirectoryResult {
