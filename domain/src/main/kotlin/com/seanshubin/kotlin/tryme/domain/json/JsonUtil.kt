@@ -6,11 +6,13 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 
 object JsonUtil {
-    val mapper: ObjectMapper = ObjectMapper().registerKotlinModule().enable(SerializationFeature.INDENT_OUTPUT)
+    val pretty: ObjectMapper = ObjectMapper().registerKotlinModule().enable(SerializationFeature.INDENT_OUTPUT)
+    val compact: ObjectMapper = ObjectMapper().registerKotlinModule()
+    val parser: ObjectMapper = compact
 
     fun String.normalizeJson(): String {
-        val asObject = mapper.readValue<Any>(this)
-        val asNormalized = mapper.writeValueAsString(asObject)
+        val asObject = parser.readValue<Any>(this)
+        val asNormalized = pretty.writeValueAsString(asObject)
         return asNormalized
     }
 }
