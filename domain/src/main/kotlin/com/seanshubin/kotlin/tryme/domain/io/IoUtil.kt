@@ -52,4 +52,19 @@ object IoUtil {
         val inputStream = bytesToInputStream(bytes)
         feedInputStreamToOutputStream(inputStream, outputStream)
     }
+
+    fun readerToIterator(reader: Reader): Iterator<Char> {
+        return object : Iterator<Char> {
+            var current = reader.read()
+            override fun hasNext(): Boolean {
+                return current != -1
+            }
+
+            override fun next(): Char {
+                val old = current
+                current = reader.read()
+                return old.toChar()
+            }
+        }
+    }
 }
