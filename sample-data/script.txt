@@ -1,0 +1,9 @@
+create-dir
+    path target
+
+create-file
+    path target/foo.txt
+
+write-line
+    path target/foo.txt
+    line Hello!
