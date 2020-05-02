@@ -95,14 +95,15 @@ class DurationFormat(private val scales: List<Scale>, val padded: Boolean) {
         private val minuteScale = Scale(60, "minute", "minutes", 2)
         private val hourScale = Scale(24, "hour", "hours", 2)
         private val dayScale = Scale(Long.MAX_VALUE, "day", "days", 0)
-        private val millisecondScales = listOf(
-            millisecondScale,
+        private val secondScales = listOf(
             secondScale,
             minuteScale,
             hourScale,
             dayScale
         )
-        private val nanosecondScales = listOf(nanosecondScale, microsecondScale) + millisecondScales
+        private val millisecondScales = listOf(millisecondScale) + secondScales
+        private val nanosecondScales =
+            listOf(nanosecondScale, microsecondScale) + millisecondScales
 
         private data class Segment(val scale: Scale, val quantity: Long) {
             override fun toString(): String = "$quantity ${scale.name(quantity)}"
@@ -123,6 +124,8 @@ class DurationFormat(private val scales: List<Scale>, val padded: Boolean) {
             return Builder(remain, builder.segments + segment)
         }
 
+        val seconds = DurationFormat(secondScales, padded = false)
+        val secondsPadded = DurationFormat(secondScales, padded = true)
         val milliseconds = DurationFormat(millisecondScales, padded = false)
         val millisecondsPadded = DurationFormat(millisecondScales, padded = true)
         val nanoseconds = DurationFormat(nanosecondScales, padded = false)
