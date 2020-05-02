@@ -106,6 +106,8 @@ fun BufferedReader.toLineIterator(): Iterator<String> {
   }
 }
 
+fun InputStream.toNumberedLineIterator(charset: Charset): Iterator<NumberedLine> = toBufferedReader(charset).toNumberedLineIterator()
+
 fun BufferedReader.toNumberedLineIterator(): Iterator<NumberedLine> {
   return object : Iterator<NumberedLine> {
     var current = readLine()
