@@ -27,7 +27,9 @@ object WhyNoEndToEnd {
     }
     val svgLines = wrapInSvg(500, 500, shapes.flatMap { it.toSvg() })
     val htmlText = wrapInHtml(svgLines)
-    val path = Paths.get("test-paths.html")
+    val base = Paths.get("out")
+    Files.createDirectories(base)
+    val path = base.resolve("test-paths.html")
     val charset = StandardCharsets.UTF_8
     Files.write(path, htmlText, charset)
   }
