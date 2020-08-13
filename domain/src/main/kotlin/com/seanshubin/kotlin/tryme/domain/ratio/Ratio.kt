@@ -48,4 +48,6 @@ data class Ratio(val numerator: Int, val denominator: Int) : Comparable<Ratio> {
       return Ratio(numerator, denominator).simplify()
     }
   }
+
+  val toDouble: Double get() = numerator.toDouble() / denominator.toDouble()
 }
