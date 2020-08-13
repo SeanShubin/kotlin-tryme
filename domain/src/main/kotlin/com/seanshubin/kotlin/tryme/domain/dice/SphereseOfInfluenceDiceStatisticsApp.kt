@@ -108,10 +108,10 @@ object SphereseOfInfluenceDiceStatisticsApp {
                 val ratio = Ratio(histogram.getValue(it), total)
                 val percent = ratio.toDouble * 100
                 val hitString = pluralize(it, "hit", "hits")
-                val summary = "%.2f%% chance of $it $hitString".format(percent)
+                val summary = "$ratio (%.2f%%) chance of $it $hitString".format(percent)
                 summary
             }
-            return listOf(caption) + summaries
+            return listOf(caption) + summaries + listOf("")
         }
     }
 
@@ -126,28 +126,32 @@ object SphereseOfInfluenceDiceStatisticsApp {
 }
 /*
 1 die
-83.33% chance of 0 hits
-16.67% chance of 1 hit
+5/6 (83.33%) chance of 0 hits
+1/6 (16.67%) chance of 1 hit
+
 2 dice
-27.78% chance of 0 hits
-69.44% chance of 1 hit
-2.78% chance of 2 hits
+10/36 (27.78%) chance of 0 hits
+25/36 (69.44%) chance of 1 hit
+1/36 (2.78%) chance of 2 hits
+
 3 dice
-4.63% chance of 0 hits
-67.13% chance of 1 hit
-27.78% chance of 2 hits
-0.46% chance of 3 hits
+10/216 (4.63%) chance of 0 hits
+145/216 (67.13%) chance of 1 hit
+60/216 (27.78%) chance of 2 hits
+1/216 (0.46%) chance of 3 hits
+
 4 dice
-0.39% chance of 0 hits
-25.69% chance of 1 hit
-65.35% chance of 2 hits
-8.49% chance of 3 hits
-0.08% chance of 4 hits
+5/1296 (0.39%) chance of 0 hits
+333/1296 (25.69%) chance of 1 hit
+847/1296 (65.35%) chance of 2 hits
+110/1296 (8.49%) chance of 3 hits
+1/1296 (0.08%) chance of 4 hits
+
 5 dice
-0.01% chance of 0 hits
-5.86% chance of 1 hit
-54.76% chance of 2 hits
-37.10% chance of 3 hits
-2.25% chance of 4 hits
-0.01% chance of 5 hits
+1/7776 (0.01%) chance of 0 hits
+456/7776 (5.86%) chance of 1 hit
+4258/7776 (54.76%) chance of 2 hits
+2885/7776 (37.10%) chance of 3 hits
+175/7776 (2.25%) chance of 4 hits
+1/7776 (0.01%) chance of 5 hits
 */
