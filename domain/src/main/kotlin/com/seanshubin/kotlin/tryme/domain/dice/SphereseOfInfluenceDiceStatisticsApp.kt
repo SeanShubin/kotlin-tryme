@@ -98,6 +98,9 @@ object SphereseOfInfluenceDiceStatisticsApp {
         return if (quantity == 1) singular else plural
     }
 
+    fun <T> List<List<T>>.flattenWithSpacer(spacer: T): List<T> =
+            map { listOf(spacer) + it }.flatten().drop(1)
+
     data class HistogramForQuantity(val quantity: Int, val histogram: Map<Int, Int>) {
         fun summary(): List<String> {
             val total = histogram.values.sum()
@@ -111,20 +114,28 @@ object SphereseOfInfluenceDiceStatisticsApp {
                 val summary = "$ratio (%.2f%%) chance of $it $hitString".format(percent)
                 summary
             }
-            return listOf(caption) + summaries + listOf("")
+            return listOf(caption) + summaries
         }
     }
 
     @JvmStatic
     fun main(args: Array<String>) {
-        (1..5).map {
+        val header = listOf(
+                "1 hit per grouping of dice that sums to 6 or greater",
+                ""
+        )
+        val body = (1..5).map {
             HistogramForQuantity(it, it.scoreHistogram())
-        }.flatMap {
+        }.map {
             it.summary()
-        }.forEach(::println)
+        }.flattenWithSpacer("")
+        val lines = header + body
+        lines.forEach(::println)
     }
 }
 /*
+1 hit per grouping of dice that sums to 6 or greater
+
 1 die
 5/6 (83.33%) chance of 0 hits
 1/6 (16.67%) chance of 1 hit
