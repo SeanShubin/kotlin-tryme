@@ -2,7 +2,7 @@ package com.seanshubin.kotlin.tryme.domain.dice
 
 import com.seanshubin.kotlin.tryme.domain.ratio.Ratio
 
-object SphereseOfInfluenceDiceStatisticsApp {
+object SpheresOfInfluenceDiceStatisticsApp {
     fun List<Int>.incrementDieRoll(faces: Int): List<Int> {
         val newValues = mutableListOf<Int>()
         var carry = true
