@@ -3,11 +3,11 @@ package com.seanshubin.kotlin.tryme.domain.dice
 import com.seanshubin.kotlin.tryme.domain.ratio.Ratio
 
 object SphereseOfInfluenceDiceStatisticsApp {
-    fun incrementDieRoll(values: List<Int>, faces: Int): List<Int> {
+    fun List<Int>.incrementDieRoll(faces: Int): List<Int> {
         val newValues = mutableListOf<Int>()
         var carry = true
-        for (currentIndex in values.size - 1 downTo 0) {
-            val value = values[currentIndex]
+        for (currentIndex in size - 1 downTo 0) {
+            val value = get(currentIndex)
             if (carry) {
                 if (value == faces) {
                     newValues.add(1)
@@ -27,10 +27,10 @@ object SphereseOfInfluenceDiceStatisticsApp {
         val startingValue = (1..quantity).map { 1 }
         var currentValue = startingValue
         val results = mutableListOf(currentValue)
-        currentValue = incrementDieRoll(currentValue, faces)
+        currentValue = currentValue.incrementDieRoll(faces)
         while (currentValue != startingValue) {
             results.add(currentValue)
-            currentValue = incrementDieRoll(currentValue, faces)
+            currentValue = currentValue.incrementDieRoll(faces)
         }
         return results
     }
@@ -82,11 +82,6 @@ object SphereseOfInfluenceDiceStatisticsApp {
             histogram[score] = (histogram[score] ?: 0) + 1
         }
         return histogram
-    }
-
-    fun List<Int>.scoreDisplay(): String {
-        val score = maxHitsForRoll()
-        return "$this -> $score"
     }
 
     fun Int.scoreHistogram(): Map<Int, Int> {
