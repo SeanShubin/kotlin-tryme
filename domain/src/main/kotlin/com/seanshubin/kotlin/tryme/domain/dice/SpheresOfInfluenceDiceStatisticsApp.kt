@@ -1,7 +1,5 @@
 package com.seanshubin.kotlin.tryme.domain.dice
 
-import com.seanshubin.kotlin.tryme.domain.ratio.Ratio
-
 object SpheresOfInfluenceDiceStatisticsApp {
     fun List<Int>.incrementDieRoll(faces: Int): List<Int> {
         val newValues = mutableListOf<Int>()
@@ -103,10 +101,10 @@ object SpheresOfInfluenceDiceStatisticsApp {
             val diceString = pluralize(quantity, "die", "dice")
             val caption = "$quantity $diceString"
             val summaries = keys.map {
-                val ratio = Ratio(histogram.getValue(it), total)
-                val percent = ratio.toDouble * 100
+                val possible = histogram.getValue(it)
+                val percent = possible.toDouble() / total.toDouble() * 100.0
                 val hitString = pluralize(it, "hit", "hits")
-                val summary = "$ratio (%.2f%%) chance of $it $hitString".format(percent)
+                val summary = "$possible/$total (%.2f%%) chance of $it $hitString".format(percent)
                 summary
             }
             return listOf(caption) + summaries
