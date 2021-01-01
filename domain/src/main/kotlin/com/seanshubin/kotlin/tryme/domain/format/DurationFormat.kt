@@ -10,6 +10,8 @@ class DurationFormat(private val scales: List<Scale>, val padded: Boolean) {
         return sum
     }
 
+    fun format(quantity: Int): String = format(quantity.toLong())
+
     fun format(quantity: Long): String {
         val initial = Builder(quantity, emptyList())
         val builder = scales.fold(initial, ::appendSegment)
@@ -73,21 +75,21 @@ class DurationFormat(private val scales: List<Scale>, val padded: Boolean) {
         throw RuntimeException("Unable to convert '$s' to a number")
     }
 
-    companion object {
-        data class Scale(val quantity: Long, val singular: String, val plural: String, val padSize: Int) {
-            fun name(x: Long): String = if (x == 1L) singular else plural
-            fun paddedName(x: Long): String {
-                val maxSize = maxOf(singular.length, plural.length)
-                val name = name(x)
-                val paddingNeeded = maxSize - name.length
-                val padding = " ".repeat(paddingNeeded)
-                return name + padding
-            }
-
-            fun matches(s: String): Boolean =
-                singular.equals(s, ignoreCase = true) || plural.equals(s, ignoreCase = true)
+    data class Scale(val quantity: Long, val singular: String, val plural: String, val padSize: Int) {
+        fun name(x: Long): String = if (x == 1L) singular else plural
+        fun paddedName(x: Long): String {
+            val maxSize = maxOf(singular.length, plural.length)
+            val name = name(x)
+            val paddingNeeded = maxSize - name.length
+            val padding = " ".repeat(paddingNeeded)
+            return name + padding
         }
 
+        fun matches(s: String): Boolean =
+            singular.equals(s, ignoreCase = true) || plural.equals(s, ignoreCase = true)
+    }
+
+    companion object {
         private val nanosecondScale = Scale(1000, "nanosecond", "nanoseconds", 3)
         private val microsecondScale = Scale(1000, "microsecond", "microseconds", 3)
         private val millisecondScale = Scale(1000, "millisecond", "milliseconds", 3)

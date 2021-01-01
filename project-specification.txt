@@ -47,6 +47,6 @@
   consoleEntryPoint {
     console com.seanshubin.kotlin.tryme.console.EntryPoint
   }
-  javaVersion 12
+  javaVersion 15
   deployableToMavenCentral true
 }
