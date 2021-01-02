@@ -2,6 +2,7 @@ package com.seanshubin.kotlin.tryme.domain.format
 
 import com.seanshubin.kotlin.tryme.domain.format.StringUtil.escape
 import com.seanshubin.kotlin.tryme.domain.format.StringUtil.truncate
+import java.io.Reader
 
 interface TableFormatter {
     interface Justify {
@@ -11,6 +12,7 @@ interface TableFormatter {
     }
 
     fun format(originalRows: List<List<Any?>>): List<String>
+    fun <T> parse(reader: Reader, mapToElement:(Map<String, String>) -> T):Iterable<T>
 
     companion object {
         val escapeString: (Any?) -> String = { cell ->

@@ -4,6 +4,8 @@ import com.seanshubin.kotlin.tryme.domain.format.ListUtil.transpose
 import com.seanshubin.kotlin.tryme.domain.format.TableFormatter.Companion.escapeString
 import com.seanshubin.kotlin.tryme.domain.format.TableFormatter.Justify.Left
 import com.seanshubin.kotlin.tryme.domain.format.TableFormatter.Justify.Right
+import com.seanshubin.kotlin.tryme.domain.io.ioutil.toBufferedReader
+import java.io.Reader
 
 data class RowStyleTableFormatter(
     private val cellToString: (Any?) -> String,
@@ -26,6 +28,72 @@ data class RowStyleTableFormatter(
         val top = if (top == null) listOf() else listOf(top.format(columnWidths))
         val bottom = if (bottom == null) listOf() else listOf(bottom.format(columnWidths))
         return top + content + bottom
+    }
+
+    override fun <T> parse(reader: Reader, mapToElement: (Map<String, String>) -> T): Iterable<T> {
+        val lineIterator = LineIterator(reader)
+        return TableIterable(lineIterator, mapToElement)
+    }
+
+    private class LineIterator(reader: Reader) : Iterator<String> {
+        private val bufferedReader = reader.toBufferedReader()
+        private var currentLine: String? = bufferedReader.readLine()
+        override fun hasNext(): Boolean = currentLine != null
+        override fun next(): String {
+            val result = currentLine!!
+            currentLine = bufferedReader.readLine()
+            return result
+        }
+    }
+
+    private class EmptyIterator<T> : Iterator<T> {
+        override fun hasNext(): Boolean = false
+        override fun next(): T {
+            throw UnsupportedOperationException("next() on an empty iterator")
+        }
+    }
+
+    private class TableIteratorWithColumnIndices<T>(
+        val lineIterator: LineIterator,
+        val mapToElement: (Map<String, String>) -> T,
+        val columnIndexNamePairs: List<Pair<Int, String>>
+    ) : Iterator<T> {
+        val columnIndexToNameMap = columnIndexNamePairs.toMap()
+        val columnIndices = columnIndexNamePairs.map{it.first}
+        val windowed = columnIndices.windowed(2)
+        override fun hasNext(): Boolean = lineIterator.hasNext()
+        override fun next(): T {
+            val line = lineIterator.next()
+            val cells = parseCells(line)
+            val map = cells.mapIndexed { index, cell -> Pair(columnIndexNamePairs[index].second, cell) }.toMap()
+            return mapToElement(map)
+        }
+        private fun parseCells(line:String):List<String> {
+            val exceptLast = windowed.map{(startIndex, endIndex) ->
+                line.substring(startIndex, endIndex)
+            }
+            val last = line.substring(columnIndices.last())
+            return exceptLast + last
+        }
+    }
+
+    private class TableIterable<T>(val lineIterator: LineIterator, val mapToElement: (Map<String, String>) -> T) :
+        Iterable<T> {
+        override operator fun iterator(): Iterator<T> {
+            if (!lineIterator.hasNext()) return EmptyIterator<T>()
+            val columnIndices = parseColumnIndices(lineIterator.next())
+            return TableIteratorWithColumnIndices(lineIterator, mapToElement, columnIndices)
+        }
+
+        fun parseColumnIndices(header:String):List<Pair<Int, String>> {
+            val word = Regex("""[^\s]+""")
+            val matches = word.findAll(header)
+            return matches.map{matchResult ->
+                val index = matchResult.range.first
+                val name = matchResult.value
+                Pair(index, name)
+            }.toList()
+        }
     }
 
     private fun makeAllRowsTheSameSize(rows: List<List<Any?>>, value: Any): List<List<Any?>> {

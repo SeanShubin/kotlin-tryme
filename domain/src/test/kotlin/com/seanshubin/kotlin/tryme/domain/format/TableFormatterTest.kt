@@ -3,7 +3,9 @@ package com.seanshubin.kotlin.tryme.domain.format
 import com.seanshubin.kotlin.tryme.domain.compare.ListDifference
 import com.seanshubin.kotlin.tryme.domain.format.TableFormatter.Justify.Left
 import com.seanshubin.kotlin.tryme.domain.format.TableFormatter.Justify.Right
+import java.io.StringReader
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class TableFormatterTest {
@@ -169,6 +171,31 @@ class TableFormatterTest {
         )
         val actual = tableFormat.format(input)
         assertLinesEqual(expected, actual)
+    }
+
+    @Test
+    fun parseMinimal(){
+        data class Data(val id:Int, val name:String, val value:Double)
+        val row1 = Data(1, "Alice", 1.23)
+        val row2 = Data(2, "Bob", 45.67)
+        val row3 = Data(3, "Carol", 8.9)
+        val expected = listOf(row1, row2, row3)
+        fun rowToData(row:Map<String, String>):Data {
+            val id = row.getValue("id").trim().toInt()
+            val name = row.getValue("name").trim()
+            val value = row.getValue("value").trim().toDouble()
+            return Data(id, name, value)
+        }
+        val tableFormat = minimal
+        val input =
+            """|id name  value
+               | 1 Alice  1.23
+               | 2 Bob   45.67
+               | 3 Carol  8.9
+               |""".trimMargin()
+        val reader = StringReader(input)
+        val actual = tableFormat.parse(reader, ::rowToData).map{it}
+        assertEquals(expected, actual)
     }
 
     private fun assertLinesEqual(expected: List<String>, actual: List<String>) {
