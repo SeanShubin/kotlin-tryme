@@ -30,4 +30,27 @@ interface Cursor<ElementType> {
         }
         return results
     }
+
+    fun <TargetType> map(transform: (ElementType) -> TargetType): Cursor<TargetType> {
+        val outer = this
+        return object : Cursor<TargetType> {
+            override val isEnd: Boolean get() = outer.isEnd
+            override val value: TargetType get() = transform(outer.value)
+            override val summary: String get() = outer.summary
+            override fun next(): Cursor<TargetType> = outer.next().map(transform)
+        }
+    }
+
+    fun forEach(operation: (ElementType) -> Unit) {
+        Companion.forEach(operation, this)
+    }
+
+    companion object {
+        private tailrec fun <ElementType> forEach(operation: (ElementType) -> Unit, cursor: Cursor<ElementType>) {
+            if (!cursor.isEnd) {
+                operation(cursor.value)
+                forEach(operation, cursor.next())
+            }
+        }
+    }
 }

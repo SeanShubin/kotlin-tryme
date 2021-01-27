@@ -3,6 +3,10 @@ package com.seanshubin.kotlin.tryme.domain.io.ioutil
 import java.io.*
 import java.nio.charset.Charset
 
+data class AnnotatedLine(val source: String, val number: Int, val text: String) {
+  val summary: String get() = "$source:$number"
+}
+
 fun InputStream.sendTo(outputStream: OutputStream) {
   var byte = read()
   while (byte != -1) {
@@ -26,13 +30,13 @@ fun InputStream.consumeBytes(): ByteArray {
 }
 
 fun InputStream.consumeLines(charset: Charset): List<String> =
-    toReader(charset).consumeLines()
+  toReader(charset).consumeLines()
 
 fun InputStream.toReader(charset: Charset): Reader =
-    InputStreamReader(this, charset)
+  InputStreamReader(this, charset)
 
 fun Reader.consumeLines(): List<String> =
-    toBufferedReader().consumeLines()
+  toBufferedReader().consumeLines()
 
 fun BufferedReader.consumeLines(): List<String> {
   val lines = mutableListOf<String>()
@@ -63,12 +67,12 @@ fun String.toReader(): Reader = StringReader(this)
 fun String.toIterator(): Iterator<Char> = toReader().toIterator()
 
 fun String.sendTo(charset: Charset, outputStream: OutputStream) =
-    outputStream.write(toByteArray(charset))
+  outputStream.write(toByteArray(charset))
 
 fun ByteArray.toString(charset: Charset): String = String(this, charset)
 
 fun ByteArray.sendTo(outputStream: OutputStream) =
-    toInputStream().sendTo(outputStream)
+  toInputStream().sendTo(outputStream)
 
 fun Reader.toIterator(): Iterator<Char> {
   return object : Iterator<Char> {
@@ -86,10 +90,10 @@ fun Reader.toIterator(): Iterator<Char> {
 }
 
 fun InputStream.toBufferedReader(charset: Charset): BufferedReader =
-    BufferedReader(toReader(charset))
+  BufferedReader(toReader(charset))
 
 fun InputStream.toLineIterator(charset: Charset): Iterator<String> =
-    toBufferedReader(charset).toLineIterator()
+  toBufferedReader(charset).toLineIterator()
 
 fun BufferedReader.toLineIterator(): Iterator<String> {
   return object : Iterator<String> {
@@ -106,21 +110,22 @@ fun BufferedReader.toLineIterator(): Iterator<String> {
   }
 }
 
-fun InputStream.toNumberedLineIterator(charset: Charset): Iterator<NumberedLine> = toBufferedReader(charset).toNumberedLineIterator()
+fun InputStream.toAnnotatedLineIterator(source: String, charset: Charset): Iterator<AnnotatedLine> =
+  toBufferedReader(charset).toAnnotatedLineIterator(source)
 
-fun BufferedReader.toNumberedLineIterator(): Iterator<NumberedLine> {
-  return object : Iterator<NumberedLine> {
+fun BufferedReader.toAnnotatedLineIterator(source: String): Iterator<AnnotatedLine> {
+  return object : Iterator<AnnotatedLine> {
     var current = readLine()
     var index = 0
     override fun hasNext(): Boolean {
       return current != null
     }
 
-    override fun next(): NumberedLine {
+    override fun next(): AnnotatedLine {
       val old = current
       current = readLine()
       index++
-      return NumberedLine(index, old)
+      return AnnotatedLine(source, index, old)
     }
   }
 }
