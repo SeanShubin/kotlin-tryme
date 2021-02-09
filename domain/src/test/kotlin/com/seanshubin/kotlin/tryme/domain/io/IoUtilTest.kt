@@ -1,9 +1,9 @@
 package com.seanshubin.kotlin.tryme.domain.io
 
 import com.seanshubin.kotlin.tryme.domain.io.ioutil.*
-import org.junit.Test
 import java.io.ByteArrayOutputStream
 import java.nio.charset.StandardCharsets
+import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class IoUtilTest {
