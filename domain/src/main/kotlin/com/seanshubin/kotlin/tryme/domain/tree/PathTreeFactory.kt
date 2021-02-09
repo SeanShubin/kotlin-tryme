@@ -5,11 +5,15 @@ import java.nio.file.Path
 import kotlin.streams.toList
 
 object PathTreeFactory {
-  fun create(files: FilesContract, path: Path): Tree<Path> {
+  fun create(files: FilesContract, path: Path, accept: (Path) -> Boolean): Tree<Path> {
     val children = if (files.isDirectory(path)) {
-      files.list(path).map {
-        create(files, it)
-      }.toList()
+      files.list(path).toList().flatMap {
+        if (accept(it)) {
+          listOf(create(files, it, accept))
+        } else {
+          emptyList()
+        }
+      }
     } else {
       emptyList()
     }
