@@ -1,7 +1,7 @@
 package com.seanshubin.kotlin.tryme.domain.language
 
-import org.junit.Test
 import java.util.*
+import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class CollectionsTest {

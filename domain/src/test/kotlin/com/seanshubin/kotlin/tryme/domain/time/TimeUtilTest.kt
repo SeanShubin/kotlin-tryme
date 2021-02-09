@@ -1,9 +1,9 @@
 package com.seanshubin.kotlin.tryme.domain.time
 
-import org.junit.Test
 import java.time.Duration
 import java.time.Instant
 import java.time.temporal.ChronoUnit
+import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class TimeUtilTest {

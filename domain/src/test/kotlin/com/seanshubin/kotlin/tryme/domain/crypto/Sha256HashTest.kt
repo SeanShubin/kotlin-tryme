@@ -1,6 +1,6 @@
 package com.seanshubin.kotlin.tryme.domain.crypto
 
-import org.junit.Test
+import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 
