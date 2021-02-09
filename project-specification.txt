@@ -40,7 +40,7 @@
   }
   global [ stdlib test ]
   modules {
-    domain  [coroutines jackson]
+    domain  [coroutines jackson jackson-time]
     console [domain]
   }
   detangler [domain]
