@@ -5,7 +5,7 @@ import com.seanshubin.kotlin.tryme.domain.cursor.RowColCursor
 import com.seanshubin.kotlin.tryme.domain.parser.AssemblingCursor
 import com.seanshubin.kotlin.tryme.domain.parser.MatchingCursor
 
-fun main(args: Array<String>) {
+fun main() {
     val s = "123 + 234 + (345 + 456)"
     val charCursor = RowColCursor.create(s)
     val tokenMatchCursor = MatchingCursor(charCursor, CalculatorTokenMatchers["token"])

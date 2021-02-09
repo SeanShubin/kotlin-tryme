@@ -2,7 +2,7 @@ package com.seanshubin.kotlin.tryme.domain.async
 
 import kotlinx.coroutines.*
 
-fun main(args: Array<String>) {
+fun main() {
     suspend fun createFutureTwo(): Int {
         delay(100)
         return 2
