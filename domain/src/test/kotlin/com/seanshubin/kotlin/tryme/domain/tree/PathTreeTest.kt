@@ -12,7 +12,8 @@ class PathTreeTest {
     fun createPathTreeIntegrationTest() {
         val filesContract: FilesContract = FilesDelegate
         val basePath = Paths.get("src/test/resources/sample-data/tree-sample")
-        val pathTree = PathTreeFactory.create(filesContract, basePath)
+        val accept:(Path)->Boolean = { true }
+        val pathTree = PathTreeFactory.create(filesContract, basePath, accept)
         val coordinateString: (Path, List<Path>, List<Int>) -> String = { value, ancestors, indices ->
             "$value, ancestors = $ancestors, indices = $indices"
         }
