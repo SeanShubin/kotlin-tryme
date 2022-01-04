@@ -27,8 +27,11 @@ object PendingEditsApp {
             val localCommitLines = execLines(path, "git log --oneline @{u}..")
             val lines = statusLines + localCommitLines
             if (lines.isNotEmpty()) {
-                println("PENDING EDITS: $path")
-                lines.map { "  $it" }.forEach(::println)
+                println(path)
+//                println("PENDING EDITS: $path")
+//                lines.map { "  $it" }.forEach(::println)
+//                val diffLines = execLines(path, "git diff") + execLines(path, "git diff --cached")
+//                diffLines.map { "  $it" }.forEach(::println)
             }
         } else {
             if (depth > 2) throw RuntimeException("Too deep at $path")
