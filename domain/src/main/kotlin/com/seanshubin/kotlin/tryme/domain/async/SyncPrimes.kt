@@ -4,7 +4,7 @@ import com.seanshubin.kotlin.tryme.domain.format.DurationFormat
 import com.seanshubin.kotlin.tryme.domain.timer.TimerFactory
 import java.math.BigInteger
 
-fun main(args: Array<String>) {
+fun main() {
     val timer = TimerFactory.createDefault()
     val (duration, _) = timer.durationAndResult {
         (1000..10000 step 1000).forEach {

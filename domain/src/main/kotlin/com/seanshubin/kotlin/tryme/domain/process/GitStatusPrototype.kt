@@ -2,7 +2,7 @@ package com.seanshubin.kotlin.tryme.domain.process
 
 import java.nio.file.Paths
 
-fun main(args: Array<String>) {
+fun main() {
     val processRunner = SystemProcessRunner()
     val command = listOf("git", "status", "-s")
     val directory = Paths.get("/Users/sshubin/github/sean/kotlin-tryme")

@@ -7,7 +7,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.math.BigInteger
 
-fun main(args: Array<String>) {
+fun main() {
     val timer = TimerFactory.createDefault()
     val (duration, _) = timer.durationAndResult {
         val jobs = (1000..10000 step 1000).map {

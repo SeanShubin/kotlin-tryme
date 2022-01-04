@@ -6,7 +6,7 @@ import java.math.RoundingMode
 
 val TWO: BigDecimal = BigDecimal.valueOf(2)
 
-fun main(args: Array<String>) {
+fun main() {
     val numbers = listOf(5, 8, 5).map { BigDecimal(it) }
     val scale = 1000
     val actual = numbers.standardDeviation(scale)
