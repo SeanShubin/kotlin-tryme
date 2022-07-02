@@ -11,7 +11,7 @@ class ProcessBuilderShell(private val runAsync: (() -> Unit) -> AsyncJob,
                           private val outputLineEvent: (String) -> Unit = {},
                           private val errorLineEvent: (String) -> Unit = {}) : Shell {
 
-  override fun execute(shellRequest: ShellRequest): ShellResult {
+  override fun execute(shellRequest: ShellRequest): ShellResponse {
     val process = launchProcess(shellRequest)
     val outputLineConsumer = LineConsumer(outputLineEvent)
     val errorLineConsumer = LineConsumer(errorLineEvent)
@@ -26,7 +26,7 @@ class ProcessBuilderShell(private val runAsync: (() -> Unit) -> AsyncJob,
       errJob.join()
     }
     val exitCode = process.waitFor()
-    return ShellResult(exitCode, outputLineConsumer.lines, errorLineConsumer.lines)
+    return ShellResponse(exitCode, outputLineConsumer.lines, errorLineConsumer.lines)
   }
 
   private fun launchProcess(shellRequest: ShellRequest): Process {
