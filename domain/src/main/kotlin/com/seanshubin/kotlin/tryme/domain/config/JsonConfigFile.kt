@@ -13,11 +13,34 @@ class JsonConfigFile(
     val configFilePath: Path
 ) {
     fun loadInt(default: Any?, vararg pathParts: String): () -> Int = {
-        loadUntyped(default, *pathParts).intValue()
+        toInt(loadUntyped(default, *pathParts),*pathParts)
     }
 
     fun loadString(default: Any?, vararg pathParts: String): () -> String = {
-        loadUntyped(default, *pathParts).stringValue()
+        toString(loadUntyped(default, *pathParts), *pathParts)
+    }
+
+    private fun toInt(untyped:Untyped, vararg pathParts:String):Int {
+        when(val value = untyped.value){
+            is Int -> return value
+            else -> {
+                val valueType = value?.javaClass?.simpleName ?: "null type"
+                val pathString = pathParts.joinToString(".")
+                val message = "At path $pathString, expected type Int, got $valueType for: $value"
+                throw RuntimeException(message)
+            }
+        }
+    }
+    private fun toString(untyped:Untyped, vararg pathParts:String):String {
+        when(val value = untyped.value){
+            is String -> return value
+            else -> {
+                val valueType = value?.javaClass?.simpleName ?: "null type"
+                val pathString = pathParts.joinToString(" > ")
+                val message = "At path $pathString, expected type Int, got $valueType for: $value"
+                throw RuntimeException(message)
+            }
+        }
     }
 
     private fun loadUntyped(default: Any?, vararg pathParts: String): Untyped {
