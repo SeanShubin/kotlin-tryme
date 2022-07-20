@@ -5,8 +5,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.seanshubin.kotlin.tryme.domain.contract.FilesContract
-import com.seanshubin.kotlin.tryme.domain.contract.FilesContractNotImplemented
-import com.seanshubin.kotlin.tryme.domain.contract.FilesDelegate
+import com.seanshubin.kotlin.tryme.domain.contract.FilesContractUnsupportedOperation
 import org.junit.Test
 import java.nio.file.LinkOption
 import java.nio.file.OpenOption
@@ -22,7 +21,7 @@ class JsonConfigFileTest {
         val files: FilesContract = FakeFiles()
         val configFilePath = Paths.get("test-config.json")
         val jsonConfigFile = JsonConfigFile(files, configFilePath)
-        val loadB = jsonConfigFile.loadInt(123, "a", "b")
+        val loadB = jsonConfigFile.intLoader(123, "a", "b")
         val expectedValue = 123
         val expectedJson =
             """{
@@ -53,7 +52,7 @@ class JsonConfigFileTest {
         files.contentMap["test-config.json"] = existingFileContent
         val configFilePath = Paths.get("test-config.json")
         val jsonConfigFile = JsonConfigFile(files, configFilePath)
-        val loadB = jsonConfigFile.loadString("default string value", "a", "b")
+        val loadB = jsonConfigFile.stringLoader("default string value", "a", "b")
         val expectedValue = "actual string value"
 
         // when
@@ -71,7 +70,7 @@ class JsonConfigFileTest {
         val files: FilesContract = FakeFiles()
         val configFilePath = Paths.get("test-config.json")
         val jsonConfigFile = JsonConfigFile(files, configFilePath)
-        val loadB = jsonConfigFile.loadInt("string value", "a", "b")
+        val loadB = jsonConfigFile.intLoader("string value", "a", "b")
         val expectedMessage = "At path a.b, expected type Int, got String for: string value"
         val expectedJson =
             """{
@@ -91,7 +90,7 @@ class JsonConfigFileTest {
         assertJsonEquals(expectedJson, actualJson)
     }
 
-    class FakeFiles:FilesContractNotImplemented{
+    class FakeFiles:FilesContractUnsupportedOperation{
         val contentMap:MutableMap<String, String> = mutableMapOf()
         override fun exists(path: Path, vararg options: LinkOption): Boolean {
             return contentMap.containsKey(path.toString())

@@ -12,11 +12,11 @@ class JsonConfigFile(
     val files: FilesContract,
     val configFilePath: Path
 ) {
-    fun loadInt(default: Any?, vararg pathParts: String): () -> Int = {
+    fun intLoader(default: Any?, vararg pathParts: String): () -> Int = {
         toInt(loadUntyped(default, *pathParts),*pathParts)
     }
 
-    fun loadString(default: Any?, vararg pathParts: String): () -> String = {
+    fun stringLoader(default: Any?, vararg pathParts: String): () -> String = {
         toString(loadUntyped(default, *pathParts), *pathParts)
     }
 

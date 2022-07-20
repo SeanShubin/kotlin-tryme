@@ -1,8 +1,6 @@
 package com.seanshubin.kotlin.tryme.domain.untyped
 
 class Untyped(val value: Any?) {
-    fun stringValue():String = value as String
-    fun intValue():Int = value as Int
     fun hasValueAtPath(vararg pathParts: Any?): Boolean =
         if (pathParts.isEmpty()) {
             true

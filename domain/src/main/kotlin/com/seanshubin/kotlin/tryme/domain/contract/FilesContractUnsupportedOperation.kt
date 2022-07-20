@@ -11,7 +11,7 @@ import java.nio.file.attribute.*
 import java.util.function.BiPredicate
 import java.util.stream.Stream
 
-interface FilesContractNotImplemented : FilesContract {
+interface FilesContractUnsupportedOperation : FilesContract {
     override fun newInputStream(path: Path, vararg options: OpenOption): InputStream {
         throw UnsupportedOperationException("not implemented")
     }
