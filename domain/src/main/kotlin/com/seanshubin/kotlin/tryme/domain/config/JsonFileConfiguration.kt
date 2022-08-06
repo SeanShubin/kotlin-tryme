@@ -8,6 +8,7 @@ import com.seanshubin.kotlin.tryme.domain.contract.FilesContract
 import com.seanshubin.kotlin.tryme.domain.untyped.Untyped
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.time.Instant
 
 class JsonFileConfiguration(
     private val files: FilesContract,
@@ -25,12 +26,17 @@ class JsonFileConfiguration(
         toPath(loadUntyped(default.toJsonType(), *keys), *keys)
     }
 
+    override fun instantLoaderAt(default: Any?, vararg keys: String): () -> Instant = {
+        toInstant(loadUntyped(default.toJsonType(), *keys), *keys)
+    }
+
     private fun Any?.toJsonType():Any? =
         when (this) {
             null -> null
             is String -> this
             is Int -> this
             is Path -> this.toString()
+            is Instant -> this.toString()
             else -> {
                 val typeName = this.javaClass.name
                 throw RuntimeException("Don't know how to convert '$this' of type '$typeName' to a JSON type")
@@ -48,6 +54,7 @@ class JsonFileConfiguration(
             }
         }
     }
+
     private fun toString(untyped:Untyped, vararg keys:String):String {
         when(val value = untyped.value){
             is String -> return value
@@ -68,6 +75,18 @@ class JsonFileConfiguration(
                 val valueType = value?.javaClass?.simpleName ?: "null type"
                 val pathString = keys.joinToString(" > ")
                 val message = "At path $pathString, expected type Path, got $valueType for: $value"
+                throw RuntimeException(message)
+            }
+        }
+    }
+    private fun toInstant(untyped:Untyped, vararg keys:String):Instant {
+        when(val value = untyped.value){
+            is Instant -> return value
+            is String -> return Instant.parse(value)
+            else -> {
+                val valueType = value?.javaClass?.simpleName ?: "null type"
+                val pathString = keys.joinToString(" > ")
+                val message = "At path $pathString, expected type Instant, got $valueType for: $value"
                 throw RuntimeException(message)
             }
         }

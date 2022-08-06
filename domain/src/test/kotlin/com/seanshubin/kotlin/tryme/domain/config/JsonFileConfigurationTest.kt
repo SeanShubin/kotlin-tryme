@@ -11,6 +11,8 @@ import java.nio.file.LinkOption
 import java.nio.file.OpenOption
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.time.Clock
+import java.time.Instant
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
@@ -154,6 +156,51 @@ class JsonFileConfigurationTest {
 
         // when
         val actual = loadPath()
+
+        // then
+        assertEquals(expected, actual)
+        assertEquals(text, files.readString(path))
+    }
+
+    @Test
+    fun existingInstant(){
+        // given
+        val text = """
+            {
+              "existing" : "2022-08-06T03:34:20.436432Z"
+            }
+        """.trimIndent()
+        val expected = Instant.parse("2022-08-06T03:34:20.436432Z")
+        val path = Paths.get("test-config.json")
+        val files = FakeFiles()
+        files.contentMap[path] = text
+        val configuration = JsonFileConfiguration(files, path)
+        val loadValue = configuration.instantLoaderAt("dummy", "existing")
+
+        // when
+        val actual = loadValue()
+
+        // then
+        assertEquals(expected, actual)
+        assertEquals(text, files.readString(path))
+    }
+
+    @Test
+    fun defaultInstant(){
+        // given
+        val text = """
+            {
+              "created" : "2022-08-06T03:34:20.436432Z"
+            }
+        """.trimIndent()
+        val expected = Instant.parse("2022-08-06T03:34:20.436432Z")
+        val path = Paths.get("test-config.json")
+        val files = FakeFiles()
+        val configuration = JsonFileConfiguration(files, path)
+        val loadValue = configuration.instantLoaderAt(expected, "created")
+
+        // when
+        val actual = loadValue()
 
         // then
         assertEquals(expected, actual)
