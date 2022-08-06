@@ -14,16 +14,28 @@ class JsonFileConfiguration(
     private val configFilePath: Path
 ):Configuration {
     override fun intLoaderAt(default: Any?, vararg keys: String): () -> Int = {
-        toInt(loadUntyped(default, *keys),*keys)
+        toInt(loadUntyped(default.toJsonType(), *keys),*keys)
     }
 
     override fun stringLoaderAt(default: Any?, vararg keys: String): () -> String = {
-        toString(loadUntyped(default, *keys), *keys)
+        toString(loadUntyped(default.toJsonType(), *keys), *keys)
     }
 
     override fun pathLoaderAt(default:Any?, vararg keys:String):() -> Path = {
-        toPath(loadUntyped(default, *keys), *keys)
+        toPath(loadUntyped(default.toJsonType(), *keys), *keys)
     }
+
+    private fun Any?.toJsonType():Any? =
+        when (this) {
+            null -> null
+            is String -> this
+            is Int -> this
+            is Path -> this.toString()
+            else -> {
+                val typeName = this.javaClass.name
+                throw RuntimeException("Don't know how to convert '$this' of type '$typeName' to a JSON type")
+            }
+        }
 
     private fun toInt(untyped:Untyped, vararg keys:String):Int {
         when(val value = untyped.value){

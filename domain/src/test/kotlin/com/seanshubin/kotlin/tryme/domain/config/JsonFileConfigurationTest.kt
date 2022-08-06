@@ -49,8 +49,8 @@ class JsonFileConfigurationTest {
               |    "b": "actual string value"
               |  }
               |}""".trimMargin()
-        files.contentMap["test-config.json"] = existingFileContent
         val configFilePath = Paths.get("test-config.json")
+        files.contentMap[configFilePath] = existingFileContent
         val jsonFileConfiguration = JsonFileConfiguration(files, configFilePath)
         val loadB = jsonFileConfiguration.stringLoaderAt("default string value", "a", "b")
         val expectedValue = "actual string value"
@@ -100,8 +100,8 @@ class JsonFileConfigurationTest {
               |    "b": "my/path"
               |  }
               |}""".trimMargin()
-        files.contentMap["test-config.json"] = existingFileContent
         val configFilePath = Paths.get("test-config.json")
+        files.contentMap[configFilePath] = existingFileContent
         val jsonFileConfiguration = JsonFileConfiguration(files, configFilePath)
         val loadB = jsonFileConfiguration.pathLoaderAt("default path value", "a", "b")
         val expectedValue = Paths.get("my/path")
@@ -115,19 +115,64 @@ class JsonFileConfigurationTest {
         assertJsonEquals(existingFileContent, actualJson)
     }
 
+    @Test
+    fun existingPath(){
+        // given
+        val text = """
+            {
+              "existing" : "my/path"
+            }
+        """.trimIndent()
+        val expected = Paths.get("my/path")
+        val path = Paths.get("test-config.json")
+        val files = FakeFiles()
+        files.contentMap[path] = text
+        val configuration = JsonFileConfiguration(files, path)
+        val loadPath = configuration.pathLoaderAt("dummy", "existing")
+
+        // when
+        val actual = loadPath()
+
+        // then
+        assertEquals(expected, actual)
+        assertEquals(text, files.readString(path))
+    }
+
+    @Test
+    fun defaultPath(){
+        // given
+        val text = """
+            {
+              "created" : "my/path"
+            }
+        """.trimIndent()
+        val expected = Paths.get("my/path")
+        val path = Paths.get("test-config.json")
+        val files = FakeFiles()
+        val configuration = JsonFileConfiguration(files, path)
+        val loadPath = configuration.pathLoaderAt(expected, "created")
+
+        // when
+        val actual = loadPath()
+
+        // then
+        assertEquals(expected, actual)
+        assertEquals(text, files.readString(path))
+    }
+
     class FakeFiles:FilesContractUnsupportedOperation{
-        val contentMap:MutableMap<String, String> = mutableMapOf()
+        val contentMap:MutableMap<Path, String> = mutableMapOf()
         override fun exists(path: Path, vararg options: LinkOption): Boolean {
-            return contentMap.containsKey(path.toString())
+            return contentMap.containsKey(path)
         }
 
         override fun writeString(path: Path, csq: CharSequence, vararg options: OpenOption): Path {
-            contentMap[path.toString()] = csq.toString()
+            contentMap[path] = csq.toString()
             return path
         }
 
         override fun readString(path: Path): String {
-            return contentMap.getValue(path.toString())
+            return contentMap.getValue(path)
         }
     }
 

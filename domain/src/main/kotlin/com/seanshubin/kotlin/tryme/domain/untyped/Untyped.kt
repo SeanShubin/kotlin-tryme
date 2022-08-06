@@ -55,5 +55,7 @@ class Untyped(val value: Any?) {
         }
 
     private fun valueIsMap(): Boolean = value is Map<*, *>
+
+    @Suppress("UNCHECKED_CAST")
     private fun valueAsMap(): Map<Any?, Any?> = value as Map<Any?, Any?>
 }
