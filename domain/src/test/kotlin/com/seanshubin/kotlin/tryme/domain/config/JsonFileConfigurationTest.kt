@@ -6,6 +6,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.seanshubin.kotlin.tryme.domain.contract.FilesContract
 import com.seanshubin.kotlin.tryme.domain.contract.FilesContractUnsupportedOperation
+import com.seanshubin.kotlin.tryme.domain.format.DurationFormat
 import org.junit.Test
 import java.nio.file.LinkOption
 import java.nio.file.OpenOption
@@ -198,6 +199,51 @@ class JsonFileConfigurationTest {
         val files = FakeFiles()
         val configuration = JsonFileConfiguration(files, path)
         val loadValue = configuration.instantLoaderAt(expected, "created")
+
+        // when
+        val actual = loadValue()
+
+        // then
+        assertEquals(expected, actual)
+        assertEquals(text, files.readString(path))
+    }
+
+    @Test
+    fun existingFormattedSeconds(){
+        // given
+        val text = """
+            {
+              "existing" : "1 minute 2 seconds"
+            }
+        """.trimIndent()
+        val expected = DurationFormat.seconds.parse("1 minute 2 seconds")
+        val path = Paths.get("test-config.json")
+        val files = FakeFiles()
+        files.contentMap[path] = text
+        val configuration = JsonFileConfiguration(files, path)
+        val loadValue = configuration.formattedSecondsLoaderAt("dummy", "existing")
+
+        // when
+        val actual = loadValue()
+
+        // then
+        assertEquals(expected, actual)
+        assertEquals(text, files.readString(path))
+    }
+
+    @Test
+    fun defaultFormattedSeconds(){
+        // given
+        val text = """
+            {
+              "created" : "1 minute 2 seconds"
+            }
+        """.trimIndent()
+        val expected = DurationFormat.seconds.parse("1 minute 2 seconds")
+        val path = Paths.get("test-config.json")
+        val files = FakeFiles()
+        val configuration = JsonFileConfiguration(files, path)
+        val loadValue = configuration.formattedSecondsLoaderAt("1 minute 2 seconds", "created")
 
         // when
         val actual = loadValue()

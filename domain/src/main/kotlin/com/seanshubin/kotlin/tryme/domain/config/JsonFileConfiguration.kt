@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.seanshubin.kotlin.tryme.domain.contract.FilesContract
+import com.seanshubin.kotlin.tryme.domain.format.DurationFormat
 import com.seanshubin.kotlin.tryme.domain.untyped.Untyped
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -30,11 +31,16 @@ class JsonFileConfiguration(
         toInstant(loadUntyped(default.toJsonType(), *keys), *keys)
     }
 
+    override fun formattedSecondsLoaderAt(default: Any?, vararg keys: String): () -> Long = {
+        toDurationSeconds(loadUntyped(default.toJsonType(), *keys), *keys)
+    }
+
     private fun Any?.toJsonType():Any? =
         when (this) {
             null -> null
             is String -> this
             is Int -> this
+            is Long -> this
             is Path -> this.toString()
             is Instant -> this.toString()
             else -> {
@@ -79,10 +85,10 @@ class JsonFileConfiguration(
             }
         }
     }
-    private fun toInstant(untyped:Untyped, vararg keys:String):Instant {
+    private fun toInstant(untyped:Untyped, vararg keys:String):Instant =
         when(val value = untyped.value){
-            is Instant -> return value
-            is String -> return Instant.parse(value)
+            is Instant -> value
+            is String -> Instant.parse(value)
             else -> {
                 val valueType = value?.javaClass?.simpleName ?: "null type"
                 val pathString = keys.joinToString(" > ")
@@ -90,7 +96,18 @@ class JsonFileConfiguration(
                 throw RuntimeException(message)
             }
         }
-    }
+    private fun toDurationSeconds(untyped:Untyped, vararg keys:String):Long =
+        when(val value = untyped.value){
+            is Int -> value.toLong()
+            is Long -> value
+            is String -> DurationFormat.seconds.parse(value)
+            else -> {
+                val valueType = value?.javaClass?.simpleName ?: "null type"
+                val pathString = keys.joinToString(" > ")
+                val message = "At path $pathString, expected type Long or DurationFormat.seconds, got $valueType for: $value"
+                throw RuntimeException(message)
+            }
+        }
 
     private fun loadUntyped(default: Any?, vararg keys: String): Untyped {
         return if (files.exists(configFilePath)) {

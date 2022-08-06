@@ -9,4 +9,5 @@ interface Configuration {
     fun stringLoaderAt(default: Any?, vararg keys: String): () -> String
     fun pathLoaderAt(default: Any?, vararg keys: String): () -> Path
     fun instantLoaderAt(default: Any?, vararg keys: String): () -> Instant
+    fun formattedSecondsLoaderAt(default:Any?, vararg keys:String): () -> Long
 }
