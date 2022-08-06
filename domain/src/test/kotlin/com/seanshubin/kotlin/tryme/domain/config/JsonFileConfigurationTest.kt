@@ -14,14 +14,14 @@ import java.nio.file.Paths
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
-class JsonConfigFileTest {
+class JsonFileConfigurationTest {
     @Test
     fun loadDefaultInt() {
         // given
         val files: FilesContract = FakeFiles()
         val configFilePath = Paths.get("test-config.json")
-        val jsonConfigFile = JsonConfigFile(files, configFilePath)
-        val loadB = jsonConfigFile.intLoader(123, "a", "b")
+        val jsonFileConfiguration = JsonFileConfiguration(files, configFilePath)
+        val loadB = jsonFileConfiguration.intLoaderAt(123, "a", "b")
         val expectedValue = 123
         val expectedJson =
             """{
@@ -51,8 +51,8 @@ class JsonConfigFileTest {
               |}""".trimMargin()
         files.contentMap["test-config.json"] = existingFileContent
         val configFilePath = Paths.get("test-config.json")
-        val jsonConfigFile = JsonConfigFile(files, configFilePath)
-        val loadB = jsonConfigFile.stringLoader("default string value", "a", "b")
+        val jsonFileConfiguration = JsonFileConfiguration(files, configFilePath)
+        val loadB = jsonFileConfiguration.stringLoaderAt("default string value", "a", "b")
         val expectedValue = "actual string value"
 
         // when
@@ -69,8 +69,8 @@ class JsonConfigFileTest {
         // given
         val files: FilesContract = FakeFiles()
         val configFilePath = Paths.get("test-config.json")
-        val jsonConfigFile = JsonConfigFile(files, configFilePath)
-        val loadB = jsonConfigFile.intLoader("string value", "a", "b")
+        val jsonFileConfiguration = JsonFileConfiguration(files, configFilePath)
+        val loadB = jsonFileConfiguration.intLoaderAt("string value", "a", "b")
         val expectedMessage = "At path a.b, expected type Int, got String for: string value"
         val expectedJson =
             """{
@@ -88,6 +88,31 @@ class JsonConfigFileTest {
         val actualJson = files.readString(configFilePath)
         assertEquals(expectedMessage, exception.message)
         assertJsonEquals(expectedJson, actualJson)
+    }
+
+    @Test
+    fun loadPath() {
+        // given
+        val files = FakeFiles()
+        val existingFileContent =
+            """{
+              |  "a": {
+              |    "b": "my/path"
+              |  }
+              |}""".trimMargin()
+        files.contentMap["test-config.json"] = existingFileContent
+        val configFilePath = Paths.get("test-config.json")
+        val jsonFileConfiguration = JsonFileConfiguration(files, configFilePath)
+        val loadB = jsonFileConfiguration.pathLoaderAt("default path value", "a", "b")
+        val expectedValue = Paths.get("my/path")
+
+        // when
+        val actualValue = loadB()
+
+        // then
+        val actualJson = files.readString(configFilePath)
+        assertEquals(expectedValue, actualValue)
+        assertJsonEquals(existingFileContent, actualJson)
     }
 
     class FakeFiles:FilesContractUnsupportedOperation{

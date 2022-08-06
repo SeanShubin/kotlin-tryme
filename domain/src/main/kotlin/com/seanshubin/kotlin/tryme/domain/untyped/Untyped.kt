@@ -1,17 +1,17 @@
 package com.seanshubin.kotlin.tryme.domain.untyped
 
 class Untyped(val value: Any?) {
-    fun hasValueAtPath(vararg pathParts: Any?): Boolean =
-        if (pathParts.isEmpty()) {
+    fun hasValueAtPath(vararg keys: Any?): Boolean =
+        if (keys.isEmpty()) {
             true
         } else {
             if (valueIsMap()) {
                 val mapValue = valueAsMap()
-                val key = pathParts[0]
+                val key = keys[0]
                 if (mapValue.containsKey(key)) {
                     val innerValue = mapValue.getValue(key)
-                    val remainingPathParts = pathParts.drop(1).toTypedArray()
-                    Untyped(innerValue).hasValueAtPath(*remainingPathParts)
+                    val remainingKeys = keys.drop(1).toTypedArray()
+                    Untyped(innerValue).hasValueAtPath(*remainingKeys)
                 } else {
                     false
                 }
@@ -20,37 +20,37 @@ class Untyped(val value: Any?) {
             }
         }
 
-    fun getValueAtPath(vararg pathParts: Any?): Any? =
-        if (pathParts.isEmpty()) {
+    fun getValueAtPath(vararg keys: Any?): Any? =
+        if (keys.isEmpty()) {
             value
         } else {
             val mapValue = valueAsMap()
-            val key = pathParts[0]
+            val key = keys[0]
             val innerValue = mapValue.getValue(key)
-            val remainingPathParts = pathParts.drop(1).toTypedArray()
-            Untyped(innerValue).getValueAtPath(*remainingPathParts)
+            val remainingKeys = keys.drop(1).toTypedArray()
+            Untyped(innerValue).getValueAtPath(*remainingKeys)
         }
 
-    fun setValueAtPath(valueToSet:Any?, vararg pathParts:Any?):Untyped =
-        if(pathParts.isEmpty()) {
+    fun setValueAtPath(valueToSet:Any?, vararg keys:Any?):Untyped =
+        if(keys.isEmpty()) {
             Untyped(valueToSet)
         } else {
             if(valueIsMap()){
-                val key = pathParts[0]
+                val key = keys[0]
                 val mapValue = valueAsMap()
                 val innerValue = if(mapValue.containsKey(key)){
                     mapValue.getValue(key)
                 } else {
                     emptyMap<Any?, Any?>()
                 }
-                val remainingPathParts = pathParts.drop(1).toTypedArray()
-                val newInnerUntyped = Untyped(innerValue).setValueAtPath(valueToSet, *remainingPathParts)
+                val remainingKeys = keys.drop(1).toTypedArray()
+                val newInnerUntyped = Untyped(innerValue).setValueAtPath(valueToSet, *remainingKeys)
                 val newInnerValue = newInnerUntyped.value
                 val newPair = key to newInnerValue
                 val newValue = mapValue + newPair
                 Untyped(newValue)
             } else {
-                Untyped(mapOf<Any?, Any?>()).setValueAtPath(valueToSet, *pathParts)
+                Untyped(mapOf<Any?, Any?>()).setValueAtPath(valueToSet, *keys)
             }
         }
 

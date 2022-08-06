@@ -7,57 +7,75 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.seanshubin.kotlin.tryme.domain.contract.FilesContract
 import com.seanshubin.kotlin.tryme.domain.untyped.Untyped
 import java.nio.file.Path
+import java.nio.file.Paths
 
-class JsonConfigFile(
-    val files: FilesContract,
-    val configFilePath: Path
-) {
-    fun intLoader(default: Any?, vararg pathParts: String): () -> Int = {
-        toInt(loadUntyped(default, *pathParts),*pathParts)
+class JsonFileConfiguration(
+    private val files: FilesContract,
+    private val configFilePath: Path
+):Configuration {
+    override fun intLoaderAt(default: Any?, vararg keys: String): () -> Int = {
+        toInt(loadUntyped(default, *keys),*keys)
     }
 
-    fun stringLoader(default: Any?, vararg pathParts: String): () -> String = {
-        toString(loadUntyped(default, *pathParts), *pathParts)
+    override fun stringLoaderAt(default: Any?, vararg keys: String): () -> String = {
+        toString(loadUntyped(default, *keys), *keys)
     }
 
-    private fun toInt(untyped:Untyped, vararg pathParts:String):Int {
+    override fun pathLoaderAt(default:Any?, vararg keys:String):() -> Path = {
+        toPath(loadUntyped(default, *keys), *keys)
+    }
+
+    private fun toInt(untyped:Untyped, vararg keys:String):Int {
         when(val value = untyped.value){
             is Int -> return value
             else -> {
                 val valueType = value?.javaClass?.simpleName ?: "null type"
-                val pathString = pathParts.joinToString(".")
+                val pathString = keys.joinToString(".")
                 val message = "At path $pathString, expected type Int, got $valueType for: $value"
                 throw RuntimeException(message)
             }
         }
     }
-    private fun toString(untyped:Untyped, vararg pathParts:String):String {
+    private fun toString(untyped:Untyped, vararg keys:String):String {
         when(val value = untyped.value){
             is String -> return value
             else -> {
                 val valueType = value?.javaClass?.simpleName ?: "null type"
-                val pathString = pathParts.joinToString(" > ")
+                val pathString = keys.joinToString(" > ")
                 val message = "At path $pathString, expected type Int, got $valueType for: $value"
                 throw RuntimeException(message)
             }
         }
     }
 
-    private fun loadUntyped(default: Any?, vararg pathParts: String): Untyped {
+    private fun toPath(untyped:Untyped, vararg keys:String):Path {
+        when(val value = untyped.value){
+            is Path -> return value
+            is String -> return Paths.get(value)
+            else -> {
+                val valueType = value?.javaClass?.simpleName ?: "null type"
+                val pathString = keys.joinToString(" > ")
+                val message = "At path $pathString, expected type Path, got $valueType for: $value"
+                throw RuntimeException(message)
+            }
+        }
+    }
+
+    private fun loadUntyped(default: Any?, vararg keys: String): Untyped {
         return if (files.exists(configFilePath)) {
             val text = files.readString(configFilePath)
             val untyped = Untyped(parser.readValue<Any?>(text))
-            if (untyped.hasValueAtPath(*pathParts)) {
-                Untyped(untyped.getValueAtPath(*pathParts))
+            if (untyped.hasValueAtPath(*keys)) {
+                Untyped(untyped.getValueAtPath(*keys))
             } else {
-                val newUntyped = untyped.setValueAtPath(default, *pathParts)
+                val newUntyped = untyped.setValueAtPath(default, *keys)
                 val jsonText = pretty.writeValueAsString(newUntyped.value)
                 files.writeString(configFilePath, jsonText)
-                loadUntyped(default, *pathParts)
+                loadUntyped(default, *keys)
             }
         } else {
             files.writeString(configFilePath, "{}")
-            loadUntyped(default, *pathParts)
+            loadUntyped(default, *keys)
         }
     }
 
