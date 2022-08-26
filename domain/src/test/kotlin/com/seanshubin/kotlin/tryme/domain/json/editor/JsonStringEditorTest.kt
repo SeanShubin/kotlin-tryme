@@ -8,13 +8,13 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class JsonEditorTest {
+class JsonStringEditorTest {
     @Test
     fun setStringFromMissing() {
         // given
         val input = ""
         val expected = """{"a":{"b":"c"}}"""
-        val editor = JsonEditor()
+        val editor = JsonStringEditor()
 
         // when
         val actual = editor.setValue(input, "c", "a", "b")
@@ -28,7 +28,7 @@ class JsonEditorTest {
         // given
         val input = "{}"
         val expected = """{"a":{"b":"c"}}"""
-        val editor = JsonEditor()
+        val editor = JsonStringEditor()
 
         // when
         val actual = editor.setValue(input, "c", "a", "b")
@@ -41,7 +41,7 @@ class JsonEditorTest {
     fun stringExists() {
         // given
         val input = """{"a":{"b":"c"}}"""
-        val editor = JsonEditor()
+        val editor = JsonStringEditor()
 
         // when
         val actual = editor.valueExists(input, "a", "b")
@@ -54,7 +54,7 @@ class JsonEditorTest {
     fun stringDoesNotExist() {
         // given
         val input = """{"a":{"c":"d"}}"""
-        val editor = JsonEditor()
+        val editor = JsonStringEditor()
 
         // when
         val actual = editor.valueExists(input, "a", "b")
@@ -68,7 +68,7 @@ class JsonEditorTest {
         // given
         val input = """{"a":{"b":"c"}}"""
         val expected = "c"
-        val editor = JsonEditor()
+        val editor = JsonStringEditor()
 
         // when
         val actual = editor.getValue(StringConverter, input, "a", "b")
@@ -82,7 +82,7 @@ class JsonEditorTest {
         // given
         val input = ""
         val expected = """{"a":{"b":123}}"""
-        val editor = JsonEditor()
+        val editor = JsonStringEditor()
 
         // when
         val actual = editor.setValue(input, 123, "a", "b")
@@ -96,7 +96,7 @@ class JsonEditorTest {
         // given
         val input = "{}"
         val expected = """{"a":{"b":123}}"""
-        val editor = JsonEditor()
+        val editor = JsonStringEditor()
 
         // when
         val actual = editor.setValue(input, 123, "a", "b")
@@ -109,7 +109,7 @@ class JsonEditorTest {
     fun intExists() {
         // given
         val input = """{"a":{"b":123}}"""
-        val editor = JsonEditor()
+        val editor = JsonStringEditor()
 
         // when
         val actual = editor.valueExists(input, "a", "b")
@@ -122,7 +122,7 @@ class JsonEditorTest {
     fun intDoesNotExist() {
         // given
         val input = """{"a":{"c":123}}"""
-        val editor = JsonEditor()
+        val editor = JsonStringEditor()
 
         // when
         val actual = editor.valueExists(input, "a", "b")
@@ -136,7 +136,7 @@ class JsonEditorTest {
         // given
         val input = """{"a":{"b":123}}"""
         val expected = 123
-        val editor = JsonEditor()
+        val editor = JsonStringEditor()
 
         // when
         val actual = editor.getValue(IntConverter, input, "a", "b")
