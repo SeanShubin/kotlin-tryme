@@ -74,7 +74,7 @@ class JsonFileConfigurationTest {
         val configFilePath = Paths.get("test-config.json")
         val jsonFileConfiguration = JsonFileConfiguration(files, configFilePath)
         val loadB = jsonFileConfiguration.intLoaderAt("string value", "a", "b")
-        val expectedMessage = "At path a.b, expected type Int, got String for: string value"
+        val expectedMessage = "At path a.b, expected type int, got String for: string value"
         val expectedJson =
             """{
               |  "a": {

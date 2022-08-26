@@ -14,28 +14,78 @@ import java.time.Instant
 class JsonFileConfiguration(
     private val files: FilesContract,
     private val configFilePath: Path
-):Configuration {
-    override fun intLoaderAt(default: Any?, vararg keys: String): () -> Int = {
-        toInt(loadUntyped(default.toJsonType(), *keys),*keys)
+) : Configuration {
+    override fun intLoaderAt(default: Any?, vararg keys: String): () -> Int =
+        genericLoader(IntConverter, default, *keys)
+
+    override fun stringLoaderAt(default: Any?, vararg keys: String): () -> String =
+        genericLoader(StringConverter, default, *keys)
+
+    override fun pathLoaderAt(default: Any?, vararg keys: String): () -> Path =
+        genericLoader(PathConverter, default, *keys)
+
+    override fun instantLoaderAt(default: Any?, vararg keys: String): () -> Instant =
+        genericLoader(InstantConverter, default, *keys)
+
+    override fun formattedSecondsLoaderAt(default: Any?, vararg keys: String): () -> Long =
+        genericLoader(DurationSecondsConverter, default, *keys)
+
+    interface Converter<T> {
+        val sourceType: Class<*>
+        fun convert(value: Any?): T?
     }
 
-    override fun stringLoaderAt(default: Any?, vararg keys: String): () -> String = {
-        toString(loadUntyped(default.toJsonType(), *keys), *keys)
+    object StringConverter : Converter<String> {
+        override val sourceType: Class<*> get() = String::class.java
+
+        override fun convert(value: Any?): String? =
+            if (value is String) value else null
     }
 
-    override fun pathLoaderAt(default:Any?, vararg keys:String):() -> Path = {
-        toPath(loadUntyped(default.toJsonType(), *keys), *keys)
+    object IntConverter : Converter<Int> {
+        override val sourceType: Class<*> get() = Int::class.java
+
+        override fun convert(value: Any?): Int? =
+            if (value is Int) value else null
     }
 
-    override fun instantLoaderAt(default: Any?, vararg keys: String): () -> Instant = {
-        toInstant(loadUntyped(default.toJsonType(), *keys), *keys)
+    object PathConverter : Converter<Path> {
+        override val sourceType: Class<*> get() = String::class.java
+
+        override fun convert(value: Any?): Path? =
+            if (value is String) Paths.get(value) else null
     }
 
-    override fun formattedSecondsLoaderAt(default: Any?, vararg keys: String): () -> Long = {
-        toDurationSeconds(loadUntyped(default.toJsonType(), *keys), *keys)
+    object InstantConverter : Converter<Instant> {
+        override val sourceType: Class<*> get() = Instant::class.java
+
+        override fun convert(value: Any?): Instant? =
+            if (value is String) Instant.parse(value) else null
     }
 
-    private fun Any?.toJsonType():Any? =
+    object DurationSecondsConverter : Converter<Long> {
+        override val sourceType: Class<*> get() = String::class.java
+
+        override fun convert(value: Any?): Long? =
+            if (value is String) DurationFormat.seconds.parse(value) else null
+    }
+
+    private fun <T> genericLoader(converter: Converter<T>, default: Any?, vararg keys: String): () -> T = {
+        val untyped = loadUntyped(default.toJsonType(), *keys)
+        val value = untyped.value
+        val typed = converter.convert(value)
+        if (typed == null) {
+            val expectedType = converter.sourceType.simpleName
+            val valueType = value?.javaClass?.simpleName ?: "null type"
+            val pathString = keys.joinToString(".")
+            val message = "At path $pathString, expected type $expectedType, got $valueType for: $value"
+            throw RuntimeException(message)
+        } else {
+            typed
+        }
+    }
+
+    private fun Any?.toJsonType(): Any? =
         when (this) {
             null -> null
             is String -> this
@@ -46,66 +96,6 @@ class JsonFileConfiguration(
             else -> {
                 val typeName = this.javaClass.name
                 throw RuntimeException("Don't know how to convert '$this' of type '$typeName' to a JSON type")
-            }
-        }
-
-    private fun toInt(untyped:Untyped, vararg keys:String):Int {
-        when(val value = untyped.value){
-            is Int -> return value
-            else -> {
-                val valueType = value?.javaClass?.simpleName ?: "null type"
-                val pathString = keys.joinToString(".")
-                val message = "At path $pathString, expected type Int, got $valueType for: $value"
-                throw RuntimeException(message)
-            }
-        }
-    }
-
-    private fun toString(untyped:Untyped, vararg keys:String):String {
-        when(val value = untyped.value){
-            is String -> return value
-            else -> {
-                val valueType = value?.javaClass?.simpleName ?: "null type"
-                val pathString = keys.joinToString(" > ")
-                val message = "At path $pathString, expected type Int, got $valueType for: $value"
-                throw RuntimeException(message)
-            }
-        }
-    }
-
-    private fun toPath(untyped:Untyped, vararg keys:String):Path {
-        when(val value = untyped.value){
-            is Path -> return value
-            is String -> return Paths.get(value)
-            else -> {
-                val valueType = value?.javaClass?.simpleName ?: "null type"
-                val pathString = keys.joinToString(" > ")
-                val message = "At path $pathString, expected type Path, got $valueType for: $value"
-                throw RuntimeException(message)
-            }
-        }
-    }
-    private fun toInstant(untyped:Untyped, vararg keys:String):Instant =
-        when(val value = untyped.value){
-            is Instant -> value
-            is String -> Instant.parse(value)
-            else -> {
-                val valueType = value?.javaClass?.simpleName ?: "null type"
-                val pathString = keys.joinToString(" > ")
-                val message = "At path $pathString, expected type Instant, got $valueType for: $value"
-                throw RuntimeException(message)
-            }
-        }
-    private fun toDurationSeconds(untyped:Untyped, vararg keys:String):Long =
-        when(val value = untyped.value){
-            is Int -> value.toLong()
-            is Long -> value
-            is String -> DurationFormat.seconds.parse(value)
-            else -> {
-                val valueType = value?.javaClass?.simpleName ?: "null type"
-                val pathString = keys.joinToString(" > ")
-                val message = "At path $pathString, expected type Long or DurationFormat.seconds, got $valueType for: $value"
-                throw RuntimeException(message)
             }
         }
 
@@ -126,7 +116,6 @@ class JsonFileConfiguration(
             loadUntyped(default, *keys)
         }
     }
-
 
     companion object {
         val pretty: ObjectMapper = ObjectMapper().registerKotlinModule().enable(SerializationFeature.INDENT_OUTPUT)
