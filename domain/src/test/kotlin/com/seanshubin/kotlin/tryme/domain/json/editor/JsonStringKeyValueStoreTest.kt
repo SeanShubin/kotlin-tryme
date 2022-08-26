@@ -17,7 +17,8 @@ class JsonStringKeyValueStoreTest {
         val editor = JsonStringKeyValueStore(input)
 
         // when
-        val actual = editor.setValue( "c", "a", "b")
+        editor.setValue( "c", "a", "b")
+        val actual = editor.text
 
         // then
         assertJsonEquals(expected, actual)
@@ -31,7 +32,8 @@ class JsonStringKeyValueStoreTest {
         val editor = JsonStringKeyValueStore(input)
 
         // when
-        val actual = editor.setValue( "c", "a", "b")
+        editor.setValue( "c", "a", "b")
+        val actual = editor.text
 
         // then
         assertJsonEquals(expected, actual)
@@ -85,7 +87,8 @@ class JsonStringKeyValueStoreTest {
         val editor = JsonStringKeyValueStore(input)
 
         // when
-        val actual = editor.setValue(123, "a", "b")
+        editor.setValue(123, "a", "b")
+        val actual = editor.text
 
         // then
         assertJsonEquals(expected, actual)
@@ -99,7 +102,8 @@ class JsonStringKeyValueStoreTest {
         val editor = JsonStringKeyValueStore(input)
 
         // when
-        val actual = editor.setValue( 123, "a", "b")
+        editor.setValue( 123, "a", "b")
+        val actual = editor.text
 
         // then
         assertJsonEquals(expected, actual)
