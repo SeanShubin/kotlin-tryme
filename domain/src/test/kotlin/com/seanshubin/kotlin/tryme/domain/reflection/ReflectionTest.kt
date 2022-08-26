@@ -1,6 +1,6 @@
 package com.seanshubin.kotlin.tryme.domain.reflection
 
-import org.junit.Test
+import kotlin.test.Test
 import kotlin.reflect.KClass
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals

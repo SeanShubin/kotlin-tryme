@@ -1,11 +1,10 @@
 package com.seanshubin.kotlin.tryme.domain.config
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.seanshubin.kotlin.tryme.domain.contract.FilesContract
 import com.seanshubin.kotlin.tryme.domain.format.DurationFormat
+import com.seanshubin.kotlin.tryme.domain.json.util.JsonUtil.parser
+import com.seanshubin.kotlin.tryme.domain.json.util.JsonUtil.pretty
 import com.seanshubin.kotlin.tryme.domain.untyped.Untyped
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -115,11 +114,5 @@ class JsonFileConfiguration(
             files.writeString(configFilePath, "{}")
             loadUntyped(default, *keys)
         }
-    }
-
-    companion object {
-        val pretty: ObjectMapper = ObjectMapper().registerKotlinModule().enable(SerializationFeature.INDENT_OUTPUT)
-        val compact: ObjectMapper = ObjectMapper().registerKotlinModule()
-        val parser: ObjectMapper = compact
     }
 }

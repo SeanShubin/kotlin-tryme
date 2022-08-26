@@ -2,7 +2,7 @@ package com.seanshubin.kotlin.tryme.domain.tree
 
 import com.seanshubin.kotlin.tryme.domain.contract.FilesContract
 import com.seanshubin.kotlin.tryme.domain.contract.FilesDelegate
-import org.junit.Test
+import kotlin.test.Test
 import java.nio.file.Path
 import java.nio.file.Paths
 import kotlin.test.assertEquals

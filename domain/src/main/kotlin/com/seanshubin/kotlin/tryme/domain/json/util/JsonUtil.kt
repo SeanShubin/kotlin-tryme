@@ -1,4 +1,4 @@
-package com.seanshubin.kotlin.tryme.domain.json
+package com.seanshubin.kotlin.tryme.domain.json.util
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
@@ -11,8 +11,8 @@ object JsonUtil {
     val parser: ObjectMapper = compact
 
     fun String.normalizeJson(): String {
-        val asObject = parser.readValue<Any>(this)
-        val asNormalized = pretty.writeValueAsString(asObject)
+        val asObject = JsonUtil.parser.readValue<Any>(this)
+        val asNormalized = JsonUtil.pretty.writeValueAsString(asObject)
         return asNormalized
     }
 }

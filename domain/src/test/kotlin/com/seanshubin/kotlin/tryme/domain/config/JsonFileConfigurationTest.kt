@@ -7,7 +7,7 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.seanshubin.kotlin.tryme.domain.contract.FilesContract
 import com.seanshubin.kotlin.tryme.domain.contract.FilesContractUnsupportedOperation
 import com.seanshubin.kotlin.tryme.domain.format.DurationFormat
-import org.junit.Test
+import kotlin.test.Test
 import java.nio.file.LinkOption
 import java.nio.file.OpenOption
 import java.nio.file.Path

@@ -1,6 +1,6 @@
 package com.seanshubin.kotlin.tryme.domain.tree
 
-import org.junit.Test
+import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class TreeTest {
