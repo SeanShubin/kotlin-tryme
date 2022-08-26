@@ -5,7 +5,7 @@ import com.seanshubin.kotlin.tryme.domain.json.util.JsonUtil.parser
 import com.seanshubin.kotlin.tryme.domain.json.util.JsonUtil.pretty
 import com.seanshubin.kotlin.tryme.domain.untyped.Untyped
 
-class JsonTextEditor:KeyValueStoreTextEditor {
+class JsonEditor:KeyValueStoreEditor {
     override fun <T> setValue(text: String, value: T, vararg keys: String): String {
         val oldUntyped = untyped(text)
         val newUntyped = oldUntyped.setValueAtPath(value, *keys)
