@@ -8,16 +8,16 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class JsonStringEditorTest {
+class JsonStringKeyValueStoreTest {
     @Test
     fun setStringFromMissing() {
         // given
         val input = ""
         val expected = """{"a":{"b":"c"}}"""
-        val editor = JsonStringEditor()
+        val editor = JsonStringKeyValueStore(input)
 
         // when
-        val actual = editor.setValue(input, "c", "a", "b")
+        val actual = editor.setValue( "c", "a", "b")
 
         // then
         assertJsonEquals(expected, actual)
@@ -28,10 +28,10 @@ class JsonStringEditorTest {
         // given
         val input = "{}"
         val expected = """{"a":{"b":"c"}}"""
-        val editor = JsonStringEditor()
+        val editor = JsonStringKeyValueStore(input)
 
         // when
-        val actual = editor.setValue(input, "c", "a", "b")
+        val actual = editor.setValue( "c", "a", "b")
 
         // then
         assertJsonEquals(expected, actual)
@@ -41,10 +41,10 @@ class JsonStringEditorTest {
     fun stringExists() {
         // given
         val input = """{"a":{"b":"c"}}"""
-        val editor = JsonStringEditor()
+        val editor = JsonStringKeyValueStore(input)
 
         // when
-        val actual = editor.valueExists(input, "a", "b")
+        val actual = editor.valueExists( "a", "b")
 
         // then
         assertTrue(actual)
@@ -54,10 +54,10 @@ class JsonStringEditorTest {
     fun stringDoesNotExist() {
         // given
         val input = """{"a":{"c":"d"}}"""
-        val editor = JsonStringEditor()
+        val editor = JsonStringKeyValueStore(input)
 
         // when
-        val actual = editor.valueExists(input, "a", "b")
+        val actual = editor.valueExists( "a", "b")
 
         // then
         assertFalse(actual)
@@ -68,10 +68,10 @@ class JsonStringEditorTest {
         // given
         val input = """{"a":{"b":"c"}}"""
         val expected = "c"
-        val editor = JsonStringEditor()
+        val editor = JsonStringKeyValueStore(input)
 
         // when
-        val actual = editor.getValue(StringConverter, input, "a", "b")
+        val actual = editor.getValue(StringConverter,  "a", "b")
 
         // then
         assertEquals(expected, actual)
@@ -82,10 +82,10 @@ class JsonStringEditorTest {
         // given
         val input = ""
         val expected = """{"a":{"b":123}}"""
-        val editor = JsonStringEditor()
+        val editor = JsonStringKeyValueStore(input)
 
         // when
-        val actual = editor.setValue(input, 123, "a", "b")
+        val actual = editor.setValue(123, "a", "b")
 
         // then
         assertJsonEquals(expected, actual)
@@ -96,10 +96,10 @@ class JsonStringEditorTest {
         // given
         val input = "{}"
         val expected = """{"a":{"b":123}}"""
-        val editor = JsonStringEditor()
+        val editor = JsonStringKeyValueStore(input)
 
         // when
-        val actual = editor.setValue(input, 123, "a", "b")
+        val actual = editor.setValue( 123, "a", "b")
 
         // then
         assertJsonEquals(expected, actual)
@@ -109,10 +109,10 @@ class JsonStringEditorTest {
     fun intExists() {
         // given
         val input = """{"a":{"b":123}}"""
-        val editor = JsonStringEditor()
+        val editor = JsonStringKeyValueStore(input)
 
         // when
-        val actual = editor.valueExists(input, "a", "b")
+        val actual = editor.valueExists( "a", "b")
 
         // then
         assertTrue(actual)
@@ -122,10 +122,10 @@ class JsonStringEditorTest {
     fun intDoesNotExist() {
         // given
         val input = """{"a":{"c":123}}"""
-        val editor = JsonStringEditor()
+        val editor = JsonStringKeyValueStore(input)
 
         // when
-        val actual = editor.valueExists(input, "a", "b")
+        val actual = editor.valueExists( "a", "b")
 
         // then
         assertFalse(actual)
@@ -136,10 +136,10 @@ class JsonStringEditorTest {
         // given
         val input = """{"a":{"b":123}}"""
         val expected = 123
-        val editor = JsonStringEditor()
+        val editor = JsonStringKeyValueStore(input)
 
         // when
-        val actual = editor.getValue(IntConverter, input, "a", "b")
+        val actual = editor.getValue(IntConverter,  "a", "b")
 
         // then
         assertEquals(expected, actual)

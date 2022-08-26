@@ -5,20 +5,23 @@ import com.seanshubin.kotlin.tryme.domain.json.util.JsonUtil.parser
 import com.seanshubin.kotlin.tryme.domain.json.util.JsonUtil.pretty
 import com.seanshubin.kotlin.tryme.domain.untyped.Untyped
 
-class JsonStringEditor:KeyValueStoreEditor {
-    override fun <T> setValue(text: String, value: T, vararg keys: String): String {
+class JsonStringKeyValueStore(initialValue:String):KeyValueStore {
+    private var mutableText:String = initialValue
+    override val text: String get() = mutableText
+
+    override fun <T> setValue(value: T, vararg keys: String): String {
         val oldUntyped = untyped(text)
         val newUntyped = oldUntyped.setValueAtPath(value, *keys)
         return pretty.writeValueAsString(newUntyped.value)
     }
 
-    override fun <T> getValue(converter:Converter<T>, text: String, vararg keys: String): T {
+    override fun <T> getValue(converter:Converter<T>, vararg keys: String): T {
         val untyped = untyped(text)
         val value = untyped.getValueAtPath(*keys) ?: throwNullException(keys)
         return converter.convert(value)
     }
 
-    override fun valueExists(text: String, vararg keys: String): Boolean {
+    override fun valueExists(vararg keys: String): Boolean {
         val untyped = untyped(text)
         return untyped.hasValueAtPath(*keys)
     }
