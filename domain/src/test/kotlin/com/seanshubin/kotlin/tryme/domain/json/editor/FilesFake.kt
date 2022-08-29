@@ -23,6 +23,6 @@ class FilesFake:FilesContractUnsupportedOperation {
     }
 
     override fun readString(path: Path): String {
-        return fileContents.getValue(path)
+        return fileContents[path] ?: throw RuntimeException("File at path '$path' does not exist")
     }
 }
