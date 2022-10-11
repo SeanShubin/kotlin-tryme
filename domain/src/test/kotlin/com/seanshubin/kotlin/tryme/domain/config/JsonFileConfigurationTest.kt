@@ -24,7 +24,7 @@ class JsonFileConfigurationTest {
         val files: FilesContract = FakeFiles()
         val configFilePath = Paths.get("test-config.json")
         val jsonFileConfiguration = JsonFileConfiguration(files, configFilePath)
-        val loadB = jsonFileConfiguration.intLoaderAt(123, "a", "b")
+        val loadB = jsonFileConfiguration.intLoaderAt(123, listOf("a", "b"))
         val expectedValue = 123
         val expectedJson =
             """{
@@ -55,7 +55,7 @@ class JsonFileConfigurationTest {
         val configFilePath = Paths.get("test-config.json")
         files.contentMap[configFilePath] = existingFileContent
         val jsonFileConfiguration = JsonFileConfiguration(files, configFilePath)
-        val loadB = jsonFileConfiguration.stringLoaderAt("default string value", "a", "b")
+        val loadB = jsonFileConfiguration.stringLoaderAt("default string value", listOf("a", "b"))
         val expectedValue = "actual string value"
 
         // when
@@ -73,7 +73,7 @@ class JsonFileConfigurationTest {
         val files: FilesContract = FakeFiles()
         val configFilePath = Paths.get("test-config.json")
         val jsonFileConfiguration = JsonFileConfiguration(files, configFilePath)
-        val loadB = jsonFileConfiguration.intLoaderAt("string value", "a", "b")
+        val loadB = jsonFileConfiguration.intLoaderAt("string value", listOf("a", "b"))
         val expectedMessage = "At path a.b, expected type int, got String for: string value"
         val expectedJson =
             """{
@@ -106,7 +106,7 @@ class JsonFileConfigurationTest {
         val configFilePath = Paths.get("test-config.json")
         files.contentMap[configFilePath] = existingFileContent
         val jsonFileConfiguration = JsonFileConfiguration(files, configFilePath)
-        val loadB = jsonFileConfiguration.pathLoaderAt("default path value", "a", "b")
+        val loadB = jsonFileConfiguration.pathLoaderAt("default path value", listOf("a", "b"))
         val expectedValue = Paths.get("my/path")
 
         // when
@@ -131,7 +131,7 @@ class JsonFileConfigurationTest {
         val files = FakeFiles()
         files.contentMap[path] = text
         val configuration = JsonFileConfiguration(files, path)
-        val loadPath = configuration.pathLoaderAt("dummy", "existing")
+        val loadPath = configuration.pathLoaderAt("dummy", listOf("existing"))
 
         // when
         val actual = loadPath()
@@ -153,7 +153,7 @@ class JsonFileConfigurationTest {
         val path = Paths.get("test-config.json")
         val files = FakeFiles()
         val configuration = JsonFileConfiguration(files, path)
-        val loadPath = configuration.pathLoaderAt(expected, "created")
+        val loadPath = configuration.pathLoaderAt(expected, listOf("created"))
 
         // when
         val actual = loadPath()
@@ -176,7 +176,7 @@ class JsonFileConfigurationTest {
         val files = FakeFiles()
         files.contentMap[path] = text
         val configuration = JsonFileConfiguration(files, path)
-        val loadValue = configuration.instantLoaderAt("dummy", "existing")
+        val loadValue = configuration.instantLoaderAt("dummy", listOf("existing"))
 
         // when
         val actual = loadValue()
@@ -198,7 +198,7 @@ class JsonFileConfigurationTest {
         val path = Paths.get("test-config.json")
         val files = FakeFiles()
         val configuration = JsonFileConfiguration(files, path)
-        val loadValue = configuration.instantLoaderAt(expected, "created")
+        val loadValue = configuration.instantLoaderAt(expected, listOf("created"))
 
         // when
         val actual = loadValue()
@@ -221,7 +221,7 @@ class JsonFileConfigurationTest {
         val files = FakeFiles()
         files.contentMap[path] = text
         val configuration = JsonFileConfiguration(files, path)
-        val loadValue = configuration.formattedSecondsLoaderAt("dummy", "existing")
+        val loadValue = configuration.formattedSecondsLoaderAt("dummy", listOf("existing"))
 
         // when
         val actual = loadValue()
@@ -243,7 +243,7 @@ class JsonFileConfigurationTest {
         val path = Paths.get("test-config.json")
         val files = FakeFiles()
         val configuration = JsonFileConfiguration(files, path)
-        val loadValue = configuration.formattedSecondsLoaderAt("1 minute 2 seconds", "created")
+        val loadValue = configuration.formattedSecondsLoaderAt("1 minute 2 seconds", listOf("created"))
 
         // when
         val actual = loadValue()
