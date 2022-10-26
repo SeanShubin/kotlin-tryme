@@ -1,48 +1,59 @@
 package com.seanshubin.kotlin.tryme.domain.config
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.seanshubin.kotlin.tryme.domain.config.Converters.DurationSecondsConverter
+import com.seanshubin.kotlin.tryme.domain.config.Converters.InstantConverter
+import com.seanshubin.kotlin.tryme.domain.config.Converters.IntConverter
+import com.seanshubin.kotlin.tryme.domain.config.Converters.PathConverter
+import com.seanshubin.kotlin.tryme.domain.config.Converters.PathListConverter
+import com.seanshubin.kotlin.tryme.domain.config.Converters.StringConverter
+import com.seanshubin.kotlin.tryme.domain.config.Converters.StringListConverter
 import com.seanshubin.kotlin.tryme.domain.contract.FilesContract
-import com.seanshubin.kotlin.tryme.domain.format.DurationFormat
 import com.seanshubin.kotlin.tryme.domain.json.util.JsonUtil.parser
 import com.seanshubin.kotlin.tryme.domain.json.util.JsonUtil.pretty
 import com.seanshubin.kotlin.tryme.domain.untyped.Untyped
 import java.nio.file.Path
-import java.nio.file.Paths
 import java.time.Instant
-import com.seanshubin.kotlin.tryme.domain.config.Converters.IntConverter
-import com.seanshubin.kotlin.tryme.domain.config.Converters.StringConverter
-import com.seanshubin.kotlin.tryme.domain.config.Converters.PathConverter
-import com.seanshubin.kotlin.tryme.domain.config.Converters.InstantConverter
-import com.seanshubin.kotlin.tryme.domain.config.Converters.DurationSecondsConverter
-import com.seanshubin.kotlin.tryme.domain.config.Converters.StringListConverter
-import com.seanshubin.kotlin.tryme.domain.config.Converters.PathListConverter
 
 class JsonFileConfiguration(
     private val files: FilesContract,
     private val configFilePath: Path
 ) : Configuration {
-    override fun intLoaderAt(default: Any?, keys: List<String>): () -> Int =
-        genericLoader(IntConverter, default, keys)
+    override fun intAt(default: Any?, keys: List<String>): ConfigurationElement<Int> =
+        genericElement(IntConverter, default, keys)
 
-    override fun stringLoaderAt(default: Any?, keys: List<String>): () -> String =
-        genericLoader(StringConverter, default, keys)
+    override fun stringAt(default: Any?, keys: List<String>): ConfigurationElement<String> =
+        genericElement(StringConverter, default, keys)
 
-    override fun pathLoaderAt(default: Any?, keys: List<String>): () -> Path =
-        genericLoader(PathConverter, default, keys)
+    override fun pathAt(default: Any?, keys: List<String>): ConfigurationElement<Path> =
+        genericElement(PathConverter, default, keys)
 
-    override fun instantLoaderAt(default: Any?, keys: List<String>): () -> Instant =
-        genericLoader(InstantConverter, default, keys)
+    override fun instantAt(default: Any?, keys: List<String>): ConfigurationElement<Instant> =
+        genericElement(InstantConverter, default, keys)
 
-    override fun formattedSecondsLoaderAt(default: Any?, keys: List<String>): () -> Long =
-        genericLoader(DurationSecondsConverter, default, keys)
+    override fun formattedSecondsAt(default: Any?, keys: List<String>): ConfigurationElement<Long> =
+        genericElement(DurationSecondsConverter, default, keys)
 
-    override fun stringListLoaderAt(default: Any?, keys: List<String>): () -> List<String> =
-        genericLoader(StringListConverter, default, keys)
+    override fun stringListAt(default: Any?, keys: List<String>): ConfigurationElement<List<String>> =
+        genericElement(StringListConverter, default, keys)
 
-    override fun pathListLoaderAt(default: Any?, keys: List<String>): () -> List<Path> =
-        genericLoader(PathListConverter, default, keys)
+    override fun pathListAt(default: Any?, keys: List<String>): ConfigurationElement<List<Path>> =
+        genericElement(PathListConverter, default, keys)
 
-    private fun <T> genericLoader(converter: Converter<T>, default: Any?, keys: List<String>): () -> T = {
+    private fun <T> genericElement(
+        converter: Converter<T>,
+        default: Any?,
+        keys: List<String>
+    ): ConfigurationElement<T> {
+        val loadFunction = genericLoadFunction(converter, default, keys)
+        val storeFunction = genericStoreFunction<T>(keys)
+        return object : ConfigurationElement<T> {
+            override val load: () -> T get() = loadFunction
+            override val store: (T) -> Unit get() = storeFunction
+        }
+    }
+
+    private fun <T> genericLoadFunction(converter: Converter<T>, default: Any?, keys: List<String>): () -> T = {
         val untyped = loadUntyped(default.toJsonType(), keys)
         val value = untyped.value
         val typed = converter.convert(value)
@@ -55,6 +66,10 @@ class JsonFileConfiguration(
         } else {
             typed
         }
+    }
+
+    private fun <T> genericStoreFunction(keys: List<String>): (T) -> Unit = { value ->
+        storeUntyped(value.toJsonType(), keys)
     }
 
     private fun Any?.toJsonType(): Any? =
@@ -73,20 +88,34 @@ class JsonFileConfiguration(
         }
 
     private fun loadUntyped(default: Any?, keys: List<String>): Untyped {
-        return if (files.exists(configFilePath)) {
-            val text = files.readString(configFilePath)
-            val untyped = Untyped(parser.readValue<Any?>(text))
-            if (untyped.hasValueAtPath(*keys.toTypedArray())) {
-                Untyped(untyped.getValueAtPath(*keys.toTypedArray()))
-            } else {
-                val newUntyped = untyped.setValueAtPath(default, *keys.toTypedArray())
-                val jsonText = pretty.writeValueAsString(newUntyped.value)
-                files.writeString(configFilePath, jsonText)
-                loadUntyped(default, keys)
-            }
+        val untyped = loadConfig()
+        return if (untyped.hasValueAtPath(*keys.toTypedArray())) {
+            Untyped(untyped.getValueAtPath(*keys.toTypedArray()))
         } else {
-            files.writeString(configFilePath, "{}")
+            val newUntyped = untyped.setValueAtPath(default, *keys.toTypedArray())
+            val jsonText = pretty.writeValueAsString(newUntyped.value)
+            files.writeString(configFilePath, jsonText)
             loadUntyped(default, keys)
+        }
+    }
+
+    private fun storeUntyped(value: Any?, keys: List<String>) {
+        val untyped = loadConfig()
+        val newUntyped = untyped.setValueAtPath(value, *keys.toTypedArray())
+        val jsonText = pretty.writeValueAsString(newUntyped.value)
+        files.writeString(configFilePath, jsonText)
+    }
+
+    private fun loadConfig() :Untyped {
+        ensureFileExists()
+        val text = files.readString(configFilePath)
+        val untyped = Untyped(parser.readValue<Any?>(text))
+        return untyped
+    }
+
+    private fun ensureFileExists() {
+        if (!files.exists(configFilePath)) {
+            files.writeString(configFilePath, "{}")
         }
     }
 }

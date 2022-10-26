@@ -1,15 +1,14 @@
 package com.seanshubin.kotlin.tryme.domain.config
 
 import java.nio.file.Path
-import java.time.Duration
 import java.time.Instant
 
 interface Configuration {
-    fun intLoaderAt(default: Any?, keys: List<String>): () -> Int
-    fun stringLoaderAt(default: Any?, keys: List<String>): () -> String
-    fun pathLoaderAt(default: Any?, keys: List<String>): () -> Path
-    fun instantLoaderAt(default: Any?, keys: List<String>): () -> Instant
-    fun formattedSecondsLoaderAt(default: Any?, keys: List<String>): () -> Long
-    fun stringListLoaderAt(default: Any?, keys: List<String>): () -> List<String>
-    fun pathListLoaderAt(default: Any?, keys: List<String>): () -> List<Path>
+    fun intAt(default: Any?, keys: List<String>): ConfigurationElement<Int>
+    fun stringAt(default: Any?, keys: List<String>): ConfigurationElement<String>
+    fun pathAt(default: Any?, keys: List<String>): ConfigurationElement<Path>
+    fun instantAt(default: Any?, keys: List<String>): ConfigurationElement<Instant>
+    fun formattedSecondsAt(default: Any?, keys: List<String>): ConfigurationElement<Long>
+    fun stringListAt(default: Any?, keys: List<String>):ConfigurationElement<List<String>>
+    fun pathListAt(default: Any?, keys: List<String>): ConfigurationElement<List<Path>>
 }
