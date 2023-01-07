@@ -8,11 +8,11 @@ class Downloader(
     private val downloadDir:Path,
     private val http: HttpContract,
     private val linkParser: LinkParser,
-    private val shouldFollow: (URI) -> Boolean,
-    private val shouldDownload: (URI) -> Boolean,
+    private val uriPolicies: List<UriPolicy>,
     private val persistence: Persistence
 ) {
     private var state = DownloadState.empty
+    private val uriPolicyMap = uriPolicies.associateBy { it.name }
 
     fun downloadSite() {
         downloadSite(baseUri)
@@ -24,48 +24,35 @@ class Downloader(
         val links = linkParser.parseLinks(uri, result.text).filter{link ->
             link.host == baseUri.host
         }
-        val linksToFollow = mutableListOf<URI>()
-        val linksToDownload = mutableListOf<URI>()
-        val linksMatchingBoth = mutableListOf<URI>()
-        val linksMatchingNeither = mutableListOf<URI>()
-        links.forEach { link ->
-            if (shouldFollow(link)) {
-                if (shouldDownload(link)) {
-                    linksMatchingBoth.add(link)
-                } else {
-                    linksToFollow.add(link)
-                }
-            } else {
-                if (shouldDownload(link)) {
-                    linksToDownload.add(link)
-                } else {
-                    linksMatchingNeither.add(link)
-                }
-            }
+        val linksByPolicyNames = links.map { link ->
+            val policyNames = uriPolicies.filter { policy ->
+                policy.accept(link)
+            }.map { it.name }
+            Pair(policyNames, link)
+        }.groupBy { it.first }.map { (policyNames, entry) ->
+            Pair(policyNames, entry.map{it.second})
+        }.toMap()
+        linksByPolicyNames.forEach(::recordLinkStatus)
+        val linksToFollow = linksByPolicyNames[listOf("follow")] ?: emptyList()
+        linksToFollow.forEach(::followLinkIfNotAlreadyFollowed)
+    }
+
+    private fun recordLinkStatus(entry: Map.Entry<List<String>, List<URI>>) {
+        val names = entry.key
+        val links = entry.value
+        val setName = if(names.isEmpty()) {
+            "uncategorized"
+        } else {
+            names.joinToString("-")
         }
-        linksMatchingNeither.forEach(::processLinkMatchingNeither)
-        linksMatchingBoth.forEach(::processLinkMatchingBoth)
-        linksToFollow.forEach(::processLinkToFollow)
-        linksToDownload.forEach(::processLinkToDownload)
+        val linkNames = links.map{it.toString()}
+        persistence.addToSet(setName, linkNames)
     }
 
-    private fun processLinkMatchingBoth(link: URI) {
-        persistence.addToSet("links-matching-both", link.toString())
-    }
-
-    private fun processLinkMatchingNeither(link: URI) {
-        persistence.addToSet("links-matching-neither", link.toString())
-    }
-
-    private fun processLinkToFollow(link: URI) {
+    private fun followLinkIfNotAlreadyFollowed(link: URI) {
         if(!state.alreadyFollowed.contains(link)){
-            persistence.addToSet("links-matching-follow", link.toString())
             state = state.addToAlreadyFollowed(link)
             downloadSite(link)
         }
-    }
-
-    private fun processLinkToDownload(link: URI) {
-        persistence.addToSet("links-matching-download", link.toString())
     }
 }

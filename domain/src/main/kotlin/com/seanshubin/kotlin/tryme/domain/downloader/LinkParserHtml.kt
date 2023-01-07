@@ -1,14 +1,32 @@
 package com.seanshubin.kotlin.tryme.domain.downloader
 
 import java.net.URI
+import java.net.URISyntaxException
 
-class LinkParserHtml:LinkParser {
+class LinkParserHtml(
+    private val uriSyntaxException:(String, URISyntaxException)->Unit
+):LinkParser {
     override fun parseLinks(source:URI, text: String): List<URI> {
-        return linkRegex.findAll(text).map { matchResult ->
-            URI(matchResult.groupValues[1])
+        return linkRegex.findAll(text).mapNotNull { matchResult ->
+            val uriString = dropFragment(matchResult.groupValues[1])
+            try {
+                URI(uriString)
+            } catch(ex: URISyntaxException){
+                uriSyntaxException(uriString, ex)
+                null
+            }
         }.map { link ->
             toAbsoluteLink(source, link)
         }.toList()
+    }
+
+    private fun dropFragment(link:String):String {
+        val fragmentIndex = link.indexOf('#')
+        return if(fragmentIndex == -1){
+            link
+        } else {
+            link.substring(0, fragmentIndex)
+        }
     }
 
     private fun toAbsoluteLink(source:URI, link:URI):URI{

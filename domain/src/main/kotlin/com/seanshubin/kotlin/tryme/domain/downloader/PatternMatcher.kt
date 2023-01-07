@@ -2,12 +2,12 @@ package com.seanshubin.kotlin.tryme.domain.downloader
 
 import java.net.URI
 
-class PatternMatcher(patterns: List<String>) : (URI) -> Boolean {
+data class PatternMatcher(override val name:String, val patterns: List<String>) : UriPolicy {
     private val regexList = patterns.map { pattern ->
         Regex(pattern)
     }
 
-    override fun invoke(uri: URI): Boolean {
+    override fun accept(uri: URI): Boolean {
         return regexList.any { regex -> regex.matches(uri.path) }
     }
 }

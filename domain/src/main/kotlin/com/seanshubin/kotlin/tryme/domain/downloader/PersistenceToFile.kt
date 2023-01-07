@@ -10,11 +10,15 @@ class PersistenceToFile(
     private val files:FilesContract
 ):Persistence {
     override fun addToSet(name: String, value: String) {
+        addToSet(name, listOf(value))
+    }
+
+    override fun addToSet(name: String, values: List<String>) {
         val path = baseDir.resolve("$name.json")
         initializeStringArrayIfNeeded(path)
         val existingText =  files.readString(path)
         val existingSet = JsonMappers.parser.readValue<List<String>>(existingText)
-        val newSet = (existingSet + value).distinct().sorted()
+        val newSet = (existingSet + values).distinct().sorted()
         val newText = JsonMappers.pretty.writeValueAsString(newSet)
         files.writeString(path, newText)
     }
