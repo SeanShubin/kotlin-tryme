@@ -1,9 +1,9 @@
 package com.seanshubin.kotlin.tryme.domain.json.store
 
+import com.seanshubin.kotlin.tryme.domain.json.JsonMappers.normalizeJson
 import com.seanshubin.kotlin.tryme.domain.json.editor.KeyValueStore
 import com.seanshubin.kotlin.tryme.domain.json.editor.Converter.Companion.IntConverter
 import com.seanshubin.kotlin.tryme.domain.json.editor.Converter.Companion.StringConverter
-import com.seanshubin.kotlin.tryme.domain.json.util.JsonUtil.normalizeJson
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

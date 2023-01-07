@@ -9,8 +9,7 @@ import com.seanshubin.kotlin.tryme.domain.config.Converters.PathListConverter
 import com.seanshubin.kotlin.tryme.domain.config.Converters.StringConverter
 import com.seanshubin.kotlin.tryme.domain.config.Converters.StringListConverter
 import com.seanshubin.kotlin.tryme.domain.contract.FilesContract
-import com.seanshubin.kotlin.tryme.domain.json.util.JsonUtil.parser
-import com.seanshubin.kotlin.tryme.domain.json.util.JsonUtil.pretty
+import com.seanshubin.kotlin.tryme.domain.json.JsonMappers
 import com.seanshubin.kotlin.tryme.domain.untyped.Untyped
 import java.nio.file.Path
 import java.time.Instant
@@ -93,7 +92,7 @@ class JsonFileConfiguration(
             Untyped(untyped.getValueAtPath(*keys.toTypedArray()))
         } else {
             val newUntyped = untyped.setValueAtPath(default, *keys.toTypedArray())
-            val jsonText = pretty.writeValueAsString(newUntyped.value)
+            val jsonText = JsonMappers.pretty.writeValueAsString(newUntyped.value)
             files.writeString(configFilePath, jsonText)
             loadUntyped(default, keys)
         }
@@ -102,14 +101,14 @@ class JsonFileConfiguration(
     private fun storeUntyped(value: Any?, keys: List<String>) {
         val untyped = loadConfig()
         val newUntyped = untyped.setValueAtPath(value, *keys.toTypedArray())
-        val jsonText = pretty.writeValueAsString(newUntyped.value)
+        val jsonText = JsonMappers.pretty.writeValueAsString(newUntyped.value)
         files.writeString(configFilePath, jsonText)
     }
 
     private fun loadConfig() :Untyped {
         ensureFileExists()
         val text = files.readString(configFilePath)
-        val untyped = Untyped(parser.readValue<Any?>(text))
+        val untyped = Untyped(JsonMappers.parser.readValue<Any?>(text))
         return untyped
     }
 

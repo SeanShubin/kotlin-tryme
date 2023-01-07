@@ -1,8 +1,8 @@
 package com.seanshubin.kotlin.tryme.domain.json.editor
 
 import com.seanshubin.kotlin.tryme.domain.contract.FilesContract
+import com.seanshubin.kotlin.tryme.domain.json.JsonMappers
 import com.seanshubin.kotlin.tryme.domain.json.store.KeyValueStoreTestBase
-import com.seanshubin.kotlin.tryme.domain.json.util.JsonUtil.pretty
 import java.nio.file.Path
 import java.nio.file.Paths
 
@@ -17,7 +17,7 @@ class JsonFileKeyValueStoreTest : KeyValueStoreTestBase() {
     override fun createStore(initialValue: Map<*, *>): KeyValueStore {
         val files = createFiles()
         val file = createFile(files)
-        val initialText = pretty.writeValueAsString(initialValue)
+        val initialText = JsonMappers.pretty.writeValueAsString(initialValue)
         files.writeString(file, initialText)
         return JsonFileKeyValueStore(files, file)
     }

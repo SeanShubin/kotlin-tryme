@@ -1,8 +1,7 @@
 package com.seanshubin.kotlin.tryme.domain.json.editor
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.seanshubin.kotlin.tryme.domain.json.util.JsonUtil.parser
-import com.seanshubin.kotlin.tryme.domain.json.util.JsonUtil.pretty
+import com.seanshubin.kotlin.tryme.domain.json.JsonMappers
 import com.seanshubin.kotlin.tryme.domain.untyped.Untyped
 
 class JsonStringKeyValueStore(initialValue:String):KeyValueStore {
@@ -12,7 +11,7 @@ class JsonStringKeyValueStore(initialValue:String):KeyValueStore {
     override fun <T> setValue(value: T, vararg keys: String) {
         val oldUntyped = untyped(text)
         val newUntyped = oldUntyped.setValueAtPath(value, *keys)
-        mutableText = pretty.writeValueAsString(newUntyped.value)
+        mutableText = JsonMappers.pretty.writeValueAsString(newUntyped.value)
     }
 
     override fun <T> getValue(converter:Converter<T>, vararg keys: String): T {
@@ -28,7 +27,7 @@ class JsonStringKeyValueStore(initialValue:String):KeyValueStore {
 
     private fun untyped(text:String):Untyped{
         val jsonText = text.ifBlank { "{}" }
-        val jsonObject:Any? = parser.readValue(jsonText)
+        val jsonObject:Any? = JsonMappers.parser.readValue(jsonText)
         val untyped = Untyped(jsonObject)
         return untyped
     }
