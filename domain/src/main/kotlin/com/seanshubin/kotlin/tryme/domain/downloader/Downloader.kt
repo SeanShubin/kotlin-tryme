@@ -1,5 +1,6 @@
 package com.seanshubin.kotlin.tryme.domain.downloader
 
+import com.seanshubin.kotlin.tryme.domain.contract.FilesContract
 import java.net.URI
 import java.nio.file.Path
 
@@ -8,11 +9,15 @@ class Downloader(
     private val downloadDir:Path,
     private val http: HttpContract,
     private val linkParser: LinkParser,
-    private val uriPolicies: List<UriPolicy>,
-    private val persistence: Persistence
+    uriPoliciesSpecification: Map<String, List<String>>,
+    private val persistence: Persistence,
+    private val files:FilesContract
 ) {
     private var state = DownloadState.empty
-    private val uriPolicyMap = uriPolicies.associateBy { it.name }
+    private val uriPolicies = uriPoliciesSpecification.map {
+        (name, patternList) ->
+        PatternMatcher(name, patternList)
+    }
 
     fun downloadSite() {
         downloadSite(baseUri)
@@ -35,6 +40,8 @@ class Downloader(
         linksByPolicyNames.forEach(::recordLinkStatus)
         val linksToFollow = linksByPolicyNames[listOf("follow")] ?: emptyList()
         linksToFollow.forEach(::followLinkIfNotAlreadyFollowed)
+        val linksToDownload = linksByPolicyNames[listOf("download")] ?: emptyList()
+        linksToDownload.forEach(::downloadLinkIfNotAlreadyDownloaded)
     }
 
     private fun recordLinkStatus(entry: Map.Entry<List<String>, List<URI>>) {
@@ -54,5 +61,17 @@ class Downloader(
             state = state.addToAlreadyFollowed(link)
             downloadSite(link)
         }
+    }
+
+    private fun downloadLinkIfNotAlreadyDownloaded(link: URI) {
+        val path = linkToPath(link)
+        if(files.exists(path)) return
+        FilesUtil.ensureParentExists(files, path)
+        http.download(link, path.toAbsolutePath())
+    }
+
+    private fun linkToPath(link:URI):Path {
+        val path = downloadDir.resolve(link.path.substring(1))
+        return path
     }
 }

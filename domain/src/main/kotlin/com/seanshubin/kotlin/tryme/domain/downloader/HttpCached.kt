@@ -28,6 +28,10 @@ class HttpCached(
         return result
     }
 
+    override fun download(uri: URI, path: Path) {
+        httpContract.download(uri, path)
+    }
+
     private fun loadFromCache(uri: URI, cacheTableOfContents: CacheTableOfContents): HttpStringResult? {
         val cacheEntry = cacheTableOfContents.entries[uri]
         return if (cacheEntry == null) {

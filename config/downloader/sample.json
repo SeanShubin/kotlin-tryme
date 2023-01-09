@@ -1,0 +1,10 @@
+{
+  "site" : "https://reactjs.org",
+  "cacheDir" : "generated/downloader/sample/cache",
+  "reportDir" : "generated/downloader/sample/report",
+  "downloadDir" : "generated/downloader/sample/download",
+  "patterns" : {
+    "follow" : [ ".*\\.html$" ],
+    "download" : [ ".*\\.png$" ]
+  }
+}
