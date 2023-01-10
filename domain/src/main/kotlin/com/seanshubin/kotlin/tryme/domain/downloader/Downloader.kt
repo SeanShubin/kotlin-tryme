@@ -9,22 +9,19 @@ class Downloader(
     private val downloadDir:Path,
     private val http: HttpContract,
     private val linkParser: LinkParser,
-    uriPoliciesSpecification: Map<String, List<String>>,
+    private val uriPolicies:List<UriPolicy>,
     private val persistence: Persistence,
-    private val files:FilesContract
+    private val files:FilesContract,
+    private val headers:List<Pair<String, String>>
 ) {
     private var state = DownloadState.empty
-    private val uriPolicies = uriPoliciesSpecification.map {
-        (name, patternList) ->
-        PatternMatcher(name, patternList)
-    }
 
     fun downloadSite() {
         downloadSite(baseUri)
     }
 
     private fun downloadSite(uri:URI){
-        val result = http.getString(uri)
+        val result = http.getString(uri, headers)
         if (result.isNotOk()) return
         val links = linkParser.parseLinks(uri, result.text).filter{link ->
             link.host == baseUri.host
@@ -65,9 +62,13 @@ class Downloader(
 
     private fun downloadLinkIfNotAlreadyDownloaded(link: URI) {
         val path = linkToPath(link)
-        if(files.exists(path)) return
-        FilesUtil.ensureParentExists(files, path)
-        http.download(link, path.toAbsolutePath())
+        if(files.exists(path)) {
+            println("already exists: $link -> $path")
+        } else {
+            println("downloading: $link -> $path")
+            FilesUtil.ensureParentExists(files, path)
+            http.download(link, headers, path)
+        }
     }
 
     private fun linkToPath(link:URI):Path {

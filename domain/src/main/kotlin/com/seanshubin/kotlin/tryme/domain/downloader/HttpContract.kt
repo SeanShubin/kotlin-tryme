@@ -4,6 +4,6 @@ import java.net.URI
 import java.nio.file.Path
 
 interface HttpContract {
-    fun getString(uri: URI):HttpStringResult
-    fun download(uri: URI, path: Path)
+    fun getString(uri: URI, headers:List<Pair<String, String>>):HttpStringResult
+    fun download(uri: URI, headers:List<Pair<String, String>>, path: Path)
 }
