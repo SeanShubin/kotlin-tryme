@@ -5,7 +5,7 @@ enum class HiraganaType {
         override fun create(char: Char): Hiragana? {
             val codePoint = char.toInt()
             val name = Character.getName(codePoint)
-            return if(name == null) HiraganaUnused(char)
+            return if(name == null) HiraganaUnused(char, codePoint)
             else null
         }
     },
@@ -15,7 +15,7 @@ enum class HiraganaType {
             val name = Character.getName(codePoint) ?: return null
             val match = hiraganaSmallLetterRegex.matchEntire(name) ?: return null
             val romaji = match.groupValues[1]
-            return HiraganaLetterSmall(char, romaji, name)
+            return HiraganaLetterSmall(char, codePoint, name, romaji)
         }
     },
     LETTER{
@@ -24,14 +24,14 @@ enum class HiraganaType {
             val name = Character.getName(codePoint) ?: return null
             val match = hiraganaLetterRegex.matchEntire(name) ?: return null
             val romaji = match.groupValues[1]
-            return HiraganaLetter(char, romaji, name)
+            return HiraganaLetter(char, codePoint, name, romaji)
         }
     },
     OTHER{
         override fun create(char: Char): Hiragana? {
             val codePoint = char.toInt()
             val name = Character.getName(codePoint) ?: return null
-            return HiraganaOther(char, name)
+            return HiraganaOther(char, codePoint, name)
         }
     };
     abstract fun create(char:Char): Hiragana?

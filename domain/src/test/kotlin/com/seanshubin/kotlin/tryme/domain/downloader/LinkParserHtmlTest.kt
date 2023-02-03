@@ -91,8 +91,12 @@ class LinkParserHtmlTest {
         assertEquals(expected, actual)
     }
 
-    fun createLinkParserHtml(): LinkParser = LinkParserHtml(::uriSyntaxException)
+    fun createLinkParserHtml(): LinkParser = LinkParserHtml(::uriSyntaxException, ::uriPathIsNull)
 
     fun uriSyntaxException(uriString: String, ex: URISyntaxException) {
+    }
+
+    fun uriPathIsNull(uri:URI){
+
     }
 }

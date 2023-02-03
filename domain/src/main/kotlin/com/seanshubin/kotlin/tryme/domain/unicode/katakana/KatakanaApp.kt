@@ -1,10 +1,10 @@
-package com.seanshubin.kotlin.tryme.domain.unicode.hiragana
+package com.seanshubin.kotlin.tryme.domain.unicode.katakana
 
-object HiraganaApp {
+object KatakanaApp {
     @JvmStatic
     fun main(args: Array<String>) {
-        val byType = HiraganaFactory.byType()
-        HiraganaType.values().forEach { type ->
+        val byType = KatakanaFactory.byType()
+        KatakanaType.values().forEach { type ->
             val list = byType[type] ?: emptyList()
             println("$type ${list.size}")
             list.forEach(::println)

@@ -2,6 +2,7 @@ package com.seanshubin.kotlin.tryme.domain.unicode.hiragana
 
 data class HiraganaLetterSmall(
     override val value: Char,
-    val romaji: String,
-    val name:String
+    override val codePoint:Int,
+    val name:String,
+    val romaji: String
 ) : Hiragana
