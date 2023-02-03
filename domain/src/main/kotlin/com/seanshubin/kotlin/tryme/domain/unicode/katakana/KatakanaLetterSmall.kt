@@ -4,6 +4,7 @@ import com.seanshubin.kotlin.tryme.domain.unicode.katakana.Katakana
 
 data class KatakanaLetterSmall(
     override val value: Char,
-    val romaji: String,
-    val name:String
+    override val codePoint: Int,
+    val name:String,
+    val romaji: String
 ) : Katakana

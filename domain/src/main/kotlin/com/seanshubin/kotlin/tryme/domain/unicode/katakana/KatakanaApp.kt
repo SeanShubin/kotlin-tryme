@@ -7,7 +7,7 @@ object KatakanaApp {
         KatakanaType.values().forEach { type ->
             val list = byType[type] ?: emptyList()
             println("$type ${list.size}")
-            list.forEach(::println)
+//            list.forEach(::println)
         }
     }
 }

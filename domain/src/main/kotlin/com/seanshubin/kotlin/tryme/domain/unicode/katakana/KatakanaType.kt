@@ -7,7 +7,7 @@ enum class KatakanaType {
         override fun create(char: Char): Katakana? {
             val codePoint = char.toInt()
             val name = Character.getName(codePoint)
-            return if(name == null) KatakanaUnused(char)
+            return if(name == null) KatakanaUnused(char, codePoint)
             else null
         }
     },
@@ -17,7 +17,7 @@ enum class KatakanaType {
             val name = Character.getName(codePoint) ?: return null
             val match = katakanaSmallLetterRegex.matchEntire(name) ?: return null
             val romaji = match.groupValues[1]
-            return KatakanaLetterSmall(char, romaji, name)
+            return KatakanaLetterSmall(char, codePoint, name, romaji)
         }
     },
     LETTER{
@@ -26,14 +26,14 @@ enum class KatakanaType {
             val name = Character.getName(codePoint) ?: return null
             val match = katakanaLetterRegex.matchEntire(name) ?: return null
             val romaji = match.groupValues[1]
-            return KatakanaLetter(char, romaji, name)
+            return KatakanaLetter(char, codePoint, name, romaji)
         }
     },
     OTHER{
         override fun create(char: Char): Katakana? {
             val codePoint = char.toInt()
             val name = Character.getName(codePoint) ?: return null
-            return KatakanaOther(char, name)
+            return KatakanaOther(char, codePoint, name)
         }
     };
     abstract fun create(char:Char): Katakana?
