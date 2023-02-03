@@ -4,19 +4,26 @@ import java.net.URI
 import java.net.URISyntaxException
 
 class LinkParserHtml(
-    private val uriSyntaxException:(String, URISyntaxException)->Unit
+    private val uriSyntaxException:(String, URISyntaxException)->Unit,
+    private val uriPathIsNull:(URI)->Unit
 ):LinkParser {
     override fun parseLinks(source:URI, text: String): List<URI> {
         return linkRegex.findAll(text).mapNotNull { matchResult ->
             val uriString = dropFragment(matchResult.groupValues[1])
             try {
-                URI(uriString)
+                val uri = URI(uriString)
+                if(uri.path == null){
+                    uriPathIsNull(uri)
+                    null
+                } else {
+                    uri
+                }
             } catch(ex: URISyntaxException){
                 uriSyntaxException(uriString, ex)
                 null
             }
         }.map { link ->
-            toAbsoluteLink(source, link)
+            toAbsoluteLink(source, link).normalize()
         }.toList()
     }
 

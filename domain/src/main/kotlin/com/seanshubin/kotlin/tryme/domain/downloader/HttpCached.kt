@@ -15,11 +15,11 @@ class HttpCached(
     private val files: FilesContract
 ) : HttpContract {
     private val cacheTableOfContentsPath =cacheBaseDir.resolve("table-of-contents.json")
-    override fun getString(uri: URI): HttpStringResult {
+    override fun getString(uri: URI, headers:List<Pair<String, String>>): HttpStringResult {
         val cacheTableOfContents = loadCacheTableOfContents()
         val cachedResult = loadFromCache(uri, cacheTableOfContents)
         val result = if (cachedResult == null) {
-            val nonCachedResult = httpContract.getString(uri)
+            val nonCachedResult = httpContract.getString(uri, headers)
             storeToCache(uri, nonCachedResult, cacheTableOfContents)
             nonCachedResult
         } else {
@@ -28,8 +28,8 @@ class HttpCached(
         return result
     }
 
-    override fun download(uri: URI, path: Path) {
-        httpContract.download(uri, path)
+    override fun download(uri: URI, headers:List<Pair<String, String>>, path: Path) {
+        httpContract.download(uri, headers, path)
     }
 
     private fun loadFromCache(uri: URI, cacheTableOfContents: CacheTableOfContents): HttpStringResult? {
@@ -38,6 +38,7 @@ class HttpCached(
             null
         } else {
             val path = Paths.get(cacheEntry.relativePath)
+            if(!files.exists(path)) return null
             val text = files.readString(path)
             val statusCode = cacheEntry.statusCode
             HttpStringResult(statusCode, text)
