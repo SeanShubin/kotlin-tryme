@@ -1,8 +1,8 @@
 package com.seanshubin.kotlin.tryme.domain.cycles
 
 object CycleUtil {
-    fun findCycles(edges: Set<Pair<String, String>>): List<List<String>> {
-        val vertices: List<String> = edges.flatMap { listOf(it.first, it.second) }.sorted().distinct()
+    fun <T:Comparable<T>> findCycles(edges: Set<Pair<T, T>>): List<List<T>> {
+        val vertices: List<T> = edges.flatMap { listOf(it.first, it.second) }.sorted().distinct()
         val adjacencyMatrix: MutableList<MutableList<Boolean>> = vertices.map { row ->
             vertices.map { column ->
                 edges.contains(row to column)
