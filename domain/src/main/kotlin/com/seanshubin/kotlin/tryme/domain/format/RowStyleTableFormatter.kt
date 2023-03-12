@@ -98,7 +98,7 @@ data class RowStyleTableFormatter(
 
     private fun makeAllRowsTheSameSize(rows: List<List<Any?>>, value: Any): List<List<Any?>> {
         val rowSizes = rows.map { row -> row.size }
-        val targetSize = rowSizes.max() ?: 0
+        val targetSize = rowSizes.maxOrNull() ?: 0
 
         fun makeRowSameSize(row: List<Any?>): List<Any?> {
             val extraCells = makeExtraCells(targetSize - row.size, value)
@@ -140,8 +140,9 @@ data class RowStyleTableFormatter(
         when (cell) {
             is Left -> leftJustify(justifiedCellToString(cell.x), width, padding)
             is Right -> rightJustify(justifiedCellToString(cell.x), width, padding)
-            null -> rightJustify(justifiedCellToString(cell), width, padding)
+            null -> rightJustify(justifiedCellToString(cell = null), width, padding)
             is String -> leftJustify(justifiedCellToString(cell), width, padding)
+            is Boolean -> leftJustify(justifiedCellToString(cell), width, padding)
             is Enum<*> -> leftJustify(justifiedCellToString(cell), width, padding)
             else -> rightJustify(justifiedCellToString(cell), width, padding)
         }
