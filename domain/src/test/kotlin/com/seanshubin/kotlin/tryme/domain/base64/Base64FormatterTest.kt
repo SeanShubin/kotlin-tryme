@@ -1,6 +1,6 @@
 package com.seanshubin.kotlin.tryme.domain.base64
 
-import org.junit.Test
+import kotlin.test.Test
 import java.util.*
 import kotlin.test.assertEquals
 
