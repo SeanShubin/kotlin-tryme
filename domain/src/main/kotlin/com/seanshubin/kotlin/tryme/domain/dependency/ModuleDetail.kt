@@ -9,9 +9,13 @@ data class ModuleDetail(
     val dependsOnInCycle:Map<ModulePath, Cycle>
 ):Detail {
     override val paths: List<ModulePath> = listOf(module.path)
-    override fun toLines(): List<String> = module.dependsOn.filterNot{
-        cycle != null && dependsOnInCycle[it] == cycle
-    }.map {
-        "${module.simpleName} -> ${it.simpleName}"
+    override fun toLines(): List<String> {
+        val thisLine = "$depth ${module.simpleName}"
+        val dependencyLines =  module.dependsOn.filterNot{
+            cycle != null && dependsOnInCycle[it] == cycle
+        }.map {
+            "$depth ${module.simpleName} -> ${it.simpleName}"
+        }
+        return listOf(thisLine) + dependencyLines
     }
 }

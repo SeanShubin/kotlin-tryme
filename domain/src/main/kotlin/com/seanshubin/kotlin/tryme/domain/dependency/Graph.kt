@@ -2,7 +2,42 @@ package com.seanshubin.kotlin.tryme.domain.dependency
 
 import com.seanshubin.kotlin.tryme.domain.cycles.CycleUtil
 
-data class Graph(val moduleList: List<Module>, val reversedModuleList: List<Module>, val cycleList: List<Cycle>) {
+data class Graph(
+    val origin: List<Pair<ModulePath, ModulePath>>,
+    val moduleList: List<Module>,
+    val reversedModuleList: List<Module>,
+    val cycleList: List<Cycle>
+) {
+    fun context(context: List<String>): Graph {
+        fun ModulePath.dropContext(): ModulePath? =
+            if (pathParts.startsWith(context)) {
+                copy(pathParts = pathParts.drop(context.size))
+            } else {
+                null
+            }
+
+        fun ModulePath.truncateAfterFirst(): ModulePath =
+            copy(pathParts = pathParts.take(1))
+
+        fun modifyPair(pair: Pair<ModulePath, ModulePath>): Pair<ModulePath, ModulePath>? {
+            val newFirst = pair.first.dropContext()?.truncateAfterFirst()
+            val newSecond = pair.second.dropContext()?.truncateAfterFirst()
+            return if (newFirst == null || newSecond == null) {
+                null
+            } else {
+                newFirst to newSecond
+            }
+        }
+
+        val newOrigin = origin.mapNotNull(::modifyPair)
+        return createFromModulePaths(newOrigin)
+    }
+
+    fun List<String>.startsWith(list: List<String>): Boolean {
+        if (list.size > size) return false
+        return take(list.size) == list
+    }
+
     val entryPoints: List<Module> = reversedModuleList.filter { it.dependsOn.isEmpty() }
 
     val moduleMap: Map<ModulePath, Module> = moduleList.associateBy { it.path }
@@ -22,7 +57,7 @@ data class Graph(val moduleList: List<Module>, val reversedModuleList: List<Modu
         val transitive = moduleTransitive(module.path)
         val dependsOnInCycle = module.dependsOn.mapNotNull {
             val dependsOnCycle = cycleMap[it]
-            if(dependsOnCycle == null) null
+            if (dependsOnCycle == null) null
             else it to dependsOnCycle
         }.toMap()
         return ModuleDetail(module, depth, breadth, transitive, cycle, dependsOnInCycle)
@@ -126,7 +161,7 @@ data class Graph(val moduleList: List<Module>, val reversedModuleList: List<Modu
             val moduleList = createModuleList(list)
             val reversedModuleList = createModuleList(list.map { it.swapPair() })
             val cycleList: List<Cycle> = CycleUtil.findCycles(list.toSet()).map { Cycle(it) }
-            return Graph(moduleList, reversedModuleList, cycleList)
+            return Graph(list, moduleList, reversedModuleList, cycleList)
         }
 
         fun createModuleList(list: List<Pair<ModulePath, ModulePath>>): List<Module> {

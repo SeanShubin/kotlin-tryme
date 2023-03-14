@@ -14,6 +14,6 @@ data class CycleDetail(
         val (first, second) = dependency
         val firstName = first.simpleName
         val secondName = second.simpleName
-        return "  $firstName -> $secondName"
+        return "  $depth $firstName -> $secondName"
     }
 }

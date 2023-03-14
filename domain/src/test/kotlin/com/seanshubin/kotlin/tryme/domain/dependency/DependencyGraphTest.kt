@@ -28,13 +28,23 @@ class DependencyGraphTest {
     }
 
     @Test
-    fun context(){
+    fun contextTruncate(){
         val input = listOf(
             listOf("a", "b") to listOf("c", "d")
         )
-        val actual = Graph.create(input)
-        actual.toLines().forEach(::println)
+        val expected = listOf("a -> c")
+        val actual = Graph.create(input).context(listOf()).toLines()
+        assertEquals(expected, actual)
+    }
 
+    @Test
+    fun contextNarrow(){
+        val input = listOf(
+            listOf("a", "b") to listOf("a", "c")
+        )
+        val expected = listOf("b -> c")
+        val actual = Graph.create(input).context(listOf("a")).toLines()
+        assertEquals(expected, actual)
     }
 
     fun String.stringToPath():List<String> = listOf(this)
