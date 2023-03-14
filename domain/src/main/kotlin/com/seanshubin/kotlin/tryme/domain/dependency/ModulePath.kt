@@ -14,7 +14,17 @@ data class ModulePath(val pathParts: List<String>):Comparable<ModulePath> {
 
     companion object {
         val defaultNameFormat: (List<String>) -> String = {
-            it.joinToString(".")
+            when (it.size) {
+                0 -> {
+                    "--root--"
+                }
+                1 -> {
+                    it[0]
+                }
+                else -> {
+                    it.joinToString(".", "\"", "\"")
+                }
+            }
         }
     }
 }

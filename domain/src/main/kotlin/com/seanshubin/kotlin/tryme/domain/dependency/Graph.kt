@@ -8,7 +8,7 @@ data class Graph(
     val reversedModuleList: List<Module>,
     val cycleList: List<Cycle>
 ) {
-    fun context(context: List<String>): Graph {
+    fun perspective(context: List<String>): Graph {
         fun ModulePath.dropContext(): ModulePath? =
             if (pathParts.startsWith(context)) {
                 copy(pathParts = pathParts.drop(context.size))
@@ -42,6 +42,8 @@ data class Graph(
 
     val moduleMap: Map<ModulePath, Module> = moduleList.associateBy { it.path }
 
+    val reversedModuleMap: Map<ModulePath, Module> = reversedModuleList.associateBy { it.path }
+
     val cycleMap: Map<ModulePath, Cycle> = cycleList.flatMap { cycle ->
         cycle.parts.map { path ->
             path to cycle
@@ -60,20 +62,26 @@ data class Graph(
             if (dependsOnCycle == null) null
             else it to dependsOnCycle
         }.toMap()
-        return ModuleDetail(module, depth, breadth, transitive, cycle, dependsOnInCycle)
+        val dependedOn = reversedModuleMap.getValue(module.path).dependsOn.isNotEmpty()
+        return ModuleDetail(module, depth, breadth, transitive, dependedOn, cycle, dependsOnInCycle)
     }
 
-    val cycleDetails: List<CycleDetail> = cycleList.map { cycle ->
+    val cycleDetails: List<CycleDetail> = cycleList.mapIndexed { index, cycle ->
         val depth = cycleDepth(cycle)
         val breadth = cycleBreadth(cycle)
         val transitive = cycleTransitive(cycle)
         val cycleDependencies = cycleDependencies(cycle)
-        CycleDetail(cycle, depth, breadth, transitive, cycleDependencies)
+        CycleDetail(cycle, index, depth, breadth, transitive, cycleDependencies)
     }
 
     val details: List<Detail> = (moduleDetails + cycleDetails).sorted()
 
-    fun toLines(): List<String> = details.flatMap { it.toLines() }
+    fun toLines(context:List<String>): List<String> {
+        val header = "digraph detangled {"
+        val body = details.flatMap { it.toLines(context) }.map{"  $it"}
+        val footer = "}"
+        return listOf(header) + body + listOf(footer)
+    }
 
     fun cycleDependencies(cycle: Cycle): List<Pair<ModulePath, ModulePath>> {
         val allDependencies = cycle.parts.flatMap { path ->
@@ -143,6 +151,15 @@ data class Graph(
         moduleMap.getValue(path).dependsOn.size
 
     fun cycleBreadth(cycle: Cycle): Int = cycleDependsOn(cycle).size
+
+    fun generatePerspectives(context:List<String>):List<Pair<List<String>, Graph>> {
+        val current = perspective(context)
+        val remaining = current.moduleList.map{it.path.pathParts[0]}.flatMap {
+            val newContext = context + it
+            generatePerspectives(newContext)
+        }
+        return listOf(context to current) + remaining
+    }
 
     fun toObject(): Map<String, Any> = mapOf(
         "singleList" to moduleList.map { it.toObject() },
