@@ -21,9 +21,10 @@ class DependencyGraphTest {
 
         val actual = Graph.create(input)
         assertEquals(listOf("a"), actual.entryPoints.map{it.simpleName})
-        assertEquals(7, actual.depth(ModulePath("a")))
-        assertEquals(1, actual.breadth(ModulePath("a")))
-        assertEquals(7, actual.transitive(ModulePath("a")))
+        assertEquals(7, actual.moduleDepth(ModulePath("a")))
+        assertEquals(1, actual.moduleBreadth(ModulePath("a")))
+        assertEquals(7, actual.moduleTransitive(ModulePath("a")))
+        actual.toLines().forEach(::println)
     }
 
     @Test
