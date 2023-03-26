@@ -1,8 +1,8 @@
 package com.seanshubin.kotlin.tryme.domain.beam
 
-data class BeamFile(
+data class BeamFileSummary(
     val beamFileInterchangeFormat: String,
     val size: Int,
     val beamSection:String,
-    val sections:List<Section>
+    val sections:List<SectionSummary>
 )

@@ -1,5 +1,6 @@
 package com.seanshubin.kotlin.tryme.domain.beam
 
+import com.seanshubin.kotlin.tryme.domain.beam.Conversions.toBeamFileSummary
 import com.seanshubin.kotlin.tryme.domain.cursor.Cursor
 import com.seanshubin.kotlin.tryme.domain.cursor.IteratorCursor
 import com.seanshubin.kotlin.tryme.domain.io.ioutil.toLineIterator
@@ -22,14 +23,15 @@ object BeamInfoApp {
         val parseResult = parser.parse(target, cursor)
         val tree = when(parseResult){
             is Result.Success -> {
-                parseResult.tree.toLines().forEach(::println)
+//                parseResult.tree.toLines().forEach(::println)
                 parseResult.tree
             }
             is Result.Failure -> throw RuntimeException(parseResult.message)
         }
         val assembler = AssemblerImpl()
-        val assembled = assembler.assemble(target, tree)
-        println(assembled)
-
+        val assembled = assembler.assemble(target, tree) as BeamFile
+        val summary = assembled.toBeamFileSummary()
+        println(summary)
+        assembled.sections.map{it.name}.forEach(::println)
     }
 }

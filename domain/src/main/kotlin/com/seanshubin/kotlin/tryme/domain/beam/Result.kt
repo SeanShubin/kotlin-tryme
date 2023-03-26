@@ -8,6 +8,11 @@ sealed interface Result {
     data class Success(val cursor: Cursor<Byte>, val tree: Tree<Byte>) : Result {
         override val success: Boolean = true
         fun wrap(name: String): Result = Success(cursor, Tree.Branch(name, listOf(tree)))
+        fun merge(name:String, other:Success):Success {
+                val cursor = other.cursor
+                val tree = Tree.Branch(name, listOf(this.tree, other.tree))
+                return Success(cursor, tree)
+        }
     }
 
     data class Failure(val message:String) : Result {

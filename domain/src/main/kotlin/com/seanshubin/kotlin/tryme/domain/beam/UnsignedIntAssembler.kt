@@ -1,22 +1,12 @@
 package com.seanshubin.kotlin.tryme.domain.beam
 
-import java.nio.ByteBuffer
+import com.seanshubin.kotlin.tryme.domain.beam.AssemblerUtil.assembleByteList
+import com.seanshubin.kotlin.tryme.domain.beam.Conversions.toInt
 
-/*
-int to byte
-    byte[] result =  ByteBuffer.allocate(4).putInt(number).array();
-byte to int
-    int num = ByteBuffer.wrap(bytes).getInt();
- */
 class UnsignedIntAssembler(override val name:String):TreeAssembler {
     override fun assemble(assemblerMap: Map<String, TreeAssembler>, tree: Tree<Byte>): Any? {
-        tree as Tree.Branch
-        val byteList = tree.list.map{ leaf  ->
-            leaf as Tree.Leaf
-            leaf.value
-        }
-        val byteArray = byteList.toByteArray()
-        val unsignedInt:UInt = ByteBuffer.wrap(byteArray).int.toUInt()
+        val byteList = assembleByteList(tree)
+        val unsignedInt:Int = byteList.toInt()
         return unsignedInt
     }
 }
