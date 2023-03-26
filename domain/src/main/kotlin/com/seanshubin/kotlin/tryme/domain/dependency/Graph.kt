@@ -3,11 +3,16 @@ package com.seanshubin.kotlin.tryme.domain.dependency
 import com.seanshubin.kotlin.tryme.domain.cycles.CycleUtil
 
 data class Graph(
-    val origin: List<Pair<ModulePath, ModulePath>>,
+    val originPairs: List<Pair<ModulePath, ModulePath>>,
+    val originSingles: List<ModulePath>,
     val moduleList: List<Module>,
     val reversedModuleList: List<Module>,
     val cycleList: List<Cycle>
 ) {
+    fun allEmpty():Boolean =
+        (originPairs.flatMap{it.toList()} + originSingles).distinct().all{
+            it.pathParts.isEmpty()
+        }
     fun perspective(context: List<String>): Graph {
         fun ModulePath.dropContext(): ModulePath? =
             if (pathParts.startsWith(context)) {
@@ -19,18 +24,30 @@ data class Graph(
         fun ModulePath.truncateAfterFirst(): ModulePath =
             copy(pathParts = pathParts.take(1))
 
+        fun modifySingle(single: ModulePath): ModulePath? =
+            single.dropContext()?.truncateAfterFirst()
+
         fun modifyPair(pair: Pair<ModulePath, ModulePath>): Pair<ModulePath, ModulePath>? {
-            val newFirst = pair.first.dropContext()?.truncateAfterFirst()
-            val newSecond = pair.second.dropContext()?.truncateAfterFirst()
+            val newFirst = modifySingle(pair.first)
+            val newSecond = modifySingle(pair.second)
             return if (newFirst == null || newSecond == null) {
+                null
+            } else if (newFirst == newSecond) {
                 null
             } else {
                 newFirst to newSecond
             }
         }
 
-        val newOrigin = origin.mapNotNull(::modifyPair)
-        return createFromModulePaths(newOrigin)
+        fun modifyPairToSingles(pair: Pair<ModulePath, ModulePath>): List<ModulePath> {
+            val newFirst = modifySingle(pair.first)
+            val newSecond = modifySingle(pair.second)
+            return listOfNotNull(newFirst, newSecond)
+        }
+
+        val newPairs = originPairs.mapNotNull(::modifyPair)
+        val newSingles = originSingles.mapNotNull(::modifySingle) + originPairs.flatMap(::modifyPairToSingles)
+        return createFromModulePaths(newPairs, newSingles)
     }
 
     fun List<String>.startsWith(list: List<String>): Boolean {
@@ -76,9 +93,9 @@ data class Graph(
 
     val details: List<Detail> = (moduleDetails + cycleDetails).sorted()
 
-    fun toLines(context:List<String>): List<String> {
+    fun toLines(makeLink:(ModulePath)->String?): List<String> {
         val header = "digraph detangled {"
-        val body = details.flatMap { it.toLines(context) }.map{"  $it"}
+        val body = details.flatMap { it.toLines(makeLink) }.map { "  $it" }
         val footer = "}"
         return listOf(header) + body + listOf(footer)
     }
@@ -152,13 +169,17 @@ data class Graph(
 
     fun cycleBreadth(cycle: Cycle): Int = cycleDependsOn(cycle).size
 
-    fun generatePerspectives(context:List<String>):List<Pair<List<String>, Graph>> {
+    fun generatePerspectives(context: List<String>): List<Pair<List<String>, Graph>> {
         val current = perspective(context)
-        val remaining = current.moduleList.map{it.path.pathParts[0]}.flatMap {
-            val newContext = context + it
-            generatePerspectives(newContext)
-        }
-        return listOf(context to current) + remaining
+        val remaining =
+            current.moduleList.filter { it.path.pathParts.isNotEmpty() }.map { it.path.pathParts[0] }.flatMap {
+                val newContext = context + it
+                generatePerspectives(newContext)
+            }
+        val result =
+            if (current.allEmpty() && remaining.isEmpty()) emptyList()
+            else listOf(context to current) + remaining
+        return result
     }
 
     fun toObject(): Map<String, Any> = mapOf(
@@ -167,23 +188,34 @@ data class Graph(
     )
 
     companion object {
-        fun create(list: List<Pair<List<String>, List<String>>>): Graph {
-            val pathList = list.map { (first, second) ->
+        fun create(pairs: List<Pair<List<String>, List<String>>>, singles: List<List<String>>): Graph {
+            val singleList = singles.map { ModulePath(it) }
+            val pairList = pairs.map { (first, second) ->
                 ModulePath(first) to ModulePath(second)
             }
-            return createFromModulePaths(pathList)
+            return createFromModulePaths(pairList, singleList)
         }
 
-        fun createFromModulePaths(list: List<Pair<ModulePath, ModulePath>>): Graph {
-            val moduleList = createModuleList(list)
-            val reversedModuleList = createModuleList(list.map { it.swapPair() })
-            val cycleList: List<Cycle> = CycleUtil.findCycles(list.toSet()).map { Cycle(it) }
-            return Graph(list, moduleList, reversedModuleList, cycleList)
+        fun createFromModulePaths(
+            nonDistinctPairs: List<Pair<ModulePath, ModulePath>>,
+            unfilteredSingles: List<ModulePath>
+        ): Graph {
+            val pairs = nonDistinctPairs.distinct()
+            val fromPairs = pairs.flatMap { it.toList() }.toSet()
+            val singles = unfilteredSingles.filter { !fromPairs.contains(it) }
+            val moduleList = createModuleList(pairs, singles)
+            val reversedModuleList = createModuleList(pairs.map { it.swapPair() }, singles)
+            val cycleList: List<Cycle> = CycleUtil.findCycles(pairs.toSet()).map { Cycle(it) }
+            return Graph(pairs, singles, moduleList, reversedModuleList, cycleList)
         }
 
-        fun createModuleList(list: List<Pair<ModulePath, ModulePath>>): List<Module> {
-            val dependsOnMap = list.fold(emptyMap(), ::collapseToList)
-            val moduleList = list.flatMap { it.toList() }.distinct().map { path ->
+        private fun createModuleList(
+            pairs: List<Pair<ModulePath, ModulePath>>,
+            singles: List<ModulePath>
+        ): List<Module> {
+            val dependsOnMap = pairs.fold(emptyMap(), ::collapseToList)
+            val all = (pairs.flatMap { it.toList() } + singles).distinct()
+            val moduleList = all.map { path ->
                 val dependsOnSingle: List<ModulePath> = dependsOnMap[path] ?: emptyList()
                 Module(path, dependsOnSingle)
             }

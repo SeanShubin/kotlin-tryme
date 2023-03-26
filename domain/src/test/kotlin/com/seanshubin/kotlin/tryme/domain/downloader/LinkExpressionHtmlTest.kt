@@ -5,7 +5,7 @@ import java.net.URISyntaxException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class LinkParserHtmlTest {
+class LinkExpressionHtmlTest {
     @Test
     fun simpleFullyQualified() {
         // given

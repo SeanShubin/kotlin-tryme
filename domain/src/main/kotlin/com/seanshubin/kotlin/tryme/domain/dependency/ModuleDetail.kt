@@ -10,10 +10,8 @@ data class ModuleDetail(
     val dependsOnInCycle:Map<ModulePath, Cycle>
 ):Detail {
     override val paths: List<ModulePath> = listOf(module.path)
-    override fun toLines(context:List<String>): List<String> {
-        val thisLine =
-            if(dependedOn || module.dependsOn.isNotEmpty()) emptyList<String>()
-            else listOf(module.simpleName)
+    override fun toLines(makeLink:(ModulePath)->String?): List<String> {
+        val thisLine = listOf(module.linkName(makeLink))
 
         val dependencyLines =  module.dependsOn.filterNot{
             cycle != null && dependsOnInCycle[it] == cycle

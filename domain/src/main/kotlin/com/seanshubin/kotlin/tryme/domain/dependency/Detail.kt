@@ -7,7 +7,7 @@ interface Detail:Comparable<Detail> {
     val depth:Int
     val breadth:Int
     val transitive:Int
-    fun toLines(context:List<String>):List<String>
+    fun toLines(makeLink:(ModulePath)->String?):List<String>
     override fun compareTo(other: Detail): Int =
         compare.compare(this, other)
     companion object {

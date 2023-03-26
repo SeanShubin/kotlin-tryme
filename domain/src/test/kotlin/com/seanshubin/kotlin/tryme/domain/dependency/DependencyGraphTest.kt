@@ -1,5 +1,8 @@
 package com.seanshubin.kotlin.tryme.domain.dependency
 
+import com.seanshubin.kotlin.tryme.domain.process.ProcessInput
+import com.seanshubin.kotlin.tryme.domain.process.ProcessRunner
+import com.seanshubin.kotlin.tryme.domain.process.SystemProcessRunner
 import org.junit.Test
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -21,36 +24,44 @@ class DependencyGraphTest {
             "g" to "e"
         ).stringToPath()
 
-        val actual = Graph.create(input)
-        assertEquals(listOf("a"), actual.entryPoints.map{it.simpleName})
+        val actual = Graph.create(input, emptyList())
+        assertEquals(listOf("a"), actual.entryPoints.map { it.simpleName })
         assertEquals(7, actual.moduleDepth(ModulePath("a")))
         assertEquals(1, actual.moduleBreadth(ModulePath("a")))
         assertEquals(7, actual.moduleTransitive(ModulePath("a")))
-        actual.toLines(emptyList()).forEach(::println)
+        assertEquals(0, actual.moduleDepth(ModulePath("h")))
     }
 
     @Test
-    fun contextTruncate(){
+    fun contextTruncate() {
         val input = listOf(
             listOf("a", "b") to listOf("c", "d")
         )
-        val expected = listOf("a -> c")
-        val actual = Graph.create(input).perspective(listOf()).toLines(emptyList())
+        val expected = listOf(
+            "digraph detangled {",
+            "  a -> c",
+            "}"
+        )
+        val actual = Graph.create(input, emptyList()).perspective(listOf()).toLines(nullMakeLink)
         assertEquals(expected, actual)
     }
 
     @Test
-    fun contextNarrow(){
+    fun contextNarrow() {
         val input = listOf(
             listOf("a", "b") to listOf("a", "c")
         )
-        val expected = listOf("b -> c")
-        val actual = Graph.create(input).perspective(listOf("a")).toLines(emptyList())
+        val expected = listOf(
+            "digraph detangled {",
+            "  b -> c",
+            "}"
+        )
+        val actual = Graph.create(input, emptyList()).perspective(listOf("a")).toLines(nullMakeLink)
         assertEquals(expected, actual)
     }
 
     @Test
-    fun sample(){
+    fun sample() {
         val input = listOf(
             listOf("a", "b") to listOf("c", "d"),
             listOf("c", "d") to listOf("e", "f"),
@@ -65,29 +76,62 @@ class DependencyGraphTest {
             listOf("c", "d") to listOf("e", "f", "l"),
             listOf("e", "f", "n") to listOf("g", "h")
         )
-        val actual = Graph.create(input)
+        val processRunner: ProcessRunner = SystemProcessRunner()
+        val actual = Graph.create(input, emptyList())
         val perspectives = actual.generatePerspectives(emptyList())
+
         val baseDir = Paths.get("..", "generated", "report", "dependency")
         Files.createDirectories(baseDir)
-        perspectives.forEach{ (context, graph) ->
+        val availablePerspectives = perspectives.map { it.first }
+        perspectives.forEach { (context, graph) ->
             val nameParts = listOf("dependency") + context
-            val name = nameParts.joinToString("-") + ".txt"
-            val file = baseDir.resolve(name)
-            val lines =graph.toLines(context)
+            fun makeLink(modulePath: ModulePath): String? {
+                val destination = context + modulePath.pathParts
+                return if (availablePerspectives.contains(destination)) {
+                    val linkParts = listOf("dependency") + context + modulePath.pathParts
+                    val linkName = linkParts.joinToString("-") + ".svg"
+                    "${modulePath.simpleName} [URL=\"$linkName\" fontcolor=Blue]"
+                } else {
+                    null
+                }
+            }
+
+            val baseName = nameParts.joinToString("-")
+            val dotName = baseName + ".txt"
+            val svgName = baseName + ".svg"
+            val file = baseDir.resolve(dotName)
+            val lines = graph.toLines(::makeLink)
             Files.write(file, lines)
+            val command = listOf(
+                "dot",
+                "-Tsvg",
+                "-o$svgName",
+                dotName
+            )
+            val processInput = ProcessInput(command, baseDir)
+            val processOutput = processRunner.run(processInput)
+            if(processOutput.exitCode != 0){
+                throw RuntimeException("$processInput $processOutput")
+            }
         }
     }
 
-    fun String.stringToPath():List<String> = listOf(this)
+    /*
+      e [URL="dependency-e.svg" fontcolor=Blue]
 
-    fun Pair<String, String>.stringToPath():Pair<List<String>, List<String>> = Pair(
+     */
+    fun String.stringToPath(): List<String> = listOf(this)
+
+    fun Pair<String, String>.stringToPath(): Pair<List<String>, List<String>> = Pair(
         first.stringToPath(),
         second.stringToPath()
     )
 
-    fun Set<Pair<String, String>>.stringToPath():Set<Pair<List<String>, List<String>>> =
-        map{it.stringToPath()}.toSet()
+    fun Set<Pair<String, String>>.stringToPath(): Set<Pair<List<String>, List<String>>> =
+        map { it.stringToPath() }.toSet()
 
-    fun List<Pair<String, String>>.stringToPath():List<Pair<List<String>, List<String>>> =
-        map{it.stringToPath()}
+    fun List<Pair<String, String>>.stringToPath(): List<Pair<List<String>, List<String>>> =
+        map { it.stringToPath() }
+
+    val nullMakeLink: (ModulePath) -> String? = { null }
 }

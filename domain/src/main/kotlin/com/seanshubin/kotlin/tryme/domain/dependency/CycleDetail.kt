@@ -9,7 +9,7 @@ data class CycleDetail(
     val cycleDependencyList: List<Pair<ModulePath, ModulePath>>
 ) : Detail {
     override val paths: List<ModulePath> = cycle.parts
-    override fun toLines(context:List<String>): List<String> =
+    override fun toLines(makeLink:(ModulePath)->String?): List<String> =
         listOf(
             "subgraph cluster_$id {",
             "  penwidth=2",

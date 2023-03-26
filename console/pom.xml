@@ -20,16 +20,16 @@
         <plugins>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.3.0</version>
+                <version>3.5.0</version>
                 <configuration>
-                    <finalName>kotlin-tryme</finalName>
+                    <finalName>kotlin-tryme-console</finalName>
                     <appendAssemblyId>false</appendAssemblyId>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass>com.seanshubin.kotlin.tryme.console.EntryPointKt</mainClass>
+                            <mainClass>com.seanshubin.kotlin.tryme.console.EntryPoint</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
