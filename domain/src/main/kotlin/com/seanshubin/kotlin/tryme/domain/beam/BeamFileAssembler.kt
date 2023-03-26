@@ -10,7 +10,8 @@ class BeamFileAssembler(override val name:String):TreeAssembler {
         }
         val beamInterchangeFileFormat = list[0] as String
         val size = list[1] as UInt
-        val beamFile = BeamFile(beamInterchangeFileFormat, size)
+        val beamSection = list[2] as String
+        val beamFile = BeamFile(beamInterchangeFileFormat, size, beamSection)
         return beamFile
     }
 }

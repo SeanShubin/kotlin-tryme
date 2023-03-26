@@ -1,6 +1,6 @@
 package com.seanshubin.kotlin.tryme.domain.beam
 
-class BeamInterchangeFileFormatAssembler(override val name:String):TreeAssembler {
+class StringAssembler(override val name:String):TreeAssembler {
     override fun assemble(assemblerMap: Map<String, TreeAssembler>, tree: Tree<Byte>): Any? {
         tree as Tree.Branch
         val byteList = tree.list.map{ leaf  ->
