@@ -2,11 +2,11 @@ package com.seanshubin.kotlin.tryme.domain.string
 
 object ByteArrayFormatHex : ByteArrayFormat {
     override fun encodeCompact(bytes: ByteArray): String {
-        return bytes.joinToString("", transform = ::byteToHex)
+        return bytes.joinToString("", transform = { it.toHex() })
     }
 
     override fun encodePretty(bytes: ByteArray): String {
-        return bytes.map(::byteToHex).windowed(16, 16, partialWindows = true)
+        return bytes.map { it.toHex() }.windowed(16, 16, partialWindows = true)
             .joinToString("\n") { list -> list.joinToString(" ") }
     }
 
@@ -20,13 +20,13 @@ object ByteArrayFormatHex : ByteArrayFormat {
         toList().windowed(16, 16, partialWindows = true).map{it.toLine()}
 
     private fun List<Byte>.toLine():String {
-        val hexes = this.map(::byteToHex).joinToString(" ")
+        val hexes = this.map { it.toHex() }.joinToString(" ")
         val chars = this.map(::byteToDisplayChar).joinToString("")
         return "$hexes $chars"
     }
 
-    private fun byteToHex(byte: Byte): String {
-        val asInt = byte.toInt()
+    fun Byte.toHex(): String {
+        val asInt = toInt()
         val digits = "0123456789ABCDEF"
         val lowByte = asInt and 0b1111
         val highByte = asInt shr 4 and 0b1111
