@@ -22,7 +22,11 @@ object ByteArrayFormatHex : ByteArrayFormat {
     private fun List<Byte>.toLine():String {
         val hexes = this.map { it.toHex() }.joinToString(" ")
         val chars = this.map(::byteToDisplayChar).joinToString("")
-        return "$hexes $chars"
+        val hexPaddingCount = 16 * 3 - 1 - hexes.length
+        val charPaddingCount = 16 - chars.length
+        val hexPadding = " ".repeat(hexPaddingCount)
+        val charPadding = " ".repeat(charPaddingCount)
+        return "$hexes$hexPadding $chars$charPadding"
     }
 
     fun Byte.toHex(): String {
