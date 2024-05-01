@@ -8,3 +8,4 @@ duration format
 inliner
 voter
 downloader
+compiler

@@ -1,7 +1,6 @@
 package com.seanshubin.kotlin.tryme.domain.base64
 
 import kotlin.test.Test
-import java.util.*
 import kotlin.test.assertEquals
 
 class Base64FormatterTest {
