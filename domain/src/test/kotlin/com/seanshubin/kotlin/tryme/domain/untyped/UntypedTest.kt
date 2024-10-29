@@ -38,4 +38,11 @@ class UntypedTest {
     fun setValueAtPathOverwriteExisting(){
         assertEquals(mapOf("a" to mapOf("b" to 2)), Untyped(mapOf("a" to mapOf("b" to 1))).setValueAtPath(2, "a", "b").value)
     }
+
+    @Test
+    fun updateValueAtPath(){
+        val oldMap = Untyped(mapOf("a" to mapOf("b" to 1)))
+        val newMap = oldMap.updateValueAtPath({old:Any? -> (old as Int)+1}, "a", "b")
+        assertEquals(mapOf("a" to mapOf("b" to 2)), newMap.value)
+    }
 }

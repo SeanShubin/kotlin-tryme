@@ -103,6 +103,16 @@ class DurationFormat(private val scales: List<Scale>, val padded: Boolean) {
             hourScale,
             dayScale
         )
+        val byteScale = Scale(1024, "byte", "bytes", 4)
+        val kilobyteScale = Scale(1024, "kilobyte", "kilobytes", 4)
+        val megabyteScale = Scale(1024, "megabyte", "megabytes", 4)
+        val gigabyteScale = Scale(1024, "gigabyte", "gigabytes", 4)
+        private val byteScales = listOf(
+            byteScale,
+            kilobyteScale,
+            megabyteScale,
+            gigabyteScale
+        )
         private val millisecondScales = listOf(millisecondScale) + secondScales
         private val nanosecondScales =
             listOf(nanosecondScale, microsecondScale) + millisecondScales
@@ -132,5 +142,6 @@ class DurationFormat(private val scales: List<Scale>, val padded: Boolean) {
         val millisecondsPadded = DurationFormat(millisecondScales, padded = true)
         val nanoseconds = DurationFormat(nanosecondScales, padded = false)
         val nanosecondsPadded = DurationFormat(nanosecondScales, padded = true)
+        val bytes = DurationFormat(byteScales, padded=false)
     }
 }

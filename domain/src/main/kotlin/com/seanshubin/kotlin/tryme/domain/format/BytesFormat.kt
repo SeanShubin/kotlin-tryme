@@ -4,14 +4,7 @@ object BytesFormat {
 
   val metricPrefixes = "kMGTPEYZ"
   fun formatBytes(bytes: Long): String {
-    var remain = bytes
-    var scale = 0
-    while (remain >= 1024) {
-      remain /= 1024
-      scale++
-    }
-    val suffix = if (scale == 0) "" else metricPrefixes[scale - 1]
-    return "%,d%s".format(remain, suffix)
+    return DurationFormat.bytes.format(bytes)
   }
 
   @JvmStatic

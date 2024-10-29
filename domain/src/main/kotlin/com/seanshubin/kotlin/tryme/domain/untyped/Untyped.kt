@@ -54,6 +54,13 @@ class Untyped(val value: Any?) {
             }
         }
 
+    fun updateValueAtPath(update:(Any?)->Any?, vararg keys:Any?):Untyped {
+        if(!hasValueAtPath(*keys)) throw RuntimeException("Value expected at path '${keys.joinToString(" -> ")}'")
+        val oldValue = getValueAtPath(*keys)
+        val newValue = update(oldValue)
+        return setValueAtPath(newValue, *keys)
+    }
+
     private fun valueIsMap(): Boolean = value is Map<*, *>
 
     @Suppress("UNCHECKED_CAST")

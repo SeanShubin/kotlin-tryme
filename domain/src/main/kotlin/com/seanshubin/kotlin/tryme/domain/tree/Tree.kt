@@ -1,61 +1,90 @@
 package com.seanshubin.kotlin.tryme.domain.tree
 
-data class Tree<T>(val value: T,
-                   val children: List<Tree<T>> = emptyList()) {
-  fun <U> map(f: (T) -> U): Tree<U> {
-    val newValue = f(value)
-    val newChildren = children.map { it.map(f) }
-    return Tree(newValue, newChildren)
-  }
+sealed interface Tree<KeyType, ValueType> {
+  fun setValue(path: List<KeyType>, value: ValueType): Tree<KeyType, ValueType>
+  fun getValue(path: List<KeyType>): ValueType?
+  fun toLines(
+    keyOrder: Comparator<KeyType>,
+    keyToString: (KeyType) -> String,
+    valueToString: (ValueType) -> String
+  ): List<String>
 
-  fun addChildPath(vararg parts: T): Tree<T> = addChildPath(parts.toList())
+  fun pathValues(path: List<KeyType>): List<Pair<List<KeyType>, ValueType>>
 
-  fun addChildPath(parts: List<T>): Tree<T> {
-    if (parts.isEmpty()) return this
-    val part = parts[0]
-    val existingIndex = children.indexOfFirst { it.value == part }
-    return if (existingIndex == -1) {
-      val remainingPath = parts.drop(1)
-      val newChild = Tree(part, emptyList()).addChildPath(remainingPath)
-      val newChildren = children + newChild
-      Tree(value, newChildren)
-    } else {
-      val remainingPath = parts.drop(1)
-      val existingChild = children[existingIndex]
-      val newChild = existingChild.addChildPath(remainingPath)
-      val newChildren = children.take(existingIndex) + newChild + children.drop(existingIndex + 1)
-      Tree(value, newChildren)
+  data class Branch<KeyType, ValueType>(val parts: Map<KeyType, Tree<KeyType, ValueType>>) :
+    Tree<KeyType, ValueType> {
+    override fun setValue(path: List<KeyType>, value: ValueType): Tree<KeyType, ValueType> {
+      if (path.isEmpty()) return Leaf(value)
+      val key = path[0]
+      val remainingPath = path.drop(1)
+      val innerValue = when (val existingInnerValue = parts[key]) {
+        is Branch -> existingInnerValue
+        else -> empty()
+      }
+      val newInnerValue = innerValue.setValue(remainingPath, value)
+      val newValue = Branch(parts + (key to newInnerValue))
+      return newValue
+    }
+
+    override fun getValue(path: List<KeyType>): ValueType? {
+      if (path.isEmpty()) return null
+      val key = path[0]
+      val remainingPath = path.drop(1)
+      val innerValue = when (val existingInnerValue = parts[key]) {
+        is Branch -> existingInnerValue
+        is Leaf -> return existingInnerValue.value
+        null -> return null
+      }
+      val finalValue = innerValue.getValue(remainingPath)
+      return finalValue
+    }
+
+    override fun toLines(
+      keyOrder: Comparator<KeyType>,
+      keyToString: (KeyType) -> String,
+      valueToString: (ValueType) -> String
+    ): List<String> {
+      val keys = parts.keys.toList().sortedWith(keyOrder)
+      val lines = keys.flatMap { key ->
+        val value = parts.getValue(key)
+        val thisLine = keyToString(key)
+        val subLines = value.toLines(keyOrder, keyToString, valueToString).map { "  $it" }
+        listOf(thisLine) + subLines
+      }
+      return lines
+    }
+
+    override fun pathValues(path: List<KeyType>): List<Pair<List<KeyType>, ValueType>> {
+      return parts.flatMap { (key, value) ->
+        val newPath = path + key
+        value.pathValues(newPath)
+      }
     }
   }
 
-  fun <U> mapWithCoordinates(f: (T, List<T>, List<Int>) -> U): Tree<U> = mapWithCoordinates(emptyList(), emptyList(), f)
+  data class Leaf<KeyType, ValueType>(val value: ValueType) : Tree<KeyType, ValueType> {
+    override fun setValue(path: List<KeyType>, value: ValueType): Tree<KeyType, ValueType> {
+      return empty<KeyType, ValueType>().setValue(path, value)
+    }
 
-  fun forEach(f: (Tree<T>) -> Unit) {
-    f(this)
-    children.forEach { it.forEach(f) }
+    override fun getValue(path: List<KeyType>): ValueType? {
+      return if (path.isEmpty()) this.value
+      else null
+    }
+
+    override fun toLines(
+      keyOrder: Comparator<KeyType>,
+      keyToString: (KeyType) -> String,
+      valueToString: (ValueType) -> String
+    ): List<String> = listOf(valueToString(value))
+
+    override fun pathValues(path: List<KeyType>): List<Pair<List<KeyType>, ValueType>> {
+      return listOf(path to value)
+    }
+
   }
 
-  fun forEachWithCoordinates(f: (Tree<T>, List<T>, List<Int>) -> Unit) =
-          forEachWithCoordinates(emptyList(), emptyList(), f)
-
-  fun toList(): List<T> = listOf(value) + children.flatMap { it.toList() }
-
-  private fun <U> mapWithCoordinates(ancestors: List<T>, indices: List<Int>, f: (T, List<T>, List<Int>) -> U): Tree<U> {
-    val newValue = f(value, ancestors, indices)
-    val newAncestors = ancestors + value
-    val newChildren = children.mapIndexed { childIndex, child ->
-      val newIndices = indices + childIndex
-      child.mapWithCoordinates(newAncestors, newIndices, f)
-    }
-    return Tree(newValue, newChildren)
-  }
-
-  private fun <U> forEachWithCoordinates(ancestors: List<T>, indices: List<Int>, f: (Tree<T>, List<T>, List<Int>) -> U) {
-    f(this, ancestors, indices)
-    val newAncestors = ancestors + value
-    children.forEachIndexed { childIndex, child ->
-      val newIndices = indices + childIndex
-      child.forEachWithCoordinates(newAncestors, newIndices, f)
-    }
+  companion object {
+    fun <KeyType, ValueType> empty(): Branch<KeyType, ValueType> = Branch(emptyMap())
   }
 }
