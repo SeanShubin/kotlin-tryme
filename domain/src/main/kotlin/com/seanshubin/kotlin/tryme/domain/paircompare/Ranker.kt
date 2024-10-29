@@ -5,7 +5,7 @@ import kotlin.random.Random
 data class Ranker(
     val candidates:List<String>,
     val explicitPreferences:List<Pair<String, String>>,
-    val preferences:List<Pair<String, String>>,
+    val transitivePreferences:List<Pair<String, String>>,
     val possiblePreferences:List<Pair<String, String>>
     ) {
     fun nextPair(random: Random):Pair<String, String>{
@@ -17,10 +17,10 @@ data class Ranker(
         val lines = mutableListOf<String>()
         lines.add("Candidates(${candidates.size}):")
         candidates.forEach { lines.add("  $it") }
-        lines.add("Preferences(${preferences.size}):")
-        preferences.map(::preferenceToString).forEach { lines.add("  $it") }
         lines.add("Explicit Preferences(${explicitPreferences.size}):")
         explicitPreferences.map(::preferenceToString).forEach { lines.add("  $it") }
+        lines.add("Transitive Preferences(${transitivePreferences.size}):")
+        transitivePreferences.map(::preferenceToString).forEach { lines.add("  $it") }
         lines.add("Possible Preferences(${possiblePreferences.size}):")
         possiblePreferences.map(::preferenceToString).forEach { lines.add("  $it") }
         return lines
@@ -28,11 +28,11 @@ data class Ranker(
 
     fun addPreferenceWithTransitiveImplications(candidate1: String, candidate2: String): Ranker {
         val newPreference = candidate1 to candidate2
-        val newExplicitPreferences = explicitPreferences + newPreference
-        val transitivesBefore =  preferences.filter{it.second == candidate1}.map{it.first to candidate2}
-        val transitivesAfter = preferences.filter{it.first == candidate2}.map{candidate1 to it.second}
-        val additionalPreferences = listOf(newPreference) + transitivesBefore + transitivesAfter
-        val result = addPreferences(additionalPreferences).copy(explicitPreferences = newExplicitPreferences)
+        val preferences = explicitPreferences + transitivePreferences
+        val transitivesBefore =  preferences.filter{it.second == candidate1}.map{it.first to candidate2}.filterNot{preferences.contains(it)}
+        val transitivesAfter = preferences.filter{it.first == candidate2}.map{candidate1 to it.second}.filterNot{preferences.contains(it)}
+        val newTransitivePreferences = transitivesBefore + transitivesAfter
+        val result = addPreferences(newPreference, newTransitivePreferences)
         return result
     }
 
@@ -48,6 +48,7 @@ data class Ranker(
     }
 
     private fun top():String{
+        val preferences = explicitPreferences + transitivePreferences
         val top = candidates.filter { potentialWinner ->
             preferences.none { it.second == potentialWinner }
         }
@@ -60,23 +61,32 @@ data class Ranker(
     private fun remove(target:String):Ranker{
         val newCandidates = candidates.filterNot{it == target}
         val newExplicitPreferences = explicitPreferences.filterNot { it.first == target || it.second == target }
-        val newPreferences = preferences.filterNot { it.first == target || it.second == target }
+        val newTransitivePreferences = transitivePreferences.filterNot { it.first == target || it.second == target }
         val newPossiblePreferences = possiblePreferences.filterNot{it.first == target || it.second == target}
-        return Ranker(newCandidates, newExplicitPreferences, newPreferences, newPossiblePreferences)
+        return Ranker(newCandidates, newExplicitPreferences, newTransitivePreferences, newPossiblePreferences)
     }
 
-    private fun addPreference(candidate1: String, candidate2: String):Ranker {
-        val newPreference = candidate1 to candidate2
-        val antiPreference = candidate2 to candidate1
-        val newPreferences = preferences + newPreference
-        val newPossiblePreferences = possiblePreferences.filterNot{it == newPreference}.filterNot{it == antiPreference}
-        return copy(preferences = newPreferences, possiblePreferences = newPossiblePreferences)
+    private fun addExplicitPreference(explicitPreference:Pair<String, String>):Ranker {
+        val newExplicitPreferences = explicitPreferences + explicitPreference
+        val newPossiblePreferences = cleanupPossiblePreferences(explicitPreference)
+        return copy(explicitPreferences = newExplicitPreferences, possiblePreferences = newPossiblePreferences)
     }
 
-    private fun addPreferences(preferences:List<Pair<String, String>>):Ranker {
-        var newRanker = this
-        preferences.forEach { (candidate1, candidate2) ->
-            newRanker = newRanker.addPreference(candidate1, candidate2)
+    private fun addTransitivePreference(transitivePreference:Pair<String, String>):Ranker {
+        val newTransitivePreferences = transitivePreferences + transitivePreference
+        val newPossiblePreferences = cleanupPossiblePreferences(transitivePreference)
+        return copy(transitivePreferences = newTransitivePreferences, possiblePreferences = newPossiblePreferences)
+    }
+
+    private fun cleanupPossiblePreferences(preference:Pair<String, String>):List<Pair<String, String>>{
+        val antiPreference = preference.second to preference.first
+        return possiblePreferences.filterNot{it == preference}.filterNot{it == antiPreference}
+    }
+
+    private fun addPreferences(explicitPreference:Pair<String, String>, transitivePreferences:List<Pair<String, String>>):Ranker {
+        var newRanker = this.addExplicitPreference(explicitPreference)
+        transitivePreferences.forEach { preference ->
+            newRanker = newRanker.addTransitivePreference(preference)
         }
         return newRanker
     }
