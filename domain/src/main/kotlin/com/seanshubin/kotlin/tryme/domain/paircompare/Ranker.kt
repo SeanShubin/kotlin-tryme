@@ -30,7 +30,10 @@ data class Ranker(
     }
 
     fun addPreferenceWithTransitiveImplications(candidate1: String, candidate2: String): Ranker {
+        ensureCandidateExists(candidate1)
+        ensureCandidateExists(candidate2)
         val newPreference = candidate1 to candidate2
+        ensurePossiblePreferenceExists(newPreference)
         val preferences = explicitPreferences + transitivePreferences
         val transitivesBefore = preferences.filter { it.second == candidate1 }.map { it.first to candidate2 }
             .filterNot { preferences.contains(it) }
@@ -45,19 +48,48 @@ data class Ranker(
         var result = emptyList<List<String>>()
         var current = this.removeCandidatesWithoutPreference()
         while (current.candidates.isNotEmpty()) {
-            val top = current.top()
-            result = result + listOf(top)
-            current = current.removeAll(top)
+            val undefeated = current.undefeated()
+            result = result + listOf(undefeated)
+            current = current.removeAll(undefeated)
         }
         return result
     }
 
-    private fun top(): List<String> {
-        val preferences = explicitPreferences + transitivePreferences
-        val top = candidates.filter { potentialWinner ->
-            preferences.none { it.second == potentialWinner }
+    private fun ensureCandidateExists(candidate: String) {
+        if (!candidates.contains(candidate)) {
+            throw RuntimeException("Candidate '$candidate' does not exist")
         }
-        return top
+    }
+
+    private fun ensurePossiblePreferenceExists(preference: Pair<String, String>) {
+        if (!possiblePreferences.contains(preference)) {
+            if(explicitPreferences.contains(preference)){
+                throw RuntimeException("Preference ${preferenceToString(preference)} is already explicit")
+            } else if(transitivePreferences.contains(preference)){
+                throw RuntimeException("Preference ${preferenceToString(preference)} is already transitive")
+            } else {
+                throw RuntimeException("Preference ${preferenceToString(preference)} is not allowed")
+            }
+        }
+    }
+
+    private fun defeatedBy(current:String, contender:String):Boolean{
+        val preferences = preferences()
+        val result = preferences.contains(contender to current)
+        return result
+    }
+
+    private fun preferences():List<Pair<String, String>> =
+        explicitPreferences + transitivePreferences
+
+    private fun undefeated(): List<String> {
+        val undefeated = candidates.filterNot { current ->
+            val result = candidates.any { competitor ->
+                defeatedBy(current, competitor)
+            }
+            result
+        }
+        return undefeated
     }
 
     private fun removeCandidatesWithoutPreference():Ranker {
