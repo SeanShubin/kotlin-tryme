@@ -17,10 +17,6 @@ object PairComparePrototypeApp {
             ranker = ranker.addPreferenceWithTransitiveImplications(candidate1, candidate2)
             displayRanker(ranker)
         }
-        val rankings = ranker.rankings()
-        println("-".repeat(20))
-        println("Rankings(${rankings.size}):")
-        rankings.map{"  $it"}.forEach(::println)
     }
 
     private fun displayRanker(ranker:Ranker){
