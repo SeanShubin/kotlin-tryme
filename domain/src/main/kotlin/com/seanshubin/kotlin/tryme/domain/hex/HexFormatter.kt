@@ -51,7 +51,7 @@ interface HexFormatter {
         )
         val whitespace = Regex("""\s""")
         fun hexToBytes(s:String):ByteArray{
-            return s.replace(whitespace, "").toUpperCase().toList().windowed(2, 2).map{ (first, second)->
+            return s.replace(whitespace, "").uppercase().toList().windowed(2, 2).map{ (first, second)->
                 (digitValues.getValue(first)*16 + digitValues.getValue(second)).toByte()
             }.toByteArray()
         }

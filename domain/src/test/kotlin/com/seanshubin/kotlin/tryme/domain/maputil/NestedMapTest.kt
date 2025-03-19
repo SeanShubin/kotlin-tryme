@@ -4,7 +4,7 @@ import com.seanshubin.kotlin.tryme.domain.maputil.MapUtil.invert
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class MapUtilTest {
+class NestedMapTest {
   @Test
   fun invert() {
     // given
