@@ -1,12 +1,11 @@
 package com.seanshubin.kotlin.tryme.domain.dynamic
 
 import com.fasterxml.jackson.core.JsonParseException
-import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.seanshubin.kotlin.tryme.domain.dynamic.TwoKeyMap.Companion.empty
 import com.seanshubin.kotlin.tryme.domain.dynamic.TwoKeyMap.Companion.increment
 import com.seanshubin.kotlin.tryme.domain.json.JsonMappers
-import javax.xml.crypto.Data
 
 class DataStructureAnalyzer(private val twoKeyMap: TwoKeyMap<String, String, Int>) {
     val map: Map<String, Map<String, Int>> get() = twoKeyMap.level1
@@ -34,27 +33,13 @@ class DataStructureAnalyzer(private val twoKeyMap: TwoKeyMap<String, String, Int
     }
 
     private fun addStringAtPath(path: List<String>, s: String): DataStructureAnalyzer {
-        if(s == "null"){
-            return incrementType(path, TypeEnum.NULL_AS_STRING)
-        } else if (s == "true" || s == "false") {
-            return incrementType(path, TypeEnum.BOOLEAN_AS_STRING)
-        } else {
         try {
-            s.toInt()
-            return incrementType(path, TypeEnum.INT_AS_STRING)
-        } catch (e: NumberFormatException) {
-            try {
-                s.toDouble()
-                return incrementType(path, TypeEnum.DOUBLE_AS_STRING)
-            } catch (e: NumberFormatException) {
-                    try {
-                        val o = parseJson(s)
-                        return incrementType(path, TypeEnum.OBJECT_AS_STRING).addObjectAtPath(path, o)
-                    } catch (e: JsonParseException) {
-                        return incrementType(path, TypeEnum.STRING)
-                    }
-                }
-            }
+            val o = parseJson(s)
+            return incrementType(path, TypeEnum.NESTED_JSON).addObjectAtPath(path, o)
+        } catch (e: JsonParseException) {
+            return incrementType(path, TypeEnum.STRING)
+        } catch(e: MismatchedInputException){
+            return incrementType(path, TypeEnum.STRING)
         }
     }
 
@@ -74,49 +59,25 @@ class DataStructureAnalyzer(private val twoKeyMap: TwoKeyMap<String, String, Int
     private fun addListAtPath(path: List<String>, o: List<Any?>): DataStructureAnalyzer {
         var current = this
         o.forEachIndexed { index, value ->
-            current = current.addObjectAtPath(path + "[", value)
+            current = current.addObjectAtPath(path + "[]", value)
         }
         return current
     }
 
-    private fun addDiscreteAtPath(path: List<String>, value: Any?): DataStructureAnalyzer {
-        throw UnsupportedOperationException("not implemented")
-    }
-
-//    private fun getType(o: Any?): TypeEnum {
-//        if (o == null) return TypeEnum.NULL
-//        if (o is String) return getStringType(o)
-//        if (o is Int) return TypeEnum.INT
-//        throw UnsupportedOperationException("unsupported type: ${o.javaClass.typeName}")
-//    }
-
-//    private fun parseJson(s: String): JsonParseResult =
-//        try {
-//            JsonParseResult.Success(parseJsonSuccess(s))
-//        } catch (ex: JsonParseException) {
-//            println(s)
-//            JsonParseResult.Failure(ex)
-//        }
-
-    private fun parseJson(s: String): Any? =
-        JsonMappers.parser.readValue<Any?>(s)
-
-//    private fun getStringType(s: String): TypeEnum {
-//        val result = parseJson(s)
-//        if (result is JsonParseResult.Success) {
-//            return getType(result.value)
-//        }
-//        throw UnsupportedOperationException("not implemented")
-//    } catch (x: JsonParseException)
-//    {
-//        return TypeEnum.STRING
-//    }
-//}
+    private fun parseJson(s: String): Any? = JsonMappers.parser.readValue<Any?>(s)
 
     private fun List<String>.pathAsString(): String = joinToString(".")
 
+    private enum class TypeEnum {
+        NULL,
+        STRING,
+        INT,
+        DOUBLE,
+        BOOLEAN,
+        NESTED_JSON
+    }
+
     companion object {
         val empty = DataStructureAnalyzer(empty())
-        private val nullType = "Nothing?"
     }
 }

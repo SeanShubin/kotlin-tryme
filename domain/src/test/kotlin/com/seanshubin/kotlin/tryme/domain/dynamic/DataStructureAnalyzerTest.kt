@@ -28,7 +28,7 @@ class DataStructureAnalyzerTest {
     fun mapArrayValue() {
         val input = """{ "a": { "b": [ 1, 2, 3 ] } }"""
         val expected = mapOf(
-            "a.b.[" to mapOf("INT" to 3)
+            "a.b.[]" to mapOf("INT" to 3)
         )
         val analyzer = DataStructureAnalyzer.empty.addJson(input)
         val actual = analyzer.map
@@ -36,7 +36,7 @@ class DataStructureAnalyzerTest {
     }
 
     @Test
-    fun primitives() {
+    fun root() {
         val input = """
             {
               "a": 1,
@@ -44,7 +44,9 @@ class DataStructureAnalyzerTest {
               "d": true,
               "e": false,
               "f": null,
-              "g": 3.14
+              "g": 3.14,
+              "h": [1,2,3],
+              "i": {"a":1}                            
             }
         """.trimIndent()
         val expected = mapOf(
@@ -53,7 +55,9 @@ class DataStructureAnalyzerTest {
             "d" to mapOf("BOOLEAN" to 1),
             "e" to mapOf("BOOLEAN" to 1),
             "f" to mapOf("NULL" to 1),
-            "g" to mapOf("DOUBLE" to 1)
+            "g" to mapOf("DOUBLE" to 1),
+            "h.[]" to mapOf("INT" to 3),
+            "i.a" to mapOf("INT" to 1)
         )
         val analyzer = DataStructureAnalyzer.empty.addJson(input)
         val actual = analyzer.map
@@ -75,14 +79,26 @@ class DataStructureAnalyzerTest {
             }
         """.trimIndent()
         val expected = mapOf(
-            "a" to mapOf("INT_AS_STRING" to 1),
+            "a" to mapOf("INT" to 1, "NESTED_JSON" to 1),
             "b" to mapOf("STRING" to 1),
-            "d" to mapOf("BOOLEAN_AS_STRING" to 1),
-            "e" to mapOf("BOOLEAN_AS_STRING" to 1),
-            "f" to mapOf("NULL_AS_STRING" to 1),
-            "g" to mapOf("DOUBLE_AS_STRING" to 1),
-            "h" to mapOf("ARRAY_AS_STRING" to 1),
-            "i" to mapOf("OBJECT_AS_STRING" to 1)
+            "d" to mapOf("BOOLEAN" to 1, "NESTED_JSON" to 1),
+            "e" to mapOf("BOOLEAN" to 1, "NESTED_JSON" to 1),
+            "f" to mapOf("NULL" to 1, "NESTED_JSON" to 1),
+            "g" to mapOf("DOUBLE" to 1, "NESTED_JSON" to 1),
+            "h" to mapOf("NESTED_JSON" to 1),
+            "h.[]" to mapOf("INT" to 3),
+            "i" to mapOf("NESTED_JSON" to 1 ),
+            "i.a" to mapOf("INT" to 1 )
+        )
+        val analyzer = DataStructureAnalyzer.empty.addJson(input)
+        val actual = analyzer.map
+        assertEquals(expected, actual)
+    }
+    @Test
+    fun emptyString() {
+        val input = """{"a":""}"""
+        val expected = mapOf(
+            "a" to mapOf("STRING" to 1)
         )
         val analyzer = DataStructureAnalyzer.empty.addJson(input)
         val actual = analyzer.map
