@@ -21,13 +21,12 @@ class DataStructureAnalyzer(private val twoKeyMap: TwoKeyMap<String, String, Int
     private fun addObjectAtPath(path: List<String>, o: Any?): DataStructureAnalyzer {
         return when (o) {
             null -> incrementType(path, TypeEnum.NULL)
-            true -> incrementType(path, TypeEnum.BOOLEAN)
-            is List<*> -> addListAtPath(path, o)
-            is Map<*, *> -> addMapAtPath(path, o)
-            is Int -> incrementType(path, TypeEnum.INT)
             is String -> addStringAtPath(path, o)
+            is Int -> incrementType(path, TypeEnum.INT)
             is Boolean -> incrementType(path, TypeEnum.BOOLEAN)
             is Double -> incrementType(path, TypeEnum.DOUBLE)
+            is List<*> -> addListAtPath(path, o)
+            is Map<*, *> -> addMapAtPath(path, o)
             else -> throw UnsupportedOperationException("Unsupported type ${o.javaClass.name}")
         }
     }
