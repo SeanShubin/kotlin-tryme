@@ -1,6 +1,5 @@
 package com.seanshubin.kotlin.tryme.domain.dynamic
 
-import javax.xml.crypto.Data
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -69,29 +68,32 @@ class DataStructureAnalyzerTest {
         val input = """
             {
               "a": "1",
-              "b": "c",
+              "b": "\"c\"",
               "d": "true",
               "e": "false",
               "f": "null",
               "g": "3.14",
               "h": "[1,2,3]",
-              "i": "{\"a\":1}"                            
+              "i": "{\"a\":1}",
+              "j": "{\"k\":\"2\"}",
+              "k": "{\"b\": \"{\\\"c\\\": \\\"123\\\"}\"}"
             }
         """.trimIndent()
         val expected = mapOf(
-            "a" to mapOf("INT" to 1, "NESTED_JSON" to 1),
-            "b" to mapOf("STRING" to 1),
-            "d" to mapOf("BOOLEAN" to 1, "NESTED_JSON" to 1),
-            "e" to mapOf("BOOLEAN" to 1, "NESTED_JSON" to 1),
-            "f" to mapOf("NULL" to 1, "NESTED_JSON" to 1),
-            "g" to mapOf("DOUBLE" to 1, "NESTED_JSON" to 1),
-            "h" to mapOf("NESTED_JSON" to 1),
-            "h.[]" to mapOf("INT" to 3),
-            "i" to mapOf("NESTED_JSON" to 1 ),
-            "i.a" to mapOf("INT" to 1 )
+            "a" to mapOf("INT wrapped in string" to 1),
+            "b" to mapOf("STRING wrapped in string" to 1),
+            "d" to mapOf("BOOLEAN wrapped in string" to 1),
+            "e" to mapOf("BOOLEAN wrapped in string" to 1),
+            "f" to mapOf("NULL wrapped in string" to 1),
+            "g" to mapOf("DOUBLE wrapped in string" to 1),
+            "h.[]" to mapOf("INT wrapped in string" to 3),
+            "i.a" to mapOf("INT wrapped in string" to 1 ),
+            "j.k" to mapOf("INT wrapped in string 2 times" to 1 ),
+            "k.b.c" to mapOf("INT wrapped in string 3 times" to 1 )
         )
         val analyzer = DataStructureAnalyzer.empty.addJson(input)
         val actual = analyzer.map
+        actual.forEach(::println)
         assertEquals(expected, actual)
     }
     @Test

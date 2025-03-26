@@ -15,50 +15,55 @@ class DataStructureAnalyzer(private val twoKeyMap: TwoKeyMap<String, String, Int
     }
 
     fun addObject(o: Any?): DataStructureAnalyzer {
-        return addObjectAtPath(emptyList(), o)
+        return addObjectAtPath(emptyList(), o, 0)
     }
 
-    private fun addObjectAtPath(path: List<String>, o: Any?): DataStructureAnalyzer {
+    private fun addObjectAtPath(path: List<String>, o: Any?, nestingLevel:Int): DataStructureAnalyzer {
         return when (o) {
-            null -> incrementType(path, TypeEnum.NULL)
-            is String -> addStringAtPath(path, o)
-            is Int -> incrementType(path, TypeEnum.INT)
-            is Boolean -> incrementType(path, TypeEnum.BOOLEAN)
-            is Double -> incrementType(path, TypeEnum.DOUBLE)
-            is List<*> -> addListAtPath(path, o)
-            is Map<*, *> -> addMapAtPath(path, o)
+            null -> incrementType(path, TypeEnum.NULL, nestingLevel)
+            is String -> addStringAtPath(path, o, nestingLevel)
+            is Int -> incrementType(path, TypeEnum.INT, nestingLevel)
+            is Boolean -> incrementType(path, TypeEnum.BOOLEAN, nestingLevel)
+            is Double -> incrementType(path, TypeEnum.DOUBLE, nestingLevel)
+            is List<*> -> addListAtPath(path, o, nestingLevel)
+            is Map<*, *> -> addMapAtPath(path, o, nestingLevel)
             else -> throw UnsupportedOperationException("Unsupported type ${o.javaClass.name}")
         }
     }
 
-    private fun addStringAtPath(path: List<String>, s: String): DataStructureAnalyzer {
+    private fun addStringAtPath(path: List<String>, s: String, nestingLevel:Int): DataStructureAnalyzer {
         try {
             val o = parseJson(s)
-            return incrementType(path, TypeEnum.NESTED_JSON).addObjectAtPath(path, o)
+            return addObjectAtPath(path, o, nestingLevel+1)
         } catch (e: JsonParseException) {
-            return incrementType(path, TypeEnum.STRING)
+            return incrementType(path, TypeEnum.STRING, nestingLevel)
         } catch(e: MismatchedInputException){
-            return incrementType(path, TypeEnum.STRING)
+            return incrementType(path, TypeEnum.STRING, nestingLevel)
         }
     }
 
-    private fun addMapAtPath(path: List<String>, o: Map<*, *>): DataStructureAnalyzer {
+    private fun addMapAtPath(path: List<String>, o: Map<*, *>, nestingLevel:Int): DataStructureAnalyzer {
         var current = this
         o.forEach { (key, value) ->
             key as String
-            current = current.addObjectAtPath(path + key, value)
+            current = current.addObjectAtPath(path + key, value, nestingLevel)
         }
         return current
     }
 
-    private fun incrementType(path: List<String>, typeEnum: TypeEnum): DataStructureAnalyzer {
-        return DataStructureAnalyzer(twoKeyMap.update(path.pathAsString(), typeEnum.name, increment, 0))
+    private fun incrementType(path: List<String>, typeEnum: TypeEnum, nestingLevel:Int): DataStructureAnalyzer {
+        val typeName = when(nestingLevel) {
+            0 -> typeEnum.name
+            1 -> "$typeEnum wrapped in string"
+            else -> "$typeEnum wrapped in string $nestingLevel times"
+        }
+        return DataStructureAnalyzer(twoKeyMap.update(path.pathAsString(), typeName, increment, 0))
     }
 
-    private fun addListAtPath(path: List<String>, o: List<Any?>): DataStructureAnalyzer {
+    private fun addListAtPath(path: List<String>, o: List<Any?>, nestingLevel:Int): DataStructureAnalyzer {
         var current = this
         o.forEachIndexed { index, value ->
-            current = current.addObjectAtPath(path + "[]", value)
+            current = current.addObjectAtPath(path + "[]", value, nestingLevel)
         }
         return current
     }
@@ -72,8 +77,7 @@ class DataStructureAnalyzer(private val twoKeyMap: TwoKeyMap<String, String, Int
         STRING,
         INT,
         DOUBLE,
-        BOOLEAN,
-        NESTED_JSON
+        BOOLEAN
     }
 
     companion object {
