@@ -15,8 +15,10 @@ object JsonMappers {
         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     val parser: ObjectMapper = compact
     inline fun <reified T> parse(json: String): T = parser.readValue(json)
+
+    fun Any?.toJson():String =pretty.writeValueAsString(this)
     fun String.normalizeJson(): String {
-        val asObject = parser.readValue<Any>(this)
+        val asObject = parser.readValue<Any?>(this)
         val asNormalized = pretty.writeValueAsString(asObject)
         return asNormalized
     }
