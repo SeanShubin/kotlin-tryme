@@ -54,18 +54,28 @@ data class Dynamic(val o:Any?) {
     }
 
     fun flattenMap(combineKey: (Any?, Any?) -> Any?): Dynamic {
-        if (o !is Map<*, *>) return this
-        return Dynamic(o.flatMap { (key, value) ->
-            val flattenedInner = Dynamic(value).flattenMap(combineKey).o
-            if (flattenedInner is Map<*, *>) {
-                flattenedInner.map{ (innerKey, innerValue) ->
-                    val newKey = combineKey(key, innerKey)
-                    newKey to innerValue
-                }
-            } else {
-                listOf(key to flattenedInner)
+        return when(o){
+            is Map<*, *> -> {
+                Dynamic(o.flatMap { (key, value) ->
+                    val flattenedInner = Dynamic(value).flattenMap(combineKey).o
+                    if (flattenedInner is Map<*, *>) {
+                        flattenedInner.map{ (innerKey, innerValue) ->
+                            val newKey = combineKey(key, innerKey)
+                            newKey to innerValue
+                        }
+                    } else {
+                        listOf(key to flattenedInner)
+                    }
+                }.toMap())
             }
-        }.toMap())
+            is List<*> -> {
+                val asMap = o.mapIndexed { index, value ->
+                    index to value
+                }.toMap()
+                Dynamic(asMap).flattenMap(combineKey)
+            }
+            else ->  this
+        }
     }
 
     fun update(path: List<Any?>, default: Any?, operation: (Any?) -> Any?): Dynamic {

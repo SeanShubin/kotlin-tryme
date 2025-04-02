@@ -53,7 +53,7 @@ class RandomData(
     }
 
     val defaultFrequencies = mapOf(
-        JsonType.OBJECT to 20,
+        JsonType.OBJECT to 6,
         JsonType.ARRAY to 5,
         JsonType.STRING to 4,
         JsonType.NUMBER to 3,

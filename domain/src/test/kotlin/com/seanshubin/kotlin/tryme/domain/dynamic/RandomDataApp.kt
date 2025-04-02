@@ -12,8 +12,9 @@ object RandomDataApp {
         val mapSize = 5
         val randomData = RandomData(sampleData, arraySize, mapSize)
         val o = randomData.generateRandom(5)
-//        display(o)
+        display(o)
         val flattened = DynamicUtil.flattenMap(o){ a, b -> "$a.$b"}
+        println("-".repeat(100))
         display(flattened)
     }
 
