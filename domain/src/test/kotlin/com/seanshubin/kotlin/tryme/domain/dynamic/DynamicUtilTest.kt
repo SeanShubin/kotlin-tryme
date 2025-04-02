@@ -58,22 +58,28 @@ class DynamicUtilTest {
             "b" to mapOf(
                 "c" to mapOf(
                     "value" to "d",
-                    "index" to 0))
+                    "index" to 0
+                )
+            )
         )
         val expected2 = mapOf(
             "a" to 1,
             "b" to mapOf(
                 "c" to mapOf(
                     "value" to "e",
-                    "index" to 1))
+                    "index" to 1
+                )
             )
+        )
         val expected3 = mapOf(
             "a" to 1,
             "b" to mapOf(
                 "c" to mapOf(
                     "value" to "f",
-                    "index" to 2))
+                    "index" to 2
+                )
             )
+        )
         val expected = listOf(expected1, expected2, expected3)
         val path = listOf("b", "c")
         val actual = DynamicUtil.flattenListWithIndex(input, path, "value", "index")
@@ -81,17 +87,43 @@ class DynamicUtilTest {
     }
 
     @Test
-    fun flattenMap(){
+    fun flattenMap() {
         val input = mapOf("a" to mapOf("b" to "c"), "d" to mapOf("e" to "f"))
         val expected = mapOf("a.b" to "c", "d.e" to "f")
-        val combine = {a:Any?, b:Any? -> "$a.$b"}
+        val combine = { a: Any?, b: Any? -> "$a.$b" }
         val actual = DynamicUtil.flattenMap(input, combine)
         assertEquals(expected, actual)
     }
 
     @Test
-    fun update(){
-        val increment = { a:Any? ->
+    fun flattenMap2() {
+        val input = mapOf("a" to mapOf("b" to mapOf("c" to 1)), "d" to mapOf("e" to mapOf("f" to 2)))
+        val expected = mapOf("a.b.c" to 1, "d.e.f" to 2)
+        val combine = { a: Any?, b: Any? -> "$a.$b" }
+        val actual = DynamicUtil.flattenMap(input, combine)
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun flattenMap3() {
+        val input = mapOf(
+            "a" to listOf(1,2),
+            "b" to listOf(3,4)
+        )
+        val expected = mapOf(
+            "a.0" to 1,
+            "a.1" to 2,
+            "b.0" to 3,
+            "b.1" to 4
+        )
+        val combine = { a: Any?, b: Any? -> "$a.$b" }
+        val actual = DynamicUtil.flattenMap(input, combine)
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun update() {
+        val increment = { a: Any? ->
             a as Int
             a + 1
         }
@@ -99,8 +131,8 @@ class DynamicUtilTest {
         val expected = mapOf("a" to mapOf("b" to mapOf("c" to 3)))
         val initial = null
         val first = DynamicUtil.update(initial, path, 0, increment)
-        val second = DynamicUtil.update(first, path, 0, increment )
-        val third = DynamicUtil.update(second, path, 0, increment )
+        val second = DynamicUtil.update(first, path, 0, increment)
+        val third = DynamicUtil.update(second, path, 0, increment)
         assertEquals(expected, third)
     }
 }
