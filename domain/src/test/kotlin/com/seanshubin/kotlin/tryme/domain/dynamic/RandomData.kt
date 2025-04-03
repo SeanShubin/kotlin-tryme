@@ -3,6 +3,7 @@ package com.seanshubin.kotlin.tryme.domain.dynamic
 import kotlin.random.Random
 
 class RandomData(
+    private val random:Random,
     private val sampleData:SampleData,
     private val arraySize:Int,
     private val mapSize:Int
@@ -64,6 +65,4 @@ class RandomData(
     val shallowFrequencies = defaultFrequencies.filter { (key, _) ->
         key != JsonType.OBJECT && key != JsonType.ARRAY
     }
-
-    val random = Random(0)
 }

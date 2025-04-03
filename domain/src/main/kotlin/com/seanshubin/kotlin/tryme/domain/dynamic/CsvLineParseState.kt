@@ -1,7 +1,7 @@
 package com.seanshubin.kotlin.tryme.domain.dynamic
 
-abstract class LineParseState(val line:String, val index:Int, val cell:String, val cells:List<String>){
-    fun navigateToEnd():LineParseState {
+abstract class CsvLineParseState(val line:String, val index:Int, val cell:String, val cells:List<String>){
+    fun navigateToEnd():CsvLineParseState {
         var current = this
         while(current !is End){
             current = current.next()
@@ -14,10 +14,10 @@ abstract class LineParseState(val line:String, val index:Int, val cell:String, v
     fun currentCharIsSeparator():Boolean = currentChar == ','
     fun atCellBoundary():Boolean = atEnd() || currentCharIsSeparator()
     override fun toString():String = "LineParseState(index=$index, cell=$cell, cells=$cells)"
-    abstract fun next(): LineParseState
+    abstract fun next(): CsvLineParseState
 
-    class InQuotedCell(line:String, index:Int, cell:String, cells:List<String>):LineParseState(line, index, cell, cells){
-        override fun next(): LineParseState {
+    class InQuotedCell(line:String, index:Int, cell:String, cells:List<String>):CsvLineParseState(line, index, cell, cells){
+        override fun next(): CsvLineParseState {
             if(atEnd()) throw RuntimeException("open quote without close quote")
             return if(currentCharIsQuote()){
                 AfterFirstInnerQuote(line, index+1, cell, cells)
@@ -27,8 +27,8 @@ abstract class LineParseState(val line:String, val index:Int, val cell:String, v
         }
     }
 
-    class AfterFirstInnerQuote(line:String, index:Int, cell:String, cells:List<String>):LineParseState(line, index, cell, cells){
-        override fun next(): LineParseState {
+    class AfterFirstInnerQuote(line:String, index:Int, cell:String, cells:List<String>):CsvLineParseState(line, index, cell, cells){
+        override fun next(): CsvLineParseState {
             return if(atEnd()) {
                 val newCell = ""
                 val newCells = cells + cell
@@ -47,8 +47,8 @@ abstract class LineParseState(val line:String, val index:Int, val cell:String, v
         }
     }
 
-    class AfterCellBoundary(line:String, index:Int, cell:String, cells:List<String>):LineParseState(line, index, cell, cells){
-        override fun next(): LineParseState {
+    class AfterCellBoundary(line:String, index:Int, cell:String, cells:List<String>):CsvLineParseState(line, index, cell, cells){
+        override fun next(): CsvLineParseState {
             if(atEnd()) return End(line, index, cell, cells)
             return if(currentCharIsQuote()) {
                 InQuotedCell(line, index+1, cell, cells)
@@ -60,8 +60,8 @@ abstract class LineParseState(val line:String, val index:Int, val cell:String, v
         }
     }
 
-    class InUnquotedCell(line:String, index:Int, cell:String, cells:List<String>):LineParseState(line, index, cell, cells){
-        override fun next(): LineParseState {
+    class InUnquotedCell(line:String, index:Int, cell:String, cells:List<String>):CsvLineParseState(line, index, cell, cells){
+        override fun next(): CsvLineParseState {
             if(atCellBoundary()){
                 val newCell = ""
                 val newCells = cells + cell
@@ -76,13 +76,13 @@ abstract class LineParseState(val line:String, val index:Int, val cell:String, v
         }
     }
 
-    class End(line:String, index:Int, cell:String, cells:List<String>):LineParseState(line, index, cell, cells){
-        override fun next(): LineParseState {
+    class End(line:String, index:Int, cell:String, cells:List<String>):CsvLineParseState(line, index, cell, cells){
+        override fun next(): CsvLineParseState {
             throw UnsupportedOperationException("can't call next on End")
         }
     }
 
     companion object {
-        fun create(line:String):LineParseState = AfterCellBoundary(line, 0, "", emptyList())
+        fun create(line:String):CsvLineParseState = AfterCellBoundary(line, 0, "", emptyList())
     }
 }

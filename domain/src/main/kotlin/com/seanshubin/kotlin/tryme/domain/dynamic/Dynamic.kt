@@ -89,11 +89,15 @@ data class Dynamic(val o: Any?) {
     fun typeHistogram(): Map<String, Map<String, Int>> {
         val combineKeys = { a: Any?, b: Any? -> "$a.$b" }
         val flat = flattenMap(combineKeys).o
-        if (flat !is Map<*, *>) throw RuntimeException("map expected")
+        if (flat !is Map<*, *>) return listOf(histogramEntry("", this)).toMap()
         val result = flat.map { (key, value) ->
-            val typeName = value?.javaClass?.simpleName ?: "Nothing?"
-            "$key" to mapOf(typeName to 1)
+            histogramEntry(key, value)
         }.toMap()
         return result
+    }
+
+    private fun histogramEntry(key: Any?, value: Any?): Pair<String, Map<String, Int>> {
+        val typeName = value?.javaClass?.simpleName ?: "Nothing?"
+        return "$key" to mapOf(typeName to 1)
     }
 }

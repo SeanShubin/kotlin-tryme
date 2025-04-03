@@ -7,7 +7,7 @@ import com.seanshubin.kotlin.tryme.domain.json.JsonMappers
 
 object JsonUtil {
     fun parseCsvLine(line: String): List<String> {
-        return LineParseState.create(line).navigateToEnd().cells
+        return CsvLineParseState.create(line).navigateToEnd().cells
     }
 
     fun coerceStrings(o: Any?): Any? =

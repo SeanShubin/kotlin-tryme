@@ -6,18 +6,17 @@ import kotlin.random.Random
 object RandomDataApp {
     @JvmStatic
     fun main(args: Array<String>) {
-        val random = Random(0)
-        val sampleData = SampleData()
         val arraySize = 5
         val mapSize = 5
-        val randomData = RandomData(sampleData, arraySize, mapSize)
-        val o = randomData.generateRandom(5)
-        display(o)
-        val flattened = DynamicUtil.flattenMap(o){ a, b -> "$a.$b"}
-        println("-".repeat(100))
-        display(flattened)
+        val objects = (0 until 100).map { index ->
+            val random = Random(index)
+            val sampleData = SampleData()
+            val randomData = RandomData(random, sampleData, arraySize, mapSize)
+            randomData.generateRandom(5)
+        }
+        val histogram = objects.fold(emptyMap(), DynamicUtil::accumulateTypeHistogram)
+        display(histogram)
     }
-
 
     fun display(o:Any?){
         val json = JsonMappers.pretty.writeValueAsString(o)
