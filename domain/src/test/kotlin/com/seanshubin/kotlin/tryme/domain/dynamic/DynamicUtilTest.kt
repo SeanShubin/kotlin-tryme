@@ -90,8 +90,8 @@ class DynamicUtilTest {
     fun flattenMap() {
         val input = mapOf("a" to mapOf("b" to "c"), "d" to mapOf("e" to "f"))
         val expected = mapOf("a.b" to "c", "d.e" to "f")
-        val combine = { a: Any?, b: Any? -> "$a.$b" }
-        val actual = DynamicUtil.flattenMap(input, combine)
+        val combineKeys = { a: Any?, b: Any? -> "$a.$b" }
+        val actual = DynamicUtil.flattenMap(input, combineKeys)
         assertEquals(expected, actual)
     }
 
@@ -99,8 +99,8 @@ class DynamicUtilTest {
     fun flattenMap2() {
         val input = mapOf("a" to mapOf("b" to mapOf("c" to 1)), "d" to mapOf("e" to mapOf("f" to 2)))
         val expected = mapOf("a.b.c" to 1, "d.e.f" to 2)
-        val combine = { a: Any?, b: Any? -> "$a.$b" }
-        val actual = DynamicUtil.flattenMap(input, combine)
+        val combineKeys = { a: Any?, b: Any? -> "$a.$b" }
+        val actual = DynamicUtil.flattenMap(input, combineKeys)
         assertEquals(expected, actual)
     }
 
