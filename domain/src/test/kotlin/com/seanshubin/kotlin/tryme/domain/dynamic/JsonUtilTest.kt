@@ -19,8 +19,8 @@ class JsonUtilTest {
     }
 
     @Test
-    fun coerceStrings(){
-        val o= """
+    fun coerceStrings() {
+        val o = """
             {
               "a": "{\n  \"b\": \"{\\n  \\\"c\\\": \\\"{\\\\n  \\\\\\\"d\\\\\\\": \\\\\\\"123\\\\\\\"\\\\n}\\\\n\\\"\\n}\\n\"\n}\n",
               "b": "true",
@@ -30,7 +30,15 @@ class JsonUtilTest {
               "f": "[1,2,3]"
             }
         """.trimIndent()
+        val expected = mapOf(
+            "a" to mapOf("b" to mapOf("c" to mapOf("d" to 123))),
+            "b" to true,
+            "c" to false,
+            "d" to null,
+            "e" to 123,
+            "f" to listOf(1, 2, 3)
+        )
         val actual = JsonUtil.coerceStrings(o)
-        println(actual)
+        assertEquals(expected, actual)
     }
 }
