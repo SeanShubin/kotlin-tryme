@@ -144,10 +144,10 @@ class DynamicUtilTest {
             "a.1" to mapOf("String" to 1),
             "a.2" to mapOf("Character" to 1),
             "a.3" to mapOf("Double" to 1),
-            "a.4" to mapOf("null" to 1),
+            "a.4" to mapOf("Nothing?" to 1),
             "a.5" to mapOf("Boolean" to 1),
             "b" to mapOf("Boolean" to 1),
-            "c" to mapOf("null" to 1),
+            "c" to mapOf("Nothing?" to 1),
             "d" to mapOf("Double" to 1),
             "e" to mapOf("Integer" to 1)
         )
@@ -168,7 +168,7 @@ class DynamicUtilTest {
             ),
             "b.c" to mapOf(
                 "Boolean" to 1,
-                "null" to 1
+                "Nothing?" to 1
             ),
             "b.d" to mapOf(
                 "Integer" to 3

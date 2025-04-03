@@ -91,7 +91,7 @@ data class Dynamic(val o: Any?) {
         val flat = flattenMap(combineKeys).o
         if (flat !is Map<*, *>) throw RuntimeException("map expected")
         val result = flat.map { (key, value) ->
-            val typeName = value?.javaClass?.simpleName ?: "null"
+            val typeName = value?.javaClass?.simpleName ?: "Nothing?"
             "$key" to mapOf(typeName to 1)
         }.toMap()
         return result
