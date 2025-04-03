@@ -1,6 +1,6 @@
 package com.seanshubin.kotlin.tryme.domain.dynamic
 
-data class Dynamic(val o:Any?) {
+data class Dynamic(val o: Any?) {
     fun get(path: List<Any?>): Dynamic {
         if (path.isEmpty()) return this
         return if (o is Map<*, *>) {
@@ -53,14 +53,14 @@ data class Dynamic(val o:Any?) {
         }
     }
 
-    fun flattenMap(combineKey: (Any?, Any?) -> Any?): Dynamic {
-        return when(o){
+    fun flattenMap(combineKeys: (Any?, Any?) -> Any?): Dynamic {
+        return when (o) {
             is Map<*, *> -> {
                 Dynamic(o.flatMap { (key, value) ->
-                    val flattenedInner = Dynamic(value).flattenMap(combineKey).o
+                    val flattenedInner = Dynamic(value).flattenMap(combineKeys).o
                     if (flattenedInner is Map<*, *>) {
-                        flattenedInner.map{ (innerKey, innerValue) ->
-                            val newKey = combineKey(key, innerKey)
+                        flattenedInner.map { (innerKey, innerValue) ->
+                            val newKey = combineKeys(key, innerKey)
                             newKey to innerValue
                         }
                     } else {
@@ -68,19 +68,32 @@ data class Dynamic(val o:Any?) {
                     }
                 }.toMap())
             }
+
             is List<*> -> {
                 val asMap = o.mapIndexed { index, value ->
                     index to value
                 }.toMap()
-                Dynamic(asMap).flattenMap(combineKey)
+                Dynamic(asMap).flattenMap(combineKeys)
             }
-            else ->  this
+
+            else -> this
         }
     }
 
     fun update(path: List<Any?>, default: Any?, operation: (Any?) -> Any?): Dynamic {
-        val oldValue = if(exists(path)) get(path).o else default
+        val oldValue = if (exists(path)) get(path).o else default
         val newValue = operation(oldValue)
         return set(path, newValue)
+    }
+
+    fun typeHistogram(): Map<String, Map<String, Int>> {
+        val combineKeys = { a: Any?, b: Any? -> "$a.$b" }
+        val flat = flattenMap(combineKeys).o
+        if (flat !is Map<*, *>) throw RuntimeException("map expected")
+        val result = flat.map { (key, value) ->
+            val typeName = value?.javaClass?.simpleName ?: "null"
+            "$key" to mapOf(typeName to 1)
+        }.toMap()
+        return result
     }
 }

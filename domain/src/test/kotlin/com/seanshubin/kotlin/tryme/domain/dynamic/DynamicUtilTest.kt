@@ -107,8 +107,8 @@ class DynamicUtilTest {
     @Test
     fun flattenMap3() {
         val input = mapOf(
-            "a" to listOf(1,2),
-            "b" to listOf(3,4)
+            "a" to listOf(1, 2),
+            "b" to listOf(3, 4)
         )
         val expected = mapOf(
             "a.0" to 1,
@@ -134,5 +134,57 @@ class DynamicUtilTest {
         val second = DynamicUtil.update(first, path, 0, increment)
         val third = DynamicUtil.update(second, path, 0, increment)
         assertEquals(expected, third)
+    }
+
+    @Test
+    fun typeHistogram() {
+        val o = mapOf("a" to listOf(1, "a", 'b', 2.34, null, false), "b" to true, "c" to null, "d" to 1.23, "e" to 123)
+        val expected = mapOf(
+            "a.0" to mapOf("Integer" to 1),
+            "a.1" to mapOf("String" to 1),
+            "a.2" to mapOf("Character" to 1),
+            "a.3" to mapOf("Double" to 1),
+            "a.4" to mapOf("null" to 1),
+            "a.5" to mapOf("Boolean" to 1),
+            "b" to mapOf("Boolean" to 1),
+            "c" to mapOf("null" to 1),
+            "d" to mapOf("Double" to 1),
+            "e" to mapOf("Integer" to 1)
+        )
+        val actual = DynamicUtil.typeHistogram(o)
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun accumulateTypes() {
+        val a = mapOf("a" to 1, "b" to mapOf("c" to true, "d" to 123), "c" to listOf("e", 1.23))
+        val b = mapOf("a" to 1, "b" to mapOf("d" to 123), "c" to listOf("e", 1.23), "d" to mapOf("e" to "f"))
+        val c = mapOf("a" to "1", "b" to mapOf("c" to null, "d" to 123), "c" to listOf(2.34))
+        val list = listOf(a, b, c)
+        val expected = mapOf(
+            "a" to mapOf(
+                "Integer" to 2,
+                "String" to 1
+            ),
+            "b.c" to mapOf(
+                "Boolean" to 1,
+                "null" to 1
+            ),
+            "b.d" to mapOf(
+                "Integer" to 3
+            ),
+            "c.0" to mapOf(
+                "String" to 2,
+                "Double" to 1
+            ),
+            "c.1" to mapOf(
+                "Double" to 2
+            ),
+            "d.e" to mapOf(
+                "String" to 1
+            ),
+        )
+        val actual = list.fold(emptyMap(), DynamicUtil::accumulateTypeHistogram)
+        assertEquals(expected, actual)
     }
 }
