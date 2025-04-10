@@ -187,4 +187,30 @@ class DynamicUtilTest {
         val actual = list.fold(emptyMap(), DynamicUtil::accumulateTypeHistogram)
         assertEquals(expected, actual)
     }
+
+    @Test
+    fun setArray() {
+        val path = listOf("a", 2, "b", 3)
+        val arrayDefaults = listOf(-1, -2)
+        val before = null
+        val after = DynamicUtil.setWithArrays(before, path, "c", arrayDefaults)
+        val actual = DynamicUtil.get(after, path)
+        val expectedValue = "c"
+        val expected = mapOf("a" to listOf(-1, -1, mapOf("b" to listOf(-2, -2, -2, "c"))))
+        assertEquals(expectedValue, actual)
+        assertEquals(expected, after)
+    }
+
+    @Test
+    fun updateArray() {
+        val path = listOf("a", 2, "b", 3)
+        val arrayDefaults = listOf(-1, -2)
+        val before = mapOf("a" to listOf(1, 2, mapOf("b" to listOf(3, 4, 5, "target", 6, 7)), 8, 9))
+        val after = DynamicUtil.setWithArrays(before, path, "replacement", arrayDefaults)
+        val actual = DynamicUtil.get(after, path)
+        val expectedValue = "replacement"
+        val expected = mapOf("a" to listOf(1, 2, mapOf("b" to listOf(3, 4, 5, "replacement", 6, 7)), 8, 9))
+        assertEquals(expectedValue, actual)
+        assertEquals(expected, after)
+    }
 }

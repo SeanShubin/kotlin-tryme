@@ -3,8 +3,12 @@ package com.seanshubin.kotlin.tryme.domain.dynamic
 data class Dynamic(val o: Any?) {
     fun get(path: List<Any?>): Dynamic {
         if (path.isEmpty()) return this
+        val key = path.first()
         return if (o is Map<*, *>) {
-            val key = path.first()
+            val subPath = path.drop(1)
+            val subTree = Dynamic(o[key])
+            subTree.get(subPath)
+        } else if(o is List<*> && key is Int) {
             val subPath = path.drop(1)
             val subTree = Dynamic(o[key])
             subTree.get(subPath)
@@ -24,6 +28,44 @@ data class Dynamic(val o: Any?) {
             Dynamic(o + entry)
         } else {
             Dynamic(emptyMap<Any?, Any?>()).set(path, value)
+        }
+    }
+
+    fun setWithArrays(path: List<Any?>, value: Any?, arrayDefaults: List<Any?>): Dynamic {
+        if (path.isEmpty()) return Dynamic(value)
+        val key = path.first()
+        return if (key is Int) {
+            val defaultValue = arrayDefaults.first()
+            if(o is List<*>){
+                val oldSubTree = Dynamic(o.getOrNull(key))
+                val newSubTree = oldSubTree.setWithArrays(path.drop(1), value, arrayDefaults.drop(1))
+                val newValue = updateArray(o, key, defaultValue, newSubTree.o)
+                return Dynamic(newValue)
+            } else {
+                Dynamic(emptyList<Any?>()).setWithArrays(path, value, arrayDefaults)
+            }
+        } else if(o is Map<*, *>) {
+            val oldSubTree = Dynamic(o[key])
+            val subPath = path.drop(1)
+            val newSubTree = oldSubTree.setWithArrays(subPath, value, arrayDefaults)
+            val entry = key to newSubTree.o
+            Dynamic(o + entry)
+        } else {
+            Dynamic(emptyMap<Any?, Any?>()).setWithArrays(path, value,arrayDefaults)
+        }
+    }
+
+    private fun updateArray(o:Any?, index:Int, defaultValue:Any?, value:Any?):List<Any?> {
+        if(o is List<*>) {
+            if(o.size < index) {
+                return o + (o.size until index).map{defaultValue} + value
+            } else {
+                val before = o.take(index)
+                val after = o.drop(index + 1)
+                return before + listOf(value) + after
+            }
+        } else {
+            return (0 until index).map{defaultValue} + value
         }
     }
 
