@@ -18,6 +18,12 @@ class DynamicUtilTest {
     }
 
     @Test
+    fun exists(){
+        val value = mapOf("a" to 1)
+        assertFalse(DynamicUtil.exists(value, listOf("b")))
+    }
+
+    @Test
     fun flattenListAt() {
         val input = mapOf(
             "a" to 1,
