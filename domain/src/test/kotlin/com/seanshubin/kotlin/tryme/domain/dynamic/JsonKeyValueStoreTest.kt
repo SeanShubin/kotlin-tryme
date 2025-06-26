@@ -16,11 +16,15 @@ class JsonKeyValueStoreTest {
             val key = listOf("a", "b", "c")
             val documentationKey = listOf("documentation") + key
             val documentation = listOf("this is a number")
+            val expectedDocumentation = listOf(
+                "path: a.b.c",
+                "default value: 456",
+                "default value type: Integer"
+            ) + documentation
             val value = 456
             val actualValue = keyValueStoreWithDocumentation.load(key, value, documentation)
             val actualDocumentation = keyValueStore.load(documentationKey)
-            println(Files.readString(path))
-            assertEquals(documentation, actualDocumentation)
+            assertEquals(expectedDocumentation, actualDocumentation)
             assertEquals(value, actualValue)
         }
     }
