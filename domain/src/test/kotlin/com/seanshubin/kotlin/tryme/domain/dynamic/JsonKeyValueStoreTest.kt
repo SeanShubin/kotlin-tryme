@@ -3,6 +3,7 @@ package com.seanshubin.kotlin.tryme.domain.dynamic
 import com.seanshubin.kotlin.tryme.domain.contract.FilesDelegate
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -26,6 +27,26 @@ class JsonKeyValueStoreTest {
             val actualDocumentation = keyValueStore.load(documentationKey)
             assertEquals(expectedDocumentation, actualDocumentation)
             assertEquals(value, actualValue)
+        }
+    }
+
+    @Test
+    fun arrays(){
+        withTemporaryFile { path ->
+            val keyValueStore = JsonFileKeyValueStore(path, FilesDelegate)
+            keyValueStore.store(listOf("the-array", 0, "name"), "a")
+            keyValueStore.store(listOf("the-array", 0, "value"), 1)
+            keyValueStore.store(listOf("the-array", 1, "name"), "b")
+            keyValueStore.store(listOf("the-array", 1, "value"), 2)
+            keyValueStore.store(listOf("the-array", 2, "name"), "c")
+            keyValueStore.store(listOf("the-array", 2, "value"), 3)
+            assertEquals(keyValueStore.arraySize(listOf("the-array")), 3)
+            assertEquals(keyValueStore.load(listOf("the-array", 0, "name")), "a")
+            assertEquals(keyValueStore.load(listOf("the-array", 0, "value")), 1)
+            assertEquals(keyValueStore.load(listOf("the-array", 1, "name")), "b")
+            assertEquals(keyValueStore.load(listOf("the-array", 1, "value")), 2)
+            assertEquals(keyValueStore.load(listOf("the-array", 2, "name")), "c")
+            assertEquals(keyValueStore.load(listOf("the-array", 2, "value")), 3)
         }
     }
 

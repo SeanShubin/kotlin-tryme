@@ -196,26 +196,46 @@ class DynamicUtilTest {
 
     @Test
     fun setArray() {
-        val path = listOf("a", 2, "b", 3)
-        val arrayDefaults = listOf(-1, -2)
-        val before = null
-        val after = DynamicUtil.setWithArrays(before, path, "c", arrayDefaults)
-        val actual = DynamicUtil.get(after, path)
-        val expectedValue = "c"
-        val expected = mapOf("a" to listOf(-1, -1, mapOf("b" to listOf(-2, -2, -2, "c"))))
-        assertEquals(expectedValue, actual)
-        assertEquals(expected, after)
+        var value:Any? = null
+        value = DynamicUtil.set(value, listOf("a", 0, "b", 0), "c")
+        value = DynamicUtil.set(value, listOf("a", 0, "b", 1), "d")
+        value = DynamicUtil.set(value, listOf("a", 0, "b", 2), "e")
+        value = DynamicUtil.set(value, listOf("a", 1, "b", 0), "f")
+        value = DynamicUtil.set(value, listOf("a", 1, "b", 1), "g")
+        value = DynamicUtil.set(value, listOf("a", 1, "b", 2), "h")
+        value = DynamicUtil.set(value, listOf("a", 2, "b", 0), "i")
+        value = DynamicUtil.set(value, listOf("a", 2, "b", 1), "j")
+        value = DynamicUtil.set(value, listOf("a", 2, "b", 2), "k")
+        val expected = mapOf(
+            "a" to listOf(
+                mapOf("b" to listOf("c", "d", "e")),
+                mapOf("b" to listOf("f", "g", "h")),
+                mapOf("b" to listOf("i", "j", "k"))
+            )
+        )
+        assertEquals(expected, value)
     }
 
     @Test
     fun updateArray() {
-        val path = listOf("a", 2, "b", 3)
-        val arrayDefaults = listOf(-1, -2)
-        val before = mapOf("a" to listOf(1, 2, mapOf("b" to listOf(3, 4, 5, "target", 6, 7)), 8, 9))
-        val after = DynamicUtil.setWithArrays(before, path, "replacement", arrayDefaults)
+        val before = mapOf(
+            "a" to listOf(
+                mapOf("b" to listOf("c", "d", "e")),
+                mapOf("b" to listOf("f", "g", "h")),
+                mapOf("b" to listOf("i", "j", "k"))
+            )
+        )
+        val path = listOf("a", 1, "b", 2)
+        val after = DynamicUtil.set(before, path, "replacement")
         val actual = DynamicUtil.get(after, path)
         val expectedValue = "replacement"
-        val expected = mapOf("a" to listOf(1, 2, mapOf("b" to listOf(3, 4, 5, "replacement", 6, 7)), 8, 9))
+        val expected = mapOf(
+            "a" to listOf(
+                mapOf("b" to listOf("c", "d", "e")),
+                mapOf("b" to listOf("f", "g", "replacement")),
+                mapOf("b" to listOf("i", "j", "k"))
+            )
+        )
         assertEquals(expectedValue, actual)
         assertEquals(expected, after)
     }
