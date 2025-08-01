@@ -3,11 +3,11 @@ package com.seanshubin.kotlin.tryme.domain.jvmclassformat
 import java.io.DataInput
 
 class MethodInfo(
-    val accessFlags:UShort,
-    val nameIndex:UShort,
-    val descriptorIndex:UShort,
-    val attributesCount:UShort,
-    val attributes:List<AttributeInfo>
+    val accessFlags: UShort,
+    val nameIndex: UShort,
+    val descriptorIndex: UShort,
+    val attributesCount: UShort,
+    val attributes: List<AttributeInfo>
 ) {
     companion object {
         fun fromDataInput(input: DataInput): MethodInfo {

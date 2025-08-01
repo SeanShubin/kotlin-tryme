@@ -1,6 +1,6 @@
 package com.seanshubin.kotlin.tryme.domain.jvmclassformat
 
-enum class AccessFlag(val mask:Int) {
+enum class AccessFlag(val mask: Int) {
     ACC_PUBLIC(0x0001),
     ACC_PRIVATE(0x0002),
     ACC_PROTECTED(0x0004),
@@ -15,6 +15,7 @@ enum class AccessFlag(val mask:Int) {
     ACC_ANNOTATION(0x2000),
     ACC_ENUM(0x4000),
     ACC_MODULE(0x8000);
+
     companion object {
         fun fromMask(mask: Int): Set<AccessFlag> {
             return entries.filter { (mask and it.mask) != 0 }.toSet()

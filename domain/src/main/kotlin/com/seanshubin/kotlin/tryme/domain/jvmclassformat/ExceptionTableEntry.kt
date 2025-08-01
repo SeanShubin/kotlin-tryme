@@ -16,6 +16,7 @@ data class ExceptionTableEntry(
             "catchTypeIndex" to catchType.toObject()
         )
     }
+
     companion object {
         fun fromDataInput(input: DataInput, constantPoolMap: Map<Int, ConstantPoolEntry>): ExceptionTableEntry {
             val startPc = input.readUnsignedShort().toUShort()

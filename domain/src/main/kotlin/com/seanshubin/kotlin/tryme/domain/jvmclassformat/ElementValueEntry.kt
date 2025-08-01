@@ -6,7 +6,8 @@ interface ElementValueEntry {
     val tag: ElementValueTag
     fun toObject(): Map<String, Any>
 
-    data class ElementValueConstant(override val tag: ElementValueTag, val value:ConstantPoolEntry) : ElementValueEntry{
+    data class ElementValueConstant(override val tag: ElementValueTag, val value: ConstantPoolEntry) :
+        ElementValueEntry {
         override fun toObject(): Map<String, Any> {
             return mapOf(
                 "tag" to tag.toString(),
@@ -14,7 +15,11 @@ interface ElementValueEntry {
             )
         }
     }
-    data class ElementValueClass(override val tag: ElementValueTag, val classEntry: ConstantPoolEntry.ConstantPoolEntryClass) : ElementValueEntry{
+
+    data class ElementValueClass(
+        override val tag: ElementValueTag,
+        val classEntry: ConstantPoolEntry.ConstantPoolEntryClass
+    ) : ElementValueEntry {
         override fun toObject(): Map<String, Any> {
             return mapOf(
                 "tag" to tag.toString(),
@@ -22,11 +27,12 @@ interface ElementValueEntry {
             )
         }
     }
+
     data class ElementValueEnum(
         override val tag: ElementValueTag,
         val typeName: ConstantPoolEntry.ConstantPoolEntryUtf8,
         val constName: ConstantPoolEntry.ConstantPoolEntryUtf8
-    ) : ElementValueEntry{
+    ) : ElementValueEntry {
         override fun toObject(): Map<String, Any> {
             return mapOf(
                 "tag" to tag.toString(),
@@ -36,7 +42,8 @@ interface ElementValueEntry {
         }
     }
 
-    data class ElementValueAnnotation(override val tag: ElementValueTag, val annotation: AnnotationEntry) :        ElementValueEntry{
+    data class ElementValueAnnotation(override val tag: ElementValueTag, val annotation: AnnotationEntry) :
+        ElementValueEntry {
         override fun toObject(): Map<String, Any> {
             return mapOf(
                 "tag" to tag.toString(),
@@ -45,7 +52,8 @@ interface ElementValueEntry {
         }
     }
 
-    data class ElementValueArray(override val tag: ElementValueTag, val elementValues: List<ElementValueEntry>) : ElementValueEntry{
+    data class ElementValueArray(override val tag: ElementValueTag, val elementValues: List<ElementValueEntry>) :
+        ElementValueEntry {
         override fun toObject(): Map<String, Any> {
             return mapOf(
                 "tag" to tag.toString(),
@@ -69,8 +77,10 @@ interface ElementValueEntry {
                 'e' -> {
                     val typeNameIndex = input.readUnsignedShort()
                     val constNameIndex = input.readUnsignedShort()
-                    val typeNameEntry = constantPoolMap.getValue(typeNameIndex) as ConstantPoolEntry.ConstantPoolEntryUtf8
-                    val constNameEntry = constantPoolMap.getValue(constNameIndex) as ConstantPoolEntry.ConstantPoolEntryUtf8
+                    val typeNameEntry =
+                        constantPoolMap.getValue(typeNameIndex) as ConstantPoolEntry.ConstantPoolEntryUtf8
+                    val constNameEntry =
+                        constantPoolMap.getValue(constNameIndex) as ConstantPoolEntry.ConstantPoolEntryUtf8
                     ElementValueEnum(tag, typeNameEntry, constNameEntry)
                 }
 

@@ -21,7 +21,7 @@ class RawJvmClass(
     val attributeCount: UShort,
     val attributes: List<AttributeInfo>
 ) {
-    companion object{
+    companion object {
         fun fromDataInput(input: DataInput): RawJvmClass {
             val magic = input.readInt().toUInt()
             val minorVersion = input.readUnsignedShort().toUShort()
@@ -60,11 +60,12 @@ class RawJvmClass(
             )
             return rawJvmClass
         }
-        fun readConstantPool(input: DataInput, constantPoolCount:UShort):List<ConstantPoolInfo> {
+
+        fun readConstantPool(input: DataInput, constantPoolCount: UShort): List<ConstantPoolInfo> {
             return (1 until constantPoolCount.toInt()).map { index -> readConstant(input, index) }
         }
 
-        fun readConstant(input: DataInput, index:Int):ConstantPoolInfo {
+        fun readConstant(input: DataInput, index: Int): ConstantPoolInfo {
             val tagByte = input.readUnsignedByte()
             val tag = ConstantPoolTag.fromByte(tagByte.toUByte())
             return tag.load(input, index.toUShort())
@@ -86,7 +87,7 @@ class RawJvmClass(
             return (0 until attributeCount.toInt()).map { AttributeInfo.fromDataInput(input) }
         }
 
-        fun assertEndOfInput(input: DataInput){
+        fun assertEndOfInput(input: DataInput) {
             try {
                 input.readByte()
                 throw RuntimeException("Expected end of input, but found more data")

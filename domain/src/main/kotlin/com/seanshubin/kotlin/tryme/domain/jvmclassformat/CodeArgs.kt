@@ -1,7 +1,7 @@
 package com.seanshubin.kotlin.tryme.domain.jvmclassformat
 
 enum class CodeArgs {
-    NONE{
+    NONE {
         override fun lookupSize(index: Int, code: List<Byte>): Int {
             return 0
         }
@@ -16,42 +16,42 @@ enum class CodeArgs {
             return 2
         }
     },
-    BYTE_VALUE{
+    BYTE_VALUE {
         override fun lookupSize(index: Int, code: List<Byte>): Int {
             return 1
         }
     },
-    BRANCH_OFFSET{
+    BRANCH_OFFSET {
         override fun lookupSize(index: Int, code: List<Byte>): Int {
             return 2
         }
     },
-    BRANCH_OFFSET_WIDE{
+    BRANCH_OFFSET_WIDE {
         override fun lookupSize(index: Int, code: List<Byte>): Int {
             return 4
         }
     },
-    TWO_REFERENCES{
+    TWO_REFERENCES {
         override fun lookupSize(index: Int, code: List<Byte>): Int {
             return 2
         }
     },
-    TWO_INTS{
+    TWO_INTS {
         override fun lookupSize(index: Int, code: List<Byte>): Int {
             return 2
         }
     },
-    INDEX_CONST{
+    INDEX_CONST {
         override fun lookupSize(index: Int, code: List<Byte>): Int {
             return 2
         }
     },
-    CONSTANT_POOL_INDEX_THEN_TWO_ZEROES{
+    CONSTANT_POOL_INDEX_THEN_TWO_ZEROES {
         override fun lookupSize(index: Int, code: List<Byte>): Int {
             return 4
         }
     },
-    CONSTANT_POOL_INDEX_THEN_COUNT_THEN_ZERO{
+    CONSTANT_POOL_INDEX_THEN_COUNT_THEN_ZERO {
         override fun lookupSize(index: Int, code: List<Byte>): Int {
             return 4
         }
@@ -61,27 +61,27 @@ enum class CodeArgs {
             return 1
         }
     },
-    LOOKUP_SWITCH{
+    LOOKUP_SWITCH {
         override fun lookupSize(index: Int, code: List<Byte>): Int {
             throw UnsupportedOperationException("not implemented")
         }
     },
-    CONSTANT_POOL_INDEX_THEN_DIMENSIONS{
+    CONSTANT_POOL_INDEX_THEN_DIMENSIONS {
         override fun lookupSize(index: Int, code: List<Byte>): Int {
             return 3
         }
     },
-    ARRAY_TYPE{
+    ARRAY_TYPE {
         override fun lookupSize(index: Int, code: List<Byte>): Int {
             return 1
         }
     },
-    SHORT_VALUE{
+    SHORT_VALUE {
         override fun lookupSize(index: Int, code: List<Byte>): Int {
             return 2
         }
     },
-    TABLE_SWITCH{
+    TABLE_SWITCH {
         override fun lookupSize(index: Int, code: List<Byte>): Int {
             throw UnsupportedOperationException("not implemented")
         }
@@ -93,5 +93,5 @@ enum class CodeArgs {
     };
 
 
-    abstract fun lookupSize(index:Int, code:List<Byte>): Int
+    abstract fun lookupSize(index: Int, code: List<Byte>): Int
 }

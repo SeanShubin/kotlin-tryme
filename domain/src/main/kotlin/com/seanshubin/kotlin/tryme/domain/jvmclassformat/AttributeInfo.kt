@@ -3,9 +3,10 @@ package com.seanshubin.kotlin.tryme.domain.jvmclassformat
 import java.io.DataInput
 
 data class AttributeInfo(
-    val attributeNameIndex:UShort,
-    val attributeLength:Int,
-    val info:List<Byte>) {
+    val attributeNameIndex: UShort,
+    val attributeLength: Int,
+    val info: List<Byte>
+) {
     fun toObject(): Map<String, Any> {
         return mapOf(
             "attributeNameIndex" to attributeNameIndex.toInt(),
@@ -13,7 +14,8 @@ data class AttributeInfo(
             "info" to info
         )
     }
-    companion object{
+
+    companion object {
         fun fromDataInput(input: DataInput): AttributeInfo {
             val attributeNameIndex = input.readUnsignedShort().toUShort()
             val attributeLength = input.readInt()

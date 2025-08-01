@@ -14,8 +14,10 @@ enum class ElementValueTag(val charValue: Char) {
     CLASS('c'),
     ANNOTATION('@'),
     ARRAY('[');
-    override fun toString():String = "$name($charValue)"
-    companion object{
+
+    override fun toString(): String = "$name($charValue)"
+
+    companion object {
         fun fromByte(byte: Byte): ElementValueTag {
             val asChar = byte.toInt().toChar()
             return entries.firstOrNull { it.charValue == asChar }

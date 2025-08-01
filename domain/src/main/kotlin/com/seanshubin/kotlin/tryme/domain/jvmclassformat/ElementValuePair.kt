@@ -12,6 +12,7 @@ data class ElementValuePair(
             "value" to value.toObject()
         )
     }
+
     companion object {
         fun fromDataInput(dataInput: DataInput, constantPoolMap: Map<Int, ConstantPoolEntry>): ElementValuePair {
             val elementNameIndex = dataInput.readShort()

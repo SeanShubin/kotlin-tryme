@@ -12,7 +12,7 @@ data class JvmClass(
     val fields: List<FieldEntry>,
     val methods: List<MethodEntry>,
     val attributes: List<AttributeEntry>
-){
+) {
     fun toObject(): Map<String, Any> {
         return mapOf(
             "magic" to magic,
@@ -28,6 +28,7 @@ data class JvmClass(
             "attributes" to attributes.map { it.toObject() }
         )
     }
+
     companion object {
         fun fromRawJvmClass(rawJvmClass: RawJvmClass): JvmClass {
             val magic = rawJvmClass.magic.toInt()

@@ -1,18 +1,19 @@
 package com.seanshubin.kotlin.tryme.domain.jvmclassformat
+
 import java.io.DataInputStream
 
 enum class AttributeEnum {
-    RuntimeInvisibleAnnotations{
+    RuntimeInvisibleAnnotations {
         override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>): AttributeEntry {
             return parseRuntimeAnnotations(attributeInfo, constantPoolMap)
         }
     },
-    RuntimeVisibleAnnotations{
+    RuntimeVisibleAnnotations {
         override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>): AttributeEntry {
             return parseRuntimeAnnotations(attributeInfo, constantPoolMap)
         }
     },
-    RuntimeInvisibleParameterAnnotations{
+    RuntimeInvisibleParameterAnnotations {
         override fun parse(
             attributeInfo: AttributeInfo,
             constantPoolMap: Map<Int, ConstantPoolEntry>
@@ -20,9 +21,10 @@ enum class AttributeEnum {
             return parseRuntimeParameterAnnotations(attributeInfo, constantPoolMap)
         }
     },
-    Code{
+    Code {
         override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>): AttributeEntry {
-            val name = constantPoolMap.getValue(attributeInfo.attributeNameIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
+            val name =
+                constantPoolMap.getValue(attributeInfo.attributeNameIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
             val input = DataInputStream(attributeInfo.info.toByteArray().inputStream())
             val maxStack = input.readUnsignedShort().toUShort()
             val maxLocals = input.readUnsignedShort().toUShort()
@@ -49,9 +51,10 @@ enum class AttributeEnum {
             )
         }
     },
-    LineNumberTable{
+    LineNumberTable {
         override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>): AttributeEntry {
-            val name = constantPoolMap.getValue(attributeInfo.attributeNameIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
+            val name =
+                constantPoolMap.getValue(attributeInfo.attributeNameIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
             val input = DataInputStream(attributeInfo.info.toByteArray().inputStream())
             val lineNumberCount = input.readUnsignedShort().toInt()
             val lineNumbers = List(lineNumberCount) {
@@ -60,9 +63,10 @@ enum class AttributeEnum {
             return AttributeEntry.LineNumberTableEntry(attributeInfo, name, lineNumbers)
         }
     },
-    LocalVariableTable{
+    LocalVariableTable {
         override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>): AttributeEntry {
-            val name = constantPoolMap.getValue(attributeInfo.attributeNameIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
+            val name =
+                constantPoolMap.getValue(attributeInfo.attributeNameIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
             val input = DataInputStream(attributeInfo.info.toByteArray().inputStream())
             val localVariableCount = input.readUnsignedShort().toInt()
             val localVariables = List(localVariableCount) {
@@ -71,18 +75,20 @@ enum class AttributeEnum {
             return AttributeEntry.LocalVariableTableEntry(attributeInfo, name, localVariables)
         }
     },
-    SourceFile{
+    SourceFile {
         override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>): AttributeEntry {
-            val name = constantPoolMap.getValue(attributeInfo.attributeNameIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
+            val name =
+                constantPoolMap.getValue(attributeInfo.attributeNameIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
             val input = DataInputStream(attributeInfo.info.toByteArray().inputStream())
             val sourceFileIndex = input.readUnsignedShort().toInt()
             val sourceFile = constantPoolMap.getValue(sourceFileIndex) as ConstantPoolEntry.ConstantPoolEntryUtf8
             return AttributeEntry.SourceFileEntry(attributeInfo, name, sourceFile)
         }
     },
-    BootstrapMethods{
+    BootstrapMethods {
         override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>): AttributeEntry {
-            val name = constantPoolMap.getValue(attributeInfo.attributeNameIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
+            val name =
+                constantPoolMap.getValue(attributeInfo.attributeNameIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
             val input = DataInputStream(attributeInfo.info.toByteArray().inputStream())
             val numBootstrapMethods = input.readUnsignedShort()
             val bootstrapMethods = List(numBootstrapMethods.toInt()) {
@@ -91,17 +97,26 @@ enum class AttributeEnum {
             return AttributeEntry.BootstrapMethodsEntry(attributeInfo, name, bootstrapMethods)
         }
     };
+
     abstract fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>): AttributeEntry
+
     companion object {
-        fun fromAttributeInfo(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>): AttributeEntry {
-            val attributeUtf8 = constantPoolMap.getValue(attributeInfo.attributeNameIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
+        fun fromAttributeInfo(
+            attributeInfo: AttributeInfo,
+            constantPoolMap: Map<Int, ConstantPoolEntry>
+        ): AttributeEntry {
+            val attributeUtf8 =
+                constantPoolMap.getValue(attributeInfo.attributeNameIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
             val attributeName = attributeUtf8.raw.value
             val attributeEnum = valueOf(attributeName)
             val attributeEntry = attributeEnum.parse(attributeInfo, constantPoolMap)
             return attributeEntry
         }
 
-        private fun parseRuntimeAnnotations(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>): AttributeEntry {
+        private fun parseRuntimeAnnotations(
+            attributeInfo: AttributeInfo,
+            constantPoolMap: Map<Int, ConstantPoolEntry>
+        ): AttributeEntry {
             val name =
                 constantPoolMap.getValue(attributeInfo.attributeNameIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
             val input = DataInputStream(attributeInfo.info.toByteArray().inputStream())
@@ -116,7 +131,10 @@ enum class AttributeEnum {
             )
         }
 
-        private fun parseRuntimeParameterAnnotations(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>): AttributeEntry {
+        private fun parseRuntimeParameterAnnotations(
+            attributeInfo: AttributeInfo,
+            constantPoolMap: Map<Int, ConstantPoolEntry>
+        ): AttributeEntry {
             val name =
                 constantPoolMap.getValue(attributeInfo.attributeNameIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
             val input = DataInputStream(attributeInfo.info.toByteArray().inputStream())

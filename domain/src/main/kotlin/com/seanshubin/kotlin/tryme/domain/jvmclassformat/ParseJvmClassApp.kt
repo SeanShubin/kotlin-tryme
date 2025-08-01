@@ -9,7 +9,8 @@ object ParseJvmClassApp {
     @JvmStatic
     fun main(args: Array<String>) {
         val inputDir = Paths.get("domain", "target")
-        val relativeFilePath = Paths.get("classes","com","seanshubin","kotlin","tryme","domain","jvmclassformat","SampleApp.class")
+        val relativeFilePath =
+            Paths.get("classes", "com", "seanshubin", "kotlin", "tryme", "domain", "jvmclassformat", "SampleApp.class")
         val filePath = inputDir.resolve(relativeFilePath)
         val outputDir = Paths.get("domain", "target")
         val dataPath = outputDir.resolve("SampleApp-data.txt")

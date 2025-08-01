@@ -1,6 +1,6 @@
 package com.seanshubin.kotlin.tryme.domain.jvmclassformat
 
-enum class PrimitiveArrayType(val code:Byte){
+enum class PrimitiveArrayType(val code: Byte) {
     BOOLEAN(4),
     CHAR(5),
     FLOAT(6),

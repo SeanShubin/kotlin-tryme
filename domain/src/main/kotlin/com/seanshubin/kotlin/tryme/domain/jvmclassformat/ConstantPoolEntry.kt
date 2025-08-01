@@ -304,7 +304,8 @@ interface ConstantPoolEntry {
         companion object {
             fun parse(raw: ConstantPoolInfo.ConstantDynamic, lookup: ConstantPoolLookup): ConstantPoolEntry {
                 val nameAndTypeInfo = lookup.lookup(raw.nameAndTypeIndex) as ConstantPoolInfo.ConstantNameAndType
-                val nameAndTypeEntry = ConstantPoolEntryNameAndType.parse(nameAndTypeInfo, lookup) as ConstantPoolEntryNameAndType
+                val nameAndTypeEntry =
+                    ConstantPoolEntryNameAndType.parse(nameAndTypeInfo, lookup) as ConstantPoolEntryNameAndType
                 return ConstantPoolEntryDynamic(raw, raw.bootstrapMethodAttrIndex, nameAndTypeEntry)
             }
         }
@@ -327,7 +328,8 @@ interface ConstantPoolEntry {
         companion object {
             fun parse(raw: ConstantPoolInfo.ConstantInvokeDynamic, lookup: ConstantPoolLookup): ConstantPoolEntry {
                 val nameAndTypeInfo = lookup.lookup(raw.nameAndTypeIndex) as ConstantPoolInfo.ConstantNameAndType
-                val nameAndTypeEntry = ConstantPoolEntryNameAndType.parse(nameAndTypeInfo, lookup) as ConstantPoolEntryNameAndType
+                val nameAndTypeEntry =
+                    ConstantPoolEntryNameAndType.parse(nameAndTypeInfo, lookup) as ConstantPoolEntryNameAndType
                 return ConstantPoolEntryInvokeDynamic(raw, raw.bootstrapMethodAttrIndex, nameAndTypeEntry)
             }
         }

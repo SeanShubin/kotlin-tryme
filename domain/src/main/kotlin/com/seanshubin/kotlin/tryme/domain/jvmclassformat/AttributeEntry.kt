@@ -28,7 +28,7 @@ interface AttributeEntry {
         override fun toObject(): Map<String, Any> {
             return mapOf(
                 "name" to name.toObject(),
-                "parameterAnnotations" to parameterAnnotations.map { annotations -> annotations.map{it.toObject()} }
+                "parameterAnnotations" to parameterAnnotations.map { annotations -> annotations.map { it.toObject() } }
             )
         }
     }
@@ -54,7 +54,7 @@ interface AttributeEntry {
         }
 
         companion object {
-            fun byteToHexCode(byte:Byte):String {
+            fun byteToHexCode(byte: Byte): String {
                 return String.format("%02X", byte)
             }
         }
@@ -153,7 +153,7 @@ interface AttributeEntry {
     data class BootstrapMethodEntry(
         val bootstrapMethodRef: ConstantPoolEntry.ConstantPoolEntryMethodHandle,
         val bootstrapArguments: List<ConstantPoolEntry.ConstantPoolEntryString>
-    ){
+    ) {
         fun toObject(): Map<String, Any> {
             return mapOf(
                 "bootstrapMethodRef" to bootstrapMethodRef.toObject(),
@@ -164,7 +164,8 @@ interface AttributeEntry {
         companion object {
             fun fromDataInput(input: DataInput, constantPoolMap: Map<Int, ConstantPoolEntry>): BootstrapMethodEntry {
                 val bootstrapMethodRefIndex = input.readUnsignedShort().toInt()
-                val bootstrapMethodRef = constantPoolMap.getValue(bootstrapMethodRefIndex) as ConstantPoolEntry.ConstantPoolEntryMethodHandle
+                val bootstrapMethodRef =
+                    constantPoolMap.getValue(bootstrapMethodRefIndex) as ConstantPoolEntry.ConstantPoolEntryMethodHandle
                 val numBootstrapArguments = input.readUnsignedShort().toInt()
                 val bootstrapArguments = List(numBootstrapArguments) {
                     val index = input.readUnsignedShort().toInt()

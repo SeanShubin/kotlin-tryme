@@ -6,7 +6,7 @@ data class MethodEntry(
     val descriptor: ConstantPoolEntry.ConstantPoolEntryUtf8,
     val attributes: List<AttributeEntry>
 ) {
-    fun toObject(): Map<String, Any>{
+    fun toObject(): Map<String, Any> {
         return mapOf(
             "accessFlags" to accessFlags.map { it.toString() },
             "name" to name.toObject(),
@@ -14,11 +14,13 @@ data class MethodEntry(
             "attributes" to attributes.map { it.toObject() }
         )
     }
+
     companion object {
         fun fromMethodInfo(info: MethodInfo, constantPoolMap: Map<Int, ConstantPoolEntry>): MethodEntry {
             val accessFlags = AccessFlag.fromMask(info.accessFlags.toInt())
             val name = constantPoolMap.getValue(info.nameIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
-            val descriptor = constantPoolMap.getValue(info.descriptorIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
+            val descriptor =
+                constantPoolMap.getValue(info.descriptorIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
             val attributes = info.attributes.map { AttributeEntry.fromAttributeInfo(it, constantPoolMap) }
             return MethodEntry(
                 accessFlags = accessFlags,
