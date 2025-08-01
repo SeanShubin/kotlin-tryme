@@ -29,6 +29,7 @@ enum class AttributeEnum {
             val codeLength = input.readInt()
             val code = ByteArray(codeLength.toInt())
             input.readFully(code)
+            val opCodes = OpCodeEntry.fromBytes(code.toList(), constantPoolMap)
             val exceptionTableLength = input.readUnsignedShort().toUShort()
             val exceptionTable = List(exceptionTableLength.toInt()) {
                 ExceptionTableEntry.fromDataInput(input, constantPoolMap)
@@ -42,7 +43,7 @@ enum class AttributeEnum {
                 name,
                 maxStack,
                 maxLocals,
-                code.toList(),
+                opCodes,
                 exceptionTable,
                 attributes
             )

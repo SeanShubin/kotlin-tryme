@@ -38,7 +38,7 @@ interface AttributeEntry {
         override val name: ConstantPoolEntry.ConstantPoolEntryUtf8,
         val maxStack: UShort,
         val maxLocals: UShort,
-        val code: List<Byte>,
+        val opCodes: List<OpCodeEntry>,
         val exceptionTable: List<ExceptionTableEntry>,
         val attributes: List<AttributeEntry>
     ) : AttributeEntry {
@@ -47,10 +47,16 @@ interface AttributeEntry {
                 "name" to name.toObject(),
                 "maxStack" to maxStack,
                 "maxLocals" to maxLocals,
-                "code" to code,
+                "codes" to opCodes.map { it.toObject() },
                 "exceptionTable" to exceptionTable.map { it.toObject() },
                 "attributes" to attributes.map { it.toObject() }
             )
+        }
+
+        companion object {
+            fun byteToHexCode(byte:Byte):String {
+                return String.format("%02X", byte)
+            }
         }
     }
 
