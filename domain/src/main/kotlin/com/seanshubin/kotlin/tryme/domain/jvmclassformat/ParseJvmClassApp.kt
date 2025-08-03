@@ -30,5 +30,12 @@ object ParseJvmClassApp {
         val jvmClassObject = jvmClass.toObject()
         val jvmClassJson = JsonMappers.pretty.writeValueAsString(jvmClassObject)
         Files.writeString(interpretedPath, jvmClassJson)
+        val methodDependencyLines = jvmClass.methodDependencies().flatMap{ (methodMakingCall, methodsBeingCalled) ->
+            val methodsBeingCalledLines = methodsBeingCalled.map { methodBeingCalled ->
+                "  $methodBeingCalled"
+            }
+            listOf(methodMakingCall) + methodsBeingCalledLines
+        }
+        methodDependencyLines.forEach(::println)
     }
 }

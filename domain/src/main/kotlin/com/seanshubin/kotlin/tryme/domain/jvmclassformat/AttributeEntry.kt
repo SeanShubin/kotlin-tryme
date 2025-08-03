@@ -38,7 +38,7 @@ interface AttributeEntry {
         override val name: ConstantPoolEntry.ConstantPoolEntryUtf8,
         val maxStack: UShort,
         val maxLocals: UShort,
-        val opCodes: List<OpCodeEntry>,
+        val codeBlock: CodeBlock,
         val exceptionTable: List<ExceptionTableEntry>,
         val attributes: List<AttributeEntry>
     ) : AttributeEntry {
@@ -47,7 +47,7 @@ interface AttributeEntry {
                 "name" to name.toObject(),
                 "maxStack" to maxStack,
                 "maxLocals" to maxLocals,
-                "codes" to opCodes.map { it.toObject() },
+                "codeBlock" to codeBlock.toObject(),
                 "exceptionTable" to exceptionTable.map { it.toObject() },
                 "attributes" to attributes.map { it.toObject() }
             )

@@ -170,6 +170,12 @@ interface ConstantPoolEntry {
                 "nameAndType" to nameAndTypeEntry.toObject()
             )
         }
+        fun methodAddress():String {
+            val className = classEntry.name.raw.value
+            val methodName = nameAndTypeEntry.nameEntry.raw.value
+            val descriptor=  nameAndTypeEntry.descriptorEntry.raw.value
+            return "$className.$methodName$descriptor"
+        }
 
         companion object {
             fun parse(raw: ConstantPoolInfo.ConstantMethodRef, lookup: ConstantPoolLookup): ConstantPoolEntryMethodref {
@@ -323,6 +329,13 @@ interface ConstantPoolEntry {
                 "bootstrapMethodAttrIndex" to bootstrapMethodAttrIndex.toInt(),
                 "nameAndType" to nameAndTypeEntry.toObject()
             )
+        }
+
+        fun methodAddress():String {
+            val className = "(dynamic)"
+            val methodName = nameAndTypeEntry.nameEntry.raw.value
+            val descriptor=  nameAndTypeEntry.descriptorEntry.raw.value
+            return "$className.$methodName$descriptor"
         }
 
         companion object {

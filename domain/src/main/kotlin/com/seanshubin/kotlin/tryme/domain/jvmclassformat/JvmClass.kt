@@ -6,13 +6,49 @@ data class JvmClass(
     val majorVersion: Int,
     val constantPool: List<ConstantPoolEntry>,
     val accessFlags: Set<AccessFlag>,
-    val thisClass: ConstantPoolEntry,
-    val superClass: ConstantPoolEntry,
+    val thisClass: ConstantPoolEntry.ConstantPoolEntryClass,
+    val superClass: ConstantPoolEntry.ConstantPoolEntryClass,
     val interfaces: List<InterfaceEntry>,
     val fields: List<FieldEntry>,
     val methods: List<MethodEntry>,
     val attributes: List<AttributeEntry>
 ) {
+    val methodInvocationOpCodes = setOf(
+        Code.invokestatic,
+        Code.invokespecial,
+        Code.invokevirtual,
+        Code.invokeinterface,
+        Code.invokedynamic
+    )
+    fun methodDependencies():List<Pair<String, List<String>>>{
+        return methods.mapNotNull { method ->
+            val className = thisClass.name.raw.value
+            val name = method.name.raw.value
+            val descriptor = method.descriptor.raw.value
+            val codeBlock = method.codeAttribute.codeBlock
+            val methodDoingCall = "$className.$name$descriptor"
+            val methodsBeingCalled = codeBlock.opCodes.mapNotNull { opCode ->
+                if(methodInvocationOpCodes.contains(opCode.code)){
+                    opCode as OpCodeEntry.ConstantPoolIndex
+                    val constantPoolEntry = opCode.constantPoolEntry
+                    when(constantPoolEntry){
+                        is ConstantPoolEntry.ConstantPoolEntryMethodref -> {
+                            constantPoolEntry.methodAddress()
+                        }
+                        is ConstantPoolEntry.ConstantPoolEntryInvokeDynamic -> {
+                            constantPoolEntry.methodAddress()
+                        }
+                        else -> {
+                            throw RuntimeException("Unexpected constant pool entry type ${constantPoolEntry.javaClass.simpleName}")
+                        }
+                    }
+                } else {
+                    null
+                }
+            }
+            Pair(methodDoingCall, methodsBeingCalled)
+        }
+    }
     fun toObject(): Map<String, Any> {
         return mapOf(
             "magic" to magic,
@@ -40,8 +76,8 @@ data class JvmClass(
                 ConstantPoolEntry.from(entry, constantPoolLookup)
             }
             val constantPoolMap = constantPool.associateBy { entry -> entry.raw.index.toInt() }
-            val thisClass = constantPoolMap.getValue(rawJvmClass.thisClass.toInt())
-            val superClass = constantPoolMap.getValue(rawJvmClass.superClass.toInt())
+            val thisClass = constantPoolMap.getValue(rawJvmClass.thisClass.toInt()) as ConstantPoolEntry.ConstantPoolEntryClass
+            val superClass = constantPoolMap.getValue(rawJvmClass.superClass.toInt()) as ConstantPoolEntry.ConstantPoolEntryClass
             val interfaces = rawJvmClass.interfaces.map { InterfaceEntry.from(it, constantPoolMap) }
             val fields = rawJvmClass.fields.map { FieldEntry.fromFieldInfo(it, constantPoolMap) }
             val methods = rawJvmClass.methods.map { MethodEntry.fromMethodInfo(it, constantPoolMap) }
