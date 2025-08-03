@@ -5,7 +5,7 @@ data class MethodEntry(
     val name: ConstantPoolEntry.ConstantPoolEntryUtf8,
     val descriptor: ConstantPoolEntry.ConstantPoolEntryUtf8,
     val attributes: List<AttributeEntry>,
-    val codeAttribute: AttributeEntry.CodeEntry
+    val codeAttribute: AttributeEntry.CodeEntry?
 ) {
     fun toObject(): Map<String, Any> {
         return mapOf(
@@ -23,9 +23,7 @@ data class MethodEntry(
             val descriptor =
                 constantPoolMap.getValue(info.descriptorIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
             val attributes = info.attributes.map { AttributeEntry.fromAttributeInfo(it, constantPoolMap) }
-            val displayName = name.raw.value
-            val displayDescriptor = descriptor.raw.value
-            val codeAttribute = attributes.filterIsInstance<AttributeEntry.CodeEntry>().singleOrNull() ?: throw RuntimeException("Expected a single code entry for method $displayName $displayDescriptor")
+            val codeAttribute = attributes.filterIsInstance<AttributeEntry.CodeEntry>().singleOrNull()
             return MethodEntry(
                 accessFlags = accessFlags,
                 name = name,

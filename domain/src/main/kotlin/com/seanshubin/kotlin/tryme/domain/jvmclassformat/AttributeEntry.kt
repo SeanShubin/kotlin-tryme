@@ -7,6 +7,19 @@ interface AttributeEntry {
     val name: ConstantPoolEntry.ConstantPoolEntryUtf8
     fun toObject(): Map<String, Any>;
 
+    data class ConstantValueEntry(
+        override val info: AttributeInfo,
+        override val name: ConstantPoolEntry.ConstantPoolEntryUtf8,
+        val constantValue: ConstantPoolEntry
+    ) : AttributeEntry {
+        override fun toObject(): Map<String, Any> {
+            return mapOf(
+                "name" to name.toObject(),
+                "constantValue" to constantValue.toObject()
+            )
+        }
+    }
+
     data class RuntimeAnnotationsEntry(
         override val info: AttributeInfo,
         override val name: ConstantPoolEntry.ConstantPoolEntryUtf8,
@@ -186,6 +199,102 @@ interface AttributeEntry {
                 "name" to name.toObject(),
                 "bootstrapMethods" to bootstrapMethods.map { it.toObject() }
             )
+        }
+    }
+
+    data class ExceptionEntry(
+        override val info: AttributeInfo,
+        override val name: ConstantPoolEntry.ConstantPoolEntryUtf8,
+        val exceptionClasses:List<ConstantPoolEntry.ConstantPoolEntryClass>
+    ): AttributeEntry {
+        override fun toObject(): Map<String, Any> {
+            return mapOf(
+                "name" to name.toObject(),
+                "exceptionClasses" to exceptionClasses.map { it.toObject() }
+            )
+        }
+    }
+
+    data class SignatureEntry(
+        override val info: AttributeInfo,
+        override val name: ConstantPoolEntry.ConstantPoolEntryUtf8,
+        val signature: ConstantPoolEntry.ConstantPoolEntryUtf8
+    ) : AttributeEntry {
+        override fun toObject(): Map<String, Any> {
+            return mapOf(
+                "name" to name.toObject(),
+                "signature" to signature.toObject()
+            )
+        }
+    }
+
+    data class EnclosingMethodEntry(
+        override val info: AttributeInfo,
+        override val name: ConstantPoolEntry.ConstantPoolEntryUtf8,
+        val theClass: ConstantPoolEntry.ConstantPoolEntryClass,
+        val method: ConstantPoolEntry.ConstantPoolEntryNameAndType
+    ) : AttributeEntry {
+        override fun toObject(): Map<String, Any> {
+            return mapOf(
+                "name" to name.toObject(),
+                "class" to theClass.toObject(),
+                "method" to method.toObject()
+            )
+        }
+    }
+
+    data class NestHostEntry(
+        override val info: AttributeInfo,
+        override val name: ConstantPoolEntry.ConstantPoolEntryUtf8,
+        val nestHost: ConstantPoolEntry.ConstantPoolEntryClass
+    ) : AttributeEntry {
+        override fun toObject(): Map<String, Any> {
+            return mapOf(
+                "name" to name.toObject(),
+                "nestHost" to nestHost.toObject()
+            )
+        }
+    }
+
+    data class InnerClassesEntry(
+        override val info: AttributeInfo,
+        override val name: ConstantPoolEntry.ConstantPoolEntryUtf8,
+        val innerClasses: List<InnerClassEntry>
+    ) : AttributeEntry {
+        override fun toObject(): Map<String, Any> {
+            return mapOf(
+                "name" to name.toObject(),
+                "innerClasses" to innerClasses.map { it.toObject() }
+            )
+        }
+    }
+
+    data class InnerClassEntry(
+        val innerClass: ConstantPoolEntry.ConstantPoolEntryClass,
+        val outerClass: ConstantPoolEntry.ConstantPoolEntryClass?,
+        val innerName: ConstantPoolEntry.ConstantPoolEntryUtf8?,
+        val accessFlags: Set<AccessFlag>
+    ) {
+        fun toObject(): Map<String, Any?> {
+            return mapOf(
+                "innerClass" to innerClass.toObject(),
+                "outerClass" to outerClass?.toObject(),
+                "innerName" to innerName?.toObject(),
+                "accessFlags" to accessFlags.map { it.name }
+            )
+        }
+        companion object {
+            fun fromDataInput(input: DataInput, constantPoolMap: Map<Int, ConstantPoolEntry>): InnerClassEntry {
+                val innerClassIndex = input.readUnsignedShort().toInt()
+                val innerClass = constantPoolMap.getValue(innerClassIndex) as ConstantPoolEntry.ConstantPoolEntryClass
+                val outerClassIndex = input.readUnsignedShort().toInt()
+                val outerClass = if (outerClassIndex == 0) null else constantPoolMap.getValue(outerClassIndex) as ConstantPoolEntry.ConstantPoolEntryClass
+                val innerNameIndex = input.readUnsignedShort().toInt()
+                val innerName = if (innerNameIndex == 0) null else constantPoolMap.getValue(innerNameIndex) as ConstantPoolEntry.ConstantPoolEntryUtf8
+                val accessFlagMask = input.readUnsignedShort().toInt()
+                val accessFlags = AccessFlag.fromMask(accessFlagMask)
+                return InnerClassEntry(innerClass, outerClass, innerName, accessFlags)
+            }
         }
     }
 

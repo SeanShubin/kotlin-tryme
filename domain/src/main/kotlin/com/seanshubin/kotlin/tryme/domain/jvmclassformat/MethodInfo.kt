@@ -2,7 +2,7 @@ package com.seanshubin.kotlin.tryme.domain.jvmclassformat
 
 import java.io.DataInput
 
-class MethodInfo(
+data class MethodInfo(
     val accessFlags: UShort,
     val nameIndex: UShort,
     val descriptorIndex: UShort,

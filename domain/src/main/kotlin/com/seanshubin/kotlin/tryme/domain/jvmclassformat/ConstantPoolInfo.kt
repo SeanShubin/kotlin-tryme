@@ -4,6 +4,10 @@ sealed interface ConstantPoolInfo {
     val tag: ConstantPoolTag
     val index: UShort
 
+    fun entriesTaken():Int {
+        return tag.entriesTaken
+    }
+
     data class ConstantUtf8(override val tag: ConstantPoolTag, override val index: UShort, val value: String) :
         ConstantPoolInfo
 

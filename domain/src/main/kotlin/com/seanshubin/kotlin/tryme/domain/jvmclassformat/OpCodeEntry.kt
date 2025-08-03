@@ -1,11 +1,13 @@
 package com.seanshubin.kotlin.tryme.domain.jvmclassformat
 
+import jdk.internal.classfile.constantpool.MethodRefEntry
+
 sealed interface OpCodeEntry {
     val index: Int
     val code: Code
     val codeArgs: CodeArgs
     fun toObject(): Map<String, Any>
-    class NoArgs(override val index: Int, override val code: Code) : OpCodeEntry {
+    data class NoArgs(override val index: Int, override val code: Code) : OpCodeEntry {
         override val codeArgs: CodeArgs = CodeArgs.NONE
         override fun toObject(): Map<String, Any> {
             return mapOf(
@@ -15,7 +17,7 @@ sealed interface OpCodeEntry {
         }
     }
 
-    class ConstantPoolIndex(
+    data class ConstantPoolIndex(
         override val index: Int,
         override val code: Code,
         val constantPoolEntry: ConstantPoolEntry
@@ -30,7 +32,24 @@ sealed interface OpCodeEntry {
         }
     }
 
-    class LocalVariableIndex(
+    data class MethodRefAndArgCount(
+        override val index: Int,
+        override val code: Code,
+        val methodRef: ConstantPoolEntry.ConstantPoolEntryInterfaceMethodref,
+        val argCount:Int
+    ) : OpCodeEntry {
+        override val codeArgs: CodeArgs = CodeArgs.CONSTANT_POOL_INDEX
+        override fun toObject(): Map<String, Any> {
+            return mapOf(
+                "index" to index,
+                "code" to code.toObject(),
+                "methodRef" to methodRef.toObject(),
+                "argCount" to argCount
+            )
+        }
+    }
+
+    data class LocalVariableIndex(
         override val index: Int,
         override val code: Code,
         val localVariableIndex: Int
@@ -84,7 +103,15 @@ sealed interface OpCodeEntry {
                         ConstantPoolIndex(index, code, constantPoolEntry)
                     }
 
-                    else -> throw UnsupportedOperationException("$codeArgs")
+                    CodeArgs.CONSTANT_POOL_INDEX_THEN_COUNT_THEN_ZERO -> {
+                        val constantPoolIndex = list[index + 1].toInt() shl 8 or (list[index + 2].toInt() and 0xFF)
+                        val methodRef = constantPoolMap[constantPoolIndex] as ConstantPoolEntry.ConstantPoolEntryInterfaceMethodref
+                        val count = list[index + 3].toInt()
+                        if (list[index + 4].toInt() != 0) throw IllegalArgumentException("Expected byte at index ${index + 4} to be 0")
+                        MethodRefAndArgCount(index, code, methodRef, count)
+                    }
+
+                    else -> throw UnsupportedOperationException("$code $codeArgs")
                 }
                 result.add(entry)
                 index += size + 1

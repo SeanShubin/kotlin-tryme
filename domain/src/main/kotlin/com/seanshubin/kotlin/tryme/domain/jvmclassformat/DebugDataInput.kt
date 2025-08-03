@@ -54,7 +54,9 @@ class DebugDataInput(
     }
 
     override fun readLong(): Long {
-        throw UnsupportedOperationException("Not Implemented!")
+        val value = delegate.readLong()
+        debug("readLong", value)
+        return value
     }
 
     override fun readFloat(): Float {
@@ -74,6 +76,10 @@ class DebugDataInput(
     }
 
     private fun debug(caption: String, value: Int) {
+        emit(String.format("%-17s: %10d %10H", caption, value, value))
+    }
+
+    private fun debug(caption: String, value: Long) {
         emit(String.format("%-17s: %10d %10H", caption, value, value))
     }
 

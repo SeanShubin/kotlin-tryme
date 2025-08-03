@@ -207,6 +207,13 @@ interface ConstantPoolEntry {
             )
         }
 
+        fun methodAddress():String {
+            val className = classEntry.name.raw.value
+            val methodName = nameAndTypeEntry.nameEntry.raw.value
+            val descriptor=  nameAndTypeEntry.descriptorEntry.raw.value
+            return "$className.$methodName$descriptor"
+        }
+
         companion object {
             fun parse(raw: ConstantPoolInfo.ConstantInterfaceMethodRef, lookup: ConstantPoolLookup): ConstantPoolEntry {
                 val classInfo = lookup.lookup(raw.classIndex) as ConstantPoolInfo.ConstantClass

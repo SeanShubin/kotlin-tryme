@@ -3,6 +3,16 @@ package com.seanshubin.kotlin.tryme.domain.jvmclassformat
 import java.io.DataInputStream
 
 enum class AttributeEnum {
+    ConstantValue {
+        override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>): AttributeEntry {
+            val name =
+                constantPoolMap.getValue(attributeInfo.attributeNameIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
+            val input = DataInputStream(attributeInfo.info.toByteArray().inputStream())
+            val constantValueIndex = input.readUnsignedShort().toInt()
+            val constantValue = constantPoolMap.getValue(constantValueIndex)
+            return AttributeEntry.ConstantValueEntry(attributeInfo, name, constantValue)
+        }
+    },
     RuntimeInvisibleAnnotations {
         override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>): AttributeEntry {
             return parseRuntimeAnnotations(attributeInfo, constantPoolMap)
@@ -96,6 +106,65 @@ enum class AttributeEnum {
                 AttributeEntry.BootstrapMethodEntry.fromDataInput(input, constantPoolMap)
             }
             return AttributeEntry.BootstrapMethodsEntry(attributeInfo, name, bootstrapMethods)
+        }
+    },
+    Exceptions {
+        override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>): AttributeEntry {
+            val name =
+                constantPoolMap.getValue(attributeInfo.attributeNameIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
+            val input = DataInputStream(attributeInfo.info.toByteArray().inputStream())
+            val numberOfExceptions = input.readUnsignedShort().toInt()
+            val exceptionIndexTable = List(numberOfExceptions) {
+                input.readUnsignedShort().toInt()
+            }
+            val exceptionClasses = exceptionIndexTable.map {
+                constantPoolMap.getValue(it) as ConstantPoolEntry.ConstantPoolEntryClass
+            }
+            return AttributeEntry.ExceptionEntry(attributeInfo, name, exceptionClasses)
+        }
+    },
+    Signature {
+        override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>): AttributeEntry {
+            val name =
+                constantPoolMap.getValue(attributeInfo.attributeNameIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
+            val input = DataInputStream(attributeInfo.info.toByteArray().inputStream())
+            val signatureIndex = input.readUnsignedShort().toInt()
+            val signature = constantPoolMap.getValue(signatureIndex) as ConstantPoolEntry.ConstantPoolEntryUtf8
+            return AttributeEntry.SignatureEntry(attributeInfo, name, signature)
+        }
+    },
+    EnclosingMethod{
+        override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>): AttributeEntry {
+            val name =
+                constantPoolMap.getValue(attributeInfo.attributeNameIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
+            val input = DataInputStream(attributeInfo.info.toByteArray().inputStream())
+            val classIndex = input.readUnsignedShort().toInt()
+            val methodIndex = input.readUnsignedShort().toInt()
+            val enclosingClass = constantPoolMap.getValue(classIndex) as ConstantPoolEntry.ConstantPoolEntryClass
+            val enclosingMethod = constantPoolMap.getValue(methodIndex) as ConstantPoolEntry.ConstantPoolEntryNameAndType
+            return AttributeEntry.EnclosingMethodEntry(attributeInfo, name, enclosingClass, enclosingMethod)
+        }
+    },
+    NestHost {
+        override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>): AttributeEntry {
+            val name =
+                constantPoolMap.getValue(attributeInfo.attributeNameIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
+            val input = DataInputStream(attributeInfo.info.toByteArray().inputStream())
+            val hostClassIndex = input.readUnsignedShort().toInt()
+            val hostClass = constantPoolMap.getValue(hostClassIndex) as ConstantPoolEntry.ConstantPoolEntryClass
+            return AttributeEntry.NestHostEntry(attributeInfo, name, hostClass)
+        }
+    },
+    InnerClasses{
+        override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>): AttributeEntry {
+            val name =
+                constantPoolMap.getValue(attributeInfo.attributeNameIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
+            val input = DataInputStream(attributeInfo.info.toByteArray().inputStream())
+            val numClasses = input.readUnsignedShort().toInt()
+            val innerClasses = List(numClasses) {
+                AttributeEntry.InnerClassEntry.fromDataInput(input, constantPoolMap)
+            }
+            return AttributeEntry.InnerClassesEntry(attributeInfo, name, innerClasses)
         }
     };
 
