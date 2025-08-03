@@ -21,7 +21,7 @@ data class JvmClass(
         Code.invokedynamic
     )
     fun methodDependencies():List<Pair<String, List<String>>>{
-        return methods.mapNotNull { method ->
+        return methods.map { method ->
             val className = thisClass.name.raw.value
             val name = method.name.raw.value
             val descriptor = method.descriptor.raw.value
