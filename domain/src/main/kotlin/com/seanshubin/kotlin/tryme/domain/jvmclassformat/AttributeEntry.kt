@@ -249,8 +249,8 @@ interface AttributeEntry {
     data class ExceptionEntry(
         override val info: AttributeInfo,
         override val name: ConstantPoolEntry.ConstantPoolEntryUtf8,
-        val exceptionClasses:List<ConstantPoolEntry.ConstantPoolEntryClass>
-    ): AttributeEntry {
+        val exceptionClasses: List<ConstantPoolEntry.ConstantPoolEntryClass>
+    ) : AttributeEntry {
         override fun toObject(): Map<String, Any> {
             return mapOf(
                 "name" to name.toObject(),
@@ -327,14 +327,17 @@ interface AttributeEntry {
                 "accessFlags" to accessFlags.map { it.name }
             )
         }
+
         companion object {
             fun fromDataInput(input: DataInput, constantPoolMap: Map<Int, ConstantPoolEntry>): InnerClassEntry {
                 val innerClassIndex = input.readUnsignedShort().toInt()
                 val innerClass = constantPoolMap.getValue(innerClassIndex) as ConstantPoolEntry.ConstantPoolEntryClass
                 val outerClassIndex = input.readUnsignedShort().toInt()
-                val outerClass = if (outerClassIndex == 0) null else constantPoolMap.getValue(outerClassIndex) as ConstantPoolEntry.ConstantPoolEntryClass
+                val outerClass =
+                    if (outerClassIndex == 0) null else constantPoolMap.getValue(outerClassIndex) as ConstantPoolEntry.ConstantPoolEntryClass
                 val innerNameIndex = input.readUnsignedShort().toInt()
-                val innerName = if (innerNameIndex == 0) null else constantPoolMap.getValue(innerNameIndex) as ConstantPoolEntry.ConstantPoolEntryUtf8
+                val innerName =
+                    if (innerNameIndex == 0) null else constantPoolMap.getValue(innerNameIndex) as ConstantPoolEntry.ConstantPoolEntryUtf8
                 val accessFlagMask = input.readUnsignedShort().toInt()
                 val accessFlags = AccessFlag.fromMask(accessFlagMask)
                 return InnerClassEntry(innerClass, outerClass, innerName, accessFlags)

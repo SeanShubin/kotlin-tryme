@@ -25,34 +25,41 @@ data class JvmClass(
             } else {
                 val methodsBeingCalled = codeBlock.opCodes.mapNotNull { opCode ->
                     val code = opCode.code
-                    when(code){
+                    when (code) {
                         Code.invokestatic -> {
                             opCode as OpCodeEntry.ConstantPoolIndex
                             val constantPoolEntry = opCode.constantPoolEntry
                             constantPoolEntry as ConstantPoolEntry.ConstantPoolEntryMethodref
                             "(static   ) ${constantPoolEntry.methodAddress()}"
                         }
+
                         Code.invokespecial -> {
                             opCode as OpCodeEntry.ConstantPoolIndex
                             val constantPoolEntry = opCode.constantPoolEntry
                             constantPoolEntry as ConstantPoolEntry.ConstantPoolEntryMethodref
                             "(special  ) ${constantPoolEntry.methodAddress()}"
                         }
+
                         Code.invokevirtual -> {
                             opCode as OpCodeEntry.ConstantPoolIndex
-                            val constantPoolEntry = opCode.constantPoolEntry as ConstantPoolEntry.ConstantPoolEntryMethodref
+                            val constantPoolEntry =
+                                opCode.constantPoolEntry as ConstantPoolEntry.ConstantPoolEntryMethodref
                             "(virtual  ) ${constantPoolEntry.methodAddress()}"
                         }
+
                         Code.invokeinterface -> {
                             opCode as OpCodeEntry.MethodRefAndArgCount
                             val constantPoolEntry = opCode.methodRef
                             "(interface) ${constantPoolEntry.methodAddress()}"
                         }
+
                         Code.invokedynamic -> {
                             opCode as OpCodeEntry.ConstantPoolIndex
-                            val constantPoolEntry = opCode.constantPoolEntry as ConstantPoolEntry.ConstantPoolEntryInvokeDynamic
+                            val constantPoolEntry =
+                                opCode.constantPoolEntry as ConstantPoolEntry.ConstantPoolEntryInvokeDynamic
                             "(dynamic  ) ${constantPoolEntry.methodAddress()}"
                         }
+
                         else -> null
                     }
                 }

@@ -3,7 +3,7 @@ package com.seanshubin.kotlin.tryme.domain.jvmclassformat
 import java.io.DataInput
 
 @OptIn(ExperimentalUnsignedTypes::class)
-enum class ConstantPoolTag(val tagName: String, val tagId: UByte, val entriesTaken:Int) {
+enum class ConstantPoolTag(val tagName: String, val tagId: UByte, val entriesTaken: Int) {
     TagUtf8("Utf8", 1u, 1) {
         override fun load(input: DataInput, index: UShort): ConstantPoolInfo {
             val length = input.readUnsignedShort()

@@ -170,10 +170,11 @@ interface ConstantPoolEntry {
                 "nameAndType" to nameAndTypeEntry.toObject()
             )
         }
-        fun methodAddress():String {
+
+        fun methodAddress(): String {
             val className = classEntry.name.raw.value
             val methodName = nameAndTypeEntry.nameEntry.raw.value
-            val descriptor=  nameAndTypeEntry.descriptorEntry.raw.value
+            val descriptor = nameAndTypeEntry.descriptorEntry.raw.value
             return "$className.$methodName$descriptor"
         }
 
@@ -207,10 +208,10 @@ interface ConstantPoolEntry {
             )
         }
 
-        fun methodAddress():String {
+        fun methodAddress(): String {
             val className = classEntry.name.raw.value
             val methodName = nameAndTypeEntry.nameEntry.raw.value
-            val descriptor=  nameAndTypeEntry.descriptorEntry.raw.value
+            val descriptor = nameAndTypeEntry.descriptorEntry.raw.value
             return "$className.$methodName$descriptor"
         }
 
@@ -338,10 +339,10 @@ interface ConstantPoolEntry {
             )
         }
 
-        fun methodAddress():String {
+        fun methodAddress(): String {
             val className = "(dynamic)"
             val methodName = nameAndTypeEntry.nameEntry.raw.value
-            val descriptor=  nameAndTypeEntry.descriptorEntry.raw.value
+            val descriptor = nameAndTypeEntry.descriptorEntry.raw.value
             return "$className.$methodName$descriptor"
         }
 

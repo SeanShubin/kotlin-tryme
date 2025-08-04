@@ -64,7 +64,7 @@ class RawJvmClass(
         fun readConstantPool(input: DataInput, constantPoolCount: UShort): List<ConstantPoolInfo> {
             var index = 1
             val result = mutableListOf<ConstantPoolInfo>()
-            while(index < constantPoolCount.toInt()){
+            while (index < constantPoolCount.toInt()) {
                 val constant = readConstant(input, index)
                 index += constant.entriesTaken()
                 result.add(constant)

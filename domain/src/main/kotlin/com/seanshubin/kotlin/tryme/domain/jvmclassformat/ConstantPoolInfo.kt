@@ -4,7 +4,7 @@ sealed interface ConstantPoolInfo {
     val tag: ConstantPoolTag
     val index: UShort
 
-    fun entriesTaken():Int {
+    fun entriesTaken(): Int {
         return tag.entriesTaken
     }
 

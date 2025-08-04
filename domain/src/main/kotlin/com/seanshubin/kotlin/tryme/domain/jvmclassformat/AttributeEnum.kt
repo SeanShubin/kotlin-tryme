@@ -133,7 +133,7 @@ enum class AttributeEnum {
             return AttributeEntry.SignatureEntry(attributeInfo, name, signature)
         }
     },
-    EnclosingMethod{
+    EnclosingMethod {
         override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>): AttributeEntry {
             val name =
                 constantPoolMap.getValue(attributeInfo.attributeNameIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
@@ -141,7 +141,8 @@ enum class AttributeEnum {
             val classIndex = input.readUnsignedShort().toInt()
             val methodIndex = input.readUnsignedShort().toInt()
             val enclosingClass = constantPoolMap.getValue(classIndex) as ConstantPoolEntry.ConstantPoolEntryClass
-            val enclosingMethod = constantPoolMap.getValue(methodIndex) as ConstantPoolEntry.ConstantPoolEntryNameAndType
+            val enclosingMethod =
+                constantPoolMap.getValue(methodIndex) as ConstantPoolEntry.ConstantPoolEntryNameAndType
             return AttributeEntry.EnclosingMethodEntry(attributeInfo, name, enclosingClass, enclosingMethod)
         }
     },
@@ -155,7 +156,7 @@ enum class AttributeEnum {
             return AttributeEntry.NestHostEntry(attributeInfo, name, hostClass)
         }
     },
-    InnerClasses{
+    InnerClasses {
         override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>): AttributeEntry {
             val name =
                 constantPoolMap.getValue(attributeInfo.attributeNameIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
@@ -167,7 +168,7 @@ enum class AttributeEnum {
             return AttributeEntry.InnerClassesEntry(attributeInfo, name, innerClasses)
         }
     },
-    LocalVariableTypeTable{
+    LocalVariableTypeTable {
         override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>): AttributeEntry {
             val name =
                 constantPoolMap.getValue(attributeInfo.attributeNameIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8

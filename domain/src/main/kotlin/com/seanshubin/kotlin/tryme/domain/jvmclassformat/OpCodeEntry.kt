@@ -1,7 +1,5 @@
 package com.seanshubin.kotlin.tryme.domain.jvmclassformat
 
-import jdk.internal.classfile.constantpool.MethodRefEntry
-
 sealed interface OpCodeEntry {
     val index: Int
     val code: Code
@@ -36,7 +34,7 @@ sealed interface OpCodeEntry {
         override val index: Int,
         override val code: Code,
         val methodRef: ConstantPoolEntry.ConstantPoolEntryInterfaceMethodref,
-        val argCount:Int
+        val argCount: Int
     ) : OpCodeEntry {
         override val codeArgs: CodeArgs = CodeArgs.CONSTANT_POOL_INDEX
         override fun toObject(): Map<String, Any> {
@@ -98,7 +96,7 @@ sealed interface OpCodeEntry {
         override val index: Int,
         override val code: Code,
         val localVariableIndex: Int,
-        val constValue:Int
+        val constValue: Int
     ) : OpCodeEntry {
         override val codeArgs: CodeArgs = CodeArgs.INDEX_CONST
         override fun toObject(): Map<String, Any> {
@@ -152,7 +150,8 @@ sealed interface OpCodeEntry {
 
                     CodeArgs.CONSTANT_POOL_INDEX_THEN_COUNT_THEN_ZERO -> {
                         val constantPoolIndex = list[index + 1].toInt() shl 8 or (list[index + 2].toInt() and 0xFF)
-                        val methodRef = constantPoolMap[constantPoolIndex] as ConstantPoolEntry.ConstantPoolEntryInterfaceMethodref
+                        val methodRef =
+                            constantPoolMap[constantPoolIndex] as ConstantPoolEntry.ConstantPoolEntryInterfaceMethodref
                         val count = list[index + 3].toInt()
                         if (list[index + 4].toInt() != 0) throw IllegalArgumentException("Expected byte at index ${index + 4} to be 0")
                         MethodRefAndArgCount(index, code, methodRef, count)

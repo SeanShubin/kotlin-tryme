@@ -3,11 +3,7 @@ package com.seanshubin.kotlin.tryme.domain.jvmclassformat
 import com.seanshubin.kotlin.tryme.domain.json.JsonMappers
 import java.io.DataInputStream
 import java.io.IOException
-import java.nio.file.FileVisitResult
-import java.nio.file.FileVisitor
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
+import java.nio.file.*
 import java.nio.file.attribute.BasicFileAttributes
 
 object ParseStandardLibraryApp {
@@ -24,7 +20,7 @@ object ParseStandardLibraryApp {
         return fileName.endsWith(".class") && !fileName.startsWith("module-info")
     }
 
-    fun splitExt(path:Path): Pair<String, String> {
+    fun splitExt(path: Path): Pair<String, String> {
         val fileName = path.fileName.toString()
         val lastDotIndex = fileName.lastIndexOf('.')
         return if (lastDotIndex == -1) {
@@ -34,8 +30,8 @@ object ParseStandardLibraryApp {
         }
     }
 
-    fun parseFile(inputDir:Path, filePath:Path){
-        if(!shouldParse(filePath)) {
+    fun parseFile(inputDir: Path, filePath: Path) {
+        if (!shouldParse(filePath)) {
             return
         }
         val relativePath = inputDir.relativize(filePath)
@@ -60,7 +56,7 @@ object ParseStandardLibraryApp {
         val jvmClassObject = jvmClass.toObject()
         val jvmClassJson = JsonMappers.pretty.writeValueAsString(jvmClassObject)
         Files.writeString(interpretedPath, jvmClassJson)
-        val methodDependencyLines = jvmClass.methodDependencies().flatMap{ (methodMakingCall, methodsBeingCalled) ->
+        val methodDependencyLines = jvmClass.methodDependencies().flatMap { (methodMakingCall, methodsBeingCalled) ->
             val methodsBeingCalledLines = methodsBeingCalled.map { methodBeingCalled ->
                 "  $methodBeingCalled"
             }
@@ -69,7 +65,7 @@ object ParseStandardLibraryApp {
         methodDependencyLines.forEach(::println)
     }
 
-    class ParseVisitor(private val inputDir:Path): FileVisitor<Path>{
+    class ParseVisitor(private val inputDir: Path) : FileVisitor<Path> {
         override fun preVisitDirectory(
             dir: Path,
             attrs: BasicFileAttributes
@@ -81,7 +77,7 @@ object ParseStandardLibraryApp {
             file: Path,
             attrs: BasicFileAttributes
         ): FileVisitResult {
-            parseFile(inputDir,file)
+            parseFile(inputDir, file)
             return FileVisitResult.CONTINUE
         }
 
