@@ -166,6 +166,18 @@ enum class AttributeEnum {
             }
             return AttributeEntry.InnerClassesEntry(attributeInfo, name, innerClasses)
         }
+    },
+    LocalVariableTypeTable{
+        override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>): AttributeEntry {
+            val name =
+                constantPoolMap.getValue(attributeInfo.attributeNameIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
+            val input = DataInputStream(attributeInfo.info.toByteArray().inputStream())
+            val localVariableTypeCount = input.readUnsignedShort().toInt()
+            val localVariableTypes = List(localVariableTypeCount) {
+                AttributeEntry.LocalVariableTypeEntry.fromDataInput(input, constantPoolMap)
+            }
+            return AttributeEntry.LocalVariableTypeTableEntry(attributeInfo, name, localVariableTypes)
+        }
     };
 
     abstract fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>): AttributeEntry

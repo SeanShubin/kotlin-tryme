@@ -64,6 +64,53 @@ sealed interface OpCodeEntry {
         }
     }
 
+    data class BranchOffset(
+        override val index: Int,
+        override val code: Code,
+        val offset: Int
+    ) : OpCodeEntry {
+        override val codeArgs: CodeArgs = CodeArgs.BRANCH_OFFSET
+        override fun toObject(): Map<String, Any> {
+            return mapOf(
+                "index" to index,
+                "code" to code.toObject(),
+                "offset" to offset
+            )
+        }
+    }
+
+    data class ByteValue(
+        override val index: Int,
+        override val code: Code,
+        val value: Byte
+    ) : OpCodeEntry {
+        override val codeArgs: CodeArgs = CodeArgs.BYTE_VALUE
+        override fun toObject(): Map<String, Any> {
+            return mapOf(
+                "index" to index,
+                "code" to code.toObject(),
+                "value" to value.toInt()
+            )
+        }
+    }
+
+    data class IndexConst(
+        override val index: Int,
+        override val code: Code,
+        val localVariableIndex: Int,
+        val constValue:Int
+    ) : OpCodeEntry {
+        override val codeArgs: CodeArgs = CodeArgs.INDEX_CONST
+        override fun toObject(): Map<String, Any> {
+            return mapOf(
+                "index" to index,
+                "code" to code.toObject(),
+                "localVariableIndex" to localVariableIndex,
+                "constValue" to constValue
+            )
+        }
+    }
+
     companion object {
         fun fromBytes(list: List<Byte>, constantPoolMap: Map<Int, ConstantPoolEntry>): List<OpCodeEntry> {
             val result = mutableListOf<OpCodeEntry>()
@@ -109,6 +156,22 @@ sealed interface OpCodeEntry {
                         val count = list[index + 3].toInt()
                         if (list[index + 4].toInt() != 0) throw IllegalArgumentException("Expected byte at index ${index + 4} to be 0")
                         MethodRefAndArgCount(index, code, methodRef, count)
+                    }
+
+                    CodeArgs.BRANCH_OFFSET -> {
+                        val offset = list[index + 1].toInt() shl 8 or (list[index + 2].toInt() and 0xFF)
+                        BranchOffset(index, code, offset)
+                    }
+
+                    CodeArgs.BYTE_VALUE -> {
+                        val value = list[index + 1]
+                        ByteValue(index, code, value)
+                    }
+
+                    CodeArgs.INDEX_CONST -> {
+                        val localVariableIndex = list[index + 1].toInt()
+                        val constValue = list[index + 2].toInt()
+                        IndexConst(index, code, localVariableIndex, constValue)
                     }
 
                     else -> throw UnsupportedOperationException("$code $codeArgs")

@@ -36,11 +36,6 @@ enum class CodeArgs {
             return 2
         }
     },
-    TWO_INTS {
-        override fun lookupSize(index: Int, code: List<Byte>): Int {
-            return 2
-        }
-    },
     INDEX_CONST {
         override fun lookupSize(index: Int, code: List<Byte>): Int {
             return 2

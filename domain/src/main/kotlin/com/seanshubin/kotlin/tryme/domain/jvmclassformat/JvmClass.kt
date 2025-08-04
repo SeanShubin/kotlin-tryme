@@ -30,46 +30,31 @@ data class JvmClass(
                             opCode as OpCodeEntry.ConstantPoolIndex
                             val constantPoolEntry = opCode.constantPoolEntry
                             constantPoolEntry as ConstantPoolEntry.ConstantPoolEntryMethodref
-                            constantPoolEntry.methodAddress()
+                            "(static   ) ${constantPoolEntry.methodAddress()}"
                         }
                         Code.invokespecial -> {
                             opCode as OpCodeEntry.ConstantPoolIndex
                             val constantPoolEntry = opCode.constantPoolEntry
                             constantPoolEntry as ConstantPoolEntry.ConstantPoolEntryMethodref
-                            constantPoolEntry.methodAddress()
+                            "(special  ) ${constantPoolEntry.methodAddress()}"
                         }
                         Code.invokevirtual -> {
                             opCode as OpCodeEntry.ConstantPoolIndex
                             val constantPoolEntry = opCode.constantPoolEntry as ConstantPoolEntry.ConstantPoolEntryMethodref
-                            constantPoolEntry.methodAddress()
+                            "(virtual  ) ${constantPoolEntry.methodAddress()}"
                         }
                         Code.invokeinterface -> {
                             opCode as OpCodeEntry.MethodRefAndArgCount
                             val constantPoolEntry = opCode.methodRef
-                            constantPoolEntry.methodAddress()
+                            "(interface) ${constantPoolEntry.methodAddress()}"
                         }
                         Code.invokedynamic -> {
                             opCode as OpCodeEntry.ConstantPoolIndex
                             val constantPoolEntry = opCode.constantPoolEntry as ConstantPoolEntry.ConstantPoolEntryInvokeDynamic
-                            constantPoolEntry.methodAddress()
+                            "(dynamic  ) ${constantPoolEntry.methodAddress()}"
                         }
                         else -> null
                     }
-//                        opCode as OpCodeEntry.ConstantPoolIndex
-//                        val constantPoolEntry = opCode.constantPoolEntry
-//                        when (constantPoolEntry) {
-//                            is ConstantPoolEntry.ConstantPoolEntryMethodref -> {
-//                                constantPoolEntry.methodAddress()
-//                            }
-//
-//                            is ConstantPoolEntry.ConstantPoolEntryInvokeDynamic -> {
-//                                constantPoolEntry.methodAddress()
-//                            }
-//
-//                            else -> {
-//                                throw RuntimeException("Unexpected constant pool entry type ${constantPoolEntry.javaClass.simpleName}")
-//                            }
-//                        }
                 }
                 Pair(methodDoingCall, methodsBeingCalled)
             }

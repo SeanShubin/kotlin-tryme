@@ -150,6 +150,50 @@ interface AttributeEntry {
         }
     }
 
+    data class LocalVariableTypeTableEntry(
+        override val info: AttributeInfo,
+        override val name: ConstantPoolEntry.ConstantPoolEntryUtf8,
+        val localVariableTypes: List<LocalVariableTypeEntry>
+    ) : AttributeEntry {
+        override fun toObject(): Map<String, Any> {
+            return mapOf(
+                "name" to name.toObject(),
+                "localVariableTypes" to localVariableTypes.map { it.toObject() }
+            )
+        }
+    }
+
+    data class LocalVariableTypeEntry(
+        val startPc: UShort,
+        val length: UShort,
+        val name: ConstantPoolEntry.ConstantPoolEntryUtf8,
+        val signature: ConstantPoolEntry.ConstantPoolEntryUtf8,
+        val index: UShort
+    ) {
+        fun toObject(): Map<String, Any> {
+            return mapOf(
+                "startPc" to startPc.toInt(),
+                "length" to length.toInt(),
+                "name" to name.toObject(),
+                "signature" to signature.toObject(),
+                "index" to index.toInt()
+            )
+        }
+
+        companion object {
+            fun fromDataInput(input: DataInput, constantPoolMap: Map<Int, ConstantPoolEntry>): LocalVariableTypeEntry {
+                val startPc = input.readUnsignedShort().toUShort()
+                val length = input.readUnsignedShort().toUShort()
+                val nameIndex = input.readUnsignedShort().toInt()
+                val name = constantPoolMap.getValue(nameIndex) as ConstantPoolEntry.ConstantPoolEntryUtf8
+                val signatureIndex = input.readUnsignedShort().toInt()
+                val signature = constantPoolMap.getValue(signatureIndex) as ConstantPoolEntry.ConstantPoolEntryUtf8
+                val index = input.readUnsignedShort().toUShort()
+                return LocalVariableTypeEntry(startPc, length, name, signature, index)
+            }
+        }
+    }
+
     data class SourceFileEntry(
         override val info: AttributeInfo,
         override val name: ConstantPoolEntry.ConstantPoolEntryUtf8,

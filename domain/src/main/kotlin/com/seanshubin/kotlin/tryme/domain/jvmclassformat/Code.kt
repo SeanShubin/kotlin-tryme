@@ -2,7 +2,7 @@ package com.seanshubin.kotlin.tryme.domain.jvmclassformat
 
 enum class Code(val opcode: UByte, val codeArgs: CodeArgs) {
     aaload(0x32u, CodeArgs.NONE),
-    aastore(0x3au, CodeArgs.NONE),
+    aastore(0x53u, CodeArgs.NONE),
     aconst_null(0x01u, CodeArgs.NONE),
     aload(0x19u, CodeArgs.LOCAL_VARIABLE_INDEX),
     aload_0(0x2au, CodeArgs.NONE),
@@ -107,12 +107,12 @@ enum class Code(val opcode: UByte, val codeArgs: CodeArgs) {
     idiv(0x6cu, CodeArgs.NONE),
     if_acmpeq(0xa5u, CodeArgs.TWO_REFERENCES),
     if_acmpne(0xa6u, CodeArgs.TWO_REFERENCES),
-    if_icmpeq(0x9fu, CodeArgs.TWO_INTS),
-    if_icmpne(0xa0u, CodeArgs.TWO_INTS),
-    if_icmplt(0xa1u, CodeArgs.TWO_INTS),
-    if_icmpge(0xa2u, CodeArgs.TWO_INTS),
-    if_icmpgt(0xa3u, CodeArgs.TWO_INTS),
-    if_icmple(0xa4u, CodeArgs.TWO_INTS),
+    if_icmpeq(0x9fu, CodeArgs.BRANCH_OFFSET),
+    if_icmpne(0xa0u, CodeArgs.BRANCH_OFFSET),
+    if_icmplt(0xa1u, CodeArgs.BRANCH_OFFSET),
+    if_icmpge(0xa2u, CodeArgs.BRANCH_OFFSET),
+    if_icmpgt(0xa3u, CodeArgs.BRANCH_OFFSET),
+    if_icmple(0xa4u, CodeArgs.BRANCH_OFFSET),
     ifeq(0x99u, CodeArgs.BRANCH_OFFSET),
     ifne(0x9au, CodeArgs.BRANCH_OFFSET),
     iflt(0x9bu, CodeArgs.BRANCH_OFFSET),
@@ -215,7 +215,7 @@ enum class Code(val opcode: UByte, val codeArgs: CodeArgs) {
     companion object {
         fun fromByte(byte: Byte): Code {
             return entries.firstOrNull { it.opcode == byte.toUByte() }
-                ?: throw IllegalArgumentException("Unknown opcode: ${byte.toInt()}")
+                ?: throw IllegalArgumentException(String.format("Unknown opcode: hex(%X) dec(%d)", byte, byte))
         }
     }
 }
