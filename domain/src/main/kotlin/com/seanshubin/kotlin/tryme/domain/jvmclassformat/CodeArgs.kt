@@ -1,5 +1,6 @@
 package com.seanshubin.kotlin.tryme.domain.jvmclassformat
 
+
 enum class CodeArgs {
     NONE {
         override fun lookupSize(index: Int, code: List<Byte>): Int {
@@ -31,11 +32,6 @@ enum class CodeArgs {
             return 4
         }
     },
-    TWO_REFERENCES {
-        override fun lookupSize(index: Int, code: List<Byte>): Int {
-            return 2
-        }
-    },
     INDEX_CONST {
         override fun lookupSize(index: Int, code: List<Byte>): Int {
             return 2
@@ -58,7 +54,7 @@ enum class CodeArgs {
     },
     LOOKUP_SWITCH {
         override fun lookupSize(index: Int, code: List<Byte>): Int {
-            throw UnsupportedOperationException("not implemented")
+            return OpCodeEntry.LookupSwitchEntry.fromBytes(index, code).size()
         }
     },
     CONSTANT_POOL_INDEX_THEN_DIMENSIONS {
@@ -78,7 +74,7 @@ enum class CodeArgs {
     },
     TABLE_SWITCH {
         override fun lookupSize(index: Int, code: List<Byte>): Int {
-            throw UnsupportedOperationException("not implemented")
+            return OpCodeEntry.TableSwitchEntry.fromBytes(index, code).size()
         }
     },
     WIDE {

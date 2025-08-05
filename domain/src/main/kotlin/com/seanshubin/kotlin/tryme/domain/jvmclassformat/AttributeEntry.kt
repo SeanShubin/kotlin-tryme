@@ -207,9 +207,20 @@ interface AttributeEntry {
         }
     }
 
+    data class UnknownAttributeEntry(
+        override val info: AttributeInfo,
+        override val name: ConstantPoolEntry.ConstantPoolEntryUtf8
+    ) : AttributeEntry {
+        override fun toObject(): Map<String, Any> {
+            return mapOf(
+                "name" to name.toObject()
+            )
+        }
+    }
+
     data class BootstrapMethodEntry(
         val bootstrapMethodRef: ConstantPoolEntry.ConstantPoolEntryMethodHandle,
-        val bootstrapArguments: List<ConstantPoolEntry.ConstantPoolEntryString>
+        val bootstrapArguments: List<ConstantPoolEntry>
     ) {
         fun toObject(): Map<String, Any> {
             return mapOf(
@@ -226,7 +237,7 @@ interface AttributeEntry {
                 val numBootstrapArguments = input.readUnsignedShort().toInt()
                 val bootstrapArguments = List(numBootstrapArguments) {
                     val index = input.readUnsignedShort().toInt()
-                    constantPoolMap.getValue(index) as ConstantPoolEntry.ConstantPoolEntryString
+                    constantPoolMap.getValue(index)
                 }
                 return BootstrapMethodEntry(bootstrapMethodRef, bootstrapArguments)
             }
@@ -276,13 +287,13 @@ interface AttributeEntry {
         override val info: AttributeInfo,
         override val name: ConstantPoolEntry.ConstantPoolEntryUtf8,
         val theClass: ConstantPoolEntry.ConstantPoolEntryClass,
-        val method: ConstantPoolEntry.ConstantPoolEntryNameAndType
+        val method: ConstantPoolEntry.ConstantPoolEntryNameAndType?
     ) : AttributeEntry {
         override fun toObject(): Map<String, Any> {
             return mapOf(
                 "name" to name.toObject(),
                 "class" to theClass.toObject(),
-                "method" to method.toObject()
+                "method" to (method?.toObject() ?: "null")
             )
         }
     }

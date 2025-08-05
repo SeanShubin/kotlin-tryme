@@ -11,9 +11,9 @@ enum class PrimitiveArrayType(val code: Byte) {
     LONG(11);
 
     companion object {
-        fun fromCode(code: Byte): PrimitiveArrayType {
-            return entries.firstOrNull { it.code == code }
-                ?: throw IllegalArgumentException("Unknown array type code: $code")
+        fun fromByte(byte: Byte): PrimitiveArrayType {
+            return entries.firstOrNull { it.code == byte }
+                ?: throw IllegalArgumentException("Unknown array type code: $byte")
         }
     }
 }

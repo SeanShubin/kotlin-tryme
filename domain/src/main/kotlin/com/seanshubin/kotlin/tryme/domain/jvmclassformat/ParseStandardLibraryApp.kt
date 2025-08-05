@@ -34,6 +34,7 @@ object ParseStandardLibraryApp {
         if (!shouldParse(filePath)) {
             return
         }
+        println(filePath)
         val relativePath = inputDir.relativize(filePath)
         val parent = relativePath.parent
         val (baseName, extension) = splitExt(relativePath.fileName)

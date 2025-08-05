@@ -142,7 +142,7 @@ enum class AttributeEnum {
             val methodIndex = input.readUnsignedShort().toInt()
             val enclosingClass = constantPoolMap.getValue(classIndex) as ConstantPoolEntry.ConstantPoolEntryClass
             val enclosingMethod =
-                constantPoolMap.getValue(methodIndex) as ConstantPoolEntry.ConstantPoolEntryNameAndType
+                if(methodIndex == 0) null else constantPoolMap.getValue(methodIndex) as ConstantPoolEntry.ConstantPoolEntryNameAndType
             return AttributeEntry.EnclosingMethodEntry(attributeInfo, name, enclosingClass, enclosingMethod)
         }
     },
@@ -191,6 +191,12 @@ enum class AttributeEnum {
             val attributeUtf8 =
                 constantPoolMap.getValue(attributeInfo.attributeNameIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
             val attributeName = attributeUtf8.raw.value
+            if(!entries.map { it.name }.contains(attributeName)){
+                return AttributeEntry.UnknownAttributeEntry(
+                    attributeInfo,
+                    attributeUtf8
+                )
+            }
             val attributeEnum = valueOf(attributeName)
             val attributeEntry = attributeEnum.parse(attributeInfo, constantPoolMap)
             return attributeEntry

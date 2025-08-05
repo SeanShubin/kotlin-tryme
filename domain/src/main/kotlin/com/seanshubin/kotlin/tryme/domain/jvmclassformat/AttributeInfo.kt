@@ -1,5 +1,6 @@
 package com.seanshubin.kotlin.tryme.domain.jvmclassformat
 
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.FormatUtil.toHex
 import java.io.DataInput
 
 data class AttributeInfo(
@@ -11,7 +12,7 @@ data class AttributeInfo(
         return mapOf(
             "attributeNameIndex" to attributeNameIndex.toInt(),
             "attributeLength" to attributeLength,
-            "info" to info
+            "info" to info.toHex()
         )
     }
 
