@@ -1,11 +1,15 @@
 package com.seanshubin.kotlin.tryme.domain.jvmclassformat
 
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.ByteUtil.bytesToInt
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.FormatUtil.toHex
+
 sealed interface OpCodeEntry {
     val index: Int
     val code: Code
+    val bytes: List<Byte>
     val codeArgs: CodeArgs
     fun toObject(): Map<String, Any>
-    data class NoArgs(override val index: Int, override val code: Code) : OpCodeEntry {
+    data class NoArgs(override val index: Int, override val code: Code, override val bytes: List<Byte>) : OpCodeEntry {
         override val codeArgs: CodeArgs = CodeArgs.NONE
         override fun toObject(): Map<String, Any> {
             return mapOf(
@@ -18,6 +22,7 @@ sealed interface OpCodeEntry {
     data class ConstantPoolIndex(
         override val index: Int,
         override val code: Code,
+        override val bytes: List<Byte>,
         val constantPoolEntry: ConstantPoolEntry
     ) : OpCodeEntry {
         override val codeArgs: CodeArgs = CodeArgs.CONSTANT_POOL_INDEX
@@ -30,10 +35,29 @@ sealed interface OpCodeEntry {
         }
     }
 
+    data class ConstantPoolIndexThenDimensions(
+        override val index: Int,
+        override val code: Code,
+        override val bytes: List<Byte>,
+        val constantPoolEntry: ConstantPoolEntry,
+        val dimensions: Int
+    ) : OpCodeEntry {
+        override val codeArgs: CodeArgs = CodeArgs.CONSTANT_POOL_INDEX_THEN_DIMENSIONS
+        override fun toObject(): Map<String, Any> {
+            return mapOf(
+                "index" to index,
+                "code" to code.toObject(),
+                "constantPoolEntry" to constantPoolEntry.toObject(),
+                "dimensions" to dimensions
+            )
+        }
+    }
+
     data class MethodRefAndArgCount(
         override val index: Int,
         override val code: Code,
-        val methodRef: ConstantPoolEntry.ConstantPoolEntryInterfaceMethodref,
+        override val bytes: List<Byte>,
+        val methodRef: ConstantPoolEntry.ConstantPoolEntryFieldMethodInterfaceMethodRef,
         val argCount: Int
     ) : OpCodeEntry {
         override val codeArgs: CodeArgs = CodeArgs.CONSTANT_POOL_INDEX
@@ -50,6 +74,7 @@ sealed interface OpCodeEntry {
     data class LocalVariableIndex(
         override val index: Int,
         override val code: Code,
+        override val bytes: List<Byte>,
         val localVariableIndex: Int
     ) : OpCodeEntry {
         override val codeArgs: CodeArgs = CodeArgs.LOCAL_VARIABLE_INDEX
@@ -65,6 +90,7 @@ sealed interface OpCodeEntry {
     data class BranchOffset(
         override val index: Int,
         override val code: Code,
+        override val bytes: List<Byte>,
         val offset: Int
     ) : OpCodeEntry {
         override val codeArgs: CodeArgs = CodeArgs.BRANCH_OFFSET
@@ -80,6 +106,7 @@ sealed interface OpCodeEntry {
     data class ArrayType(
         override val index: Int,
         override val code: Code,
+        override val bytes: List<Byte>,
         val arrayType: PrimitiveArrayType
     ) : OpCodeEntry {
         override val codeArgs: CodeArgs = CodeArgs.ARRAY_TYPE
@@ -95,6 +122,7 @@ sealed interface OpCodeEntry {
     data class ByteValue(
         override val index: Int,
         override val code: Code,
+        override val bytes: List<Byte>,
         val value: Byte
     ) : OpCodeEntry {
         override val codeArgs: CodeArgs = CodeArgs.BYTE_VALUE
@@ -110,6 +138,7 @@ sealed interface OpCodeEntry {
     data class ShortValue(
         override val index: Int,
         override val code: Code,
+        override val bytes: List<Byte>,
         val value: Short
     ) : OpCodeEntry {
         override val codeArgs: CodeArgs = CodeArgs.SHORT_VALUE
@@ -125,6 +154,7 @@ sealed interface OpCodeEntry {
     data class IndexConst(
         override val index: Int,
         override val code: Code,
+        override val bytes: List<Byte>,
         val localVariableIndex: Int,
         val constValue: Int
     ) : OpCodeEntry {
@@ -141,12 +171,13 @@ sealed interface OpCodeEntry {
 
     data class LookupSwitchEntry(
         override val index: Int,
+        override val bytes: List<Byte>,
         val padding: Int,
         val default: Int,
         val pairs: List<MatchOffset>
     ) : OpCodeEntry {
-        fun size(): Int {
-            return 1 + padding + 4 + 4 + pairs.size * 8
+        fun argSize(): Int {
+            return padding + 4 + 4 + pairs.size * 8
         }
 
         override val code: Code = Code.lookupswitch
@@ -162,28 +193,30 @@ sealed interface OpCodeEntry {
         }
 
         companion object {
-            fun fromBytes(index: Int, bytes: List<Byte>): LookupSwitchEntry {
-                if (bytes[index] != Code.lookupswitch.opcode.toByte()) throw RuntimeException("Expected ${Code.lookupswitch} at index $index")
+            fun fromBytes(index: Int, methodBytes: List<Byte>): LookupSwitchEntry {
+                if (methodBytes[index] != Code.lookupswitch.opcode.toByte()) throw RuntimeException("Expected ${Code.lookupswitch} at index $index")
                 val padding = (-index - 1).mod(4)
                 var currentIndex = index + padding + 1
-                val default = bytesToInt(bytes.slice(currentIndex until currentIndex + 4))
+                val default = bytesToInt(methodBytes.slice(currentIndex until currentIndex + 4))
                 currentIndex += 4
-                val npairs = bytesToInt(bytes.slice(currentIndex until currentIndex + 4))
+                val npairs = bytesToInt(methodBytes.slice(currentIndex until currentIndex + 4))
                 currentIndex += 4
                 val pairs = (0 until npairs).map { i ->
-                    val match = bytesToInt(bytes.slice(currentIndex until currentIndex + 4))
+                    val match = bytesToInt(methodBytes.slice(currentIndex until currentIndex + 4))
                     currentIndex += 4
-                    val offset = bytesToInt(bytes.slice(currentIndex until currentIndex + 4))
+                    val offset = bytesToInt(methodBytes.slice(currentIndex until currentIndex + 4))
                     currentIndex += 4
                     MatchOffset(match, offset)
                 }
-                return LookupSwitchEntry(index, padding, default, pairs)
+                val bytes = methodBytes.subList(index, currentIndex)
+                return LookupSwitchEntry(index, bytes, padding, default, pairs)
             }
         }
     }
 
     data class TableSwitchEntry(
         override val index: Int,
+        override val bytes: List<Byte>,
         val padding: Int,
         val default: Int,
         val low: Int,
@@ -192,8 +225,8 @@ sealed interface OpCodeEntry {
     ) : OpCodeEntry {
         override val code: Code = Code.tableswitch
         override val codeArgs: CodeArgs = CodeArgs.TABLE_SWITCH
-        fun size(): Int {
-            return 1 + padding + 4 + 4 + 4 + (high - low + 1) * 4
+        fun argSize(): Int {
+            return padding + 4 + 4 + 4 + (high - low + 1) * 4
         }
 
         override fun toObject(): Map<String, Any> {
@@ -209,23 +242,99 @@ sealed interface OpCodeEntry {
         }
 
         companion object {
-            fun fromBytes(index: Int, bytes: List<Byte>): TableSwitchEntry {
-                if (bytes[index] != Code.tableswitch.opcode.toByte()) throw RuntimeException("Expected ${Code.tableswitch} at index $index")
+            fun fromBytes(index: Int, methodBytes: List<Byte>): TableSwitchEntry {
+                if (methodBytes[index] != Code.tableswitch.opcode.toByte()) throw RuntimeException("Expected ${Code.tableswitch} at index $index")
                 val padding = (-index - 1).mod(4)
                 var currentIndex = index + padding + 1
-                val default = bytesToInt(bytes.slice(currentIndex until currentIndex + 4))
+                val default = bytesToInt(methodBytes.slice(currentIndex until currentIndex + 4))
                 currentIndex += 4
-                val low = bytesToInt(bytes.slice(currentIndex until currentIndex + 4))
+                val low = bytesToInt(methodBytes.slice(currentIndex until currentIndex + 4))
                 currentIndex += 4
-                val high = bytesToInt(bytes.slice(currentIndex until currentIndex + 4))
+                val high = bytesToInt(methodBytes.slice(currentIndex until currentIndex + 4))
                 currentIndex += 4
                 val jumpOffsets = (low..high).map { i ->
-                    bytesToInt(bytes.slice(currentIndex until currentIndex + 4)).also {
+                    bytesToInt(methodBytes.slice(currentIndex until currentIndex + 4)).also {
                         currentIndex += 4
                     }
                 }
-                return TableSwitchEntry(index, padding, default, low, high, jumpOffsets)
+                val bytes = methodBytes.subList(index, currentIndex)
+                val result = TableSwitchEntry(index, bytes, padding, default, low, high, jumpOffsets)
+                return result
             }
+        }
+    }
+
+    interface WideEntry:OpCodeEntry {
+        fun argSize(): Int
+        companion object {
+            fun fromBytes(index: Int, methodBytes: List<Byte>): WideEntry {
+                if (methodBytes[index] != Code.wide.opcode.toByte()) throw RuntimeException("Expected ${Code.wide} at index $index")
+                val wideCode = Code.fromByte(methodBytes[index + 1])
+                return when (wideCode) {
+                    Code.iload, Code.fload, Code.aload, Code.lload, Code.dload, Code.istore, Code.fstore, Code.astore, Code.dstore, Code.ret -> {
+                        val localVariableIndex =
+                            ByteUtil.bytesToUShort(methodBytes.slice(index + 2 until index + 4)).toInt()
+                        WideEntryFormat1(index, wideCode, methodBytes.subList(index, index + 4), localVariableIndex)
+                    }
+
+                    Code.iinc -> {
+                        val localVariableIndex =
+                            ByteUtil.bytesToUShort(methodBytes.slice(index + 2 until index + 4)).toInt()
+                        val constValue = ByteUtil.bytesToUShort(methodBytes.slice(index + 4 until index + 6)).toInt()
+                        WideEntryFormat2(
+                            index,
+                            wideCode,
+                            methodBytes.subList(index, index + 6),
+                            localVariableIndex,
+                            constValue
+                        )
+                    }
+
+                    else -> throw UnsupportedOperationException("Unexpected wide code: $wideCode")
+                }
+            }
+        }
+    }
+
+    data class WideEntryFormat1(
+        override val index: Int,
+        override val code: Code,
+        override val bytes: List<Byte>,
+        val localVariableIndex: Int
+    ) : WideEntry {
+        override fun argSize(): Int {
+            return 4
+        }
+
+        override val codeArgs: CodeArgs = CodeArgs.WIDE
+        override fun toObject(): Map<String, Any> {
+            return mapOf(
+                "index" to index,
+                "code" to code.toObject(),
+                "localVariableIndex" to localVariableIndex
+            )
+        }
+    }
+
+    data class WideEntryFormat2(
+        override val index: Int,
+        override val code: Code,
+        override val bytes: List<Byte>,
+        val localVariableIndex: Int,
+        val constValue: Int
+    ) : WideEntry {
+        override fun argSize(): Int {
+            return 6
+        }
+
+        override val codeArgs: CodeArgs = CodeArgs.WIDE
+        override fun toObject(): Map<String, Any> {
+            return mapOf(
+                "index" to index,
+                "code" to code.toObject(),
+                "localVariableIndex" to localVariableIndex,
+                "constValue" to constValue
+            )
         }
     }
 
@@ -237,26 +346,27 @@ sealed interface OpCodeEntry {
                 val codeByte = list[index]
                 val code = Code.fromByte(codeByte)
                 val codeArgs = code.codeArgs
-                val size = codeArgs.lookupSize(index, list)
+                val size = codeArgs.lookupArgSize(index, list)
+                val bytes = list.subList(index, index + size + 1)
                 val entry = when (codeArgs) {
-                    CodeArgs.NONE -> NoArgs(index, code)
+                    CodeArgs.NONE -> NoArgs(index, code, bytes)
                     CodeArgs.CONSTANT_POOL_INDEX -> {
                         val constantPoolIndex = list[index + 1].toInt() shl 8 or (list[index + 2].toInt() and 0xFF)
                         val constantPoolEntry = constantPoolMap[constantPoolIndex]
                             ?: throw IllegalArgumentException("Invalid constant pool index: $constantPoolIndex")
-                        ConstantPoolIndex(index, code, constantPoolEntry)
+                        ConstantPoolIndex(index, code, bytes, constantPoolEntry)
                     }
 
                     CodeArgs.CONSTANT_POOL_INDEX_SHORT -> {
                         val constantPoolIndex = list[index + 1].toInt() and 0xFF
                         val constantPoolEntry = constantPoolMap[constantPoolIndex]
                             ?: throw IllegalArgumentException("$code $codeArgs Invalid constant pool index: $constantPoolIndex")
-                        ConstantPoolIndex(index, code, constantPoolEntry)
+                        ConstantPoolIndex(index, code, bytes, constantPoolEntry)
                     }
 
                     CodeArgs.LOCAL_VARIABLE_INDEX -> {
                         val localVariableIndex = list[index + 1].toInt()
-                        LocalVariableIndex(index, code, localVariableIndex)
+                        LocalVariableIndex(index, code, bytes, localVariableIndex)
                     }
 
                     CodeArgs.CONSTANT_POOL_INDEX_THEN_TWO_ZEROES -> {
@@ -265,42 +375,42 @@ sealed interface OpCodeEntry {
                             ?: throw IllegalArgumentException("Invalid constant pool index: $constantPoolIndex")
                         if (list[index + 3].toInt() != 0) throw IllegalArgumentException("Expected byte at index ${index + 3} to be 0")
                         if (list[index + 4].toInt() != 0) throw IllegalArgumentException("Expected byte at index ${index + 4} to be 0")
-                        ConstantPoolIndex(index, code, constantPoolEntry)
+                        ConstantPoolIndex(index, code, bytes, constantPoolEntry)
                     }
 
                     CodeArgs.CONSTANT_POOL_INDEX_THEN_COUNT_THEN_ZERO -> {
                         val constantPoolIndex = list[index + 1].toInt() shl 8 or (list[index + 2].toInt() and 0xFF)
                         val methodRef =
-                            constantPoolMap[constantPoolIndex] as ConstantPoolEntry.ConstantPoolEntryInterfaceMethodref
+                            constantPoolMap[constantPoolIndex] as ConstantPoolEntry.ConstantPoolEntryFieldMethodInterfaceMethodRef
                         val count = list[index + 3].toInt()
                         if (list[index + 4].toInt() != 0) throw IllegalArgumentException("Expected byte at index ${index + 4} to be 0")
-                        MethodRefAndArgCount(index, code, methodRef, count)
+                        MethodRefAndArgCount(index, code, bytes, methodRef, count)
                     }
 
                     CodeArgs.BRANCH_OFFSET -> {
                         val offset = list[index + 1].toInt() shl 8 or (list[index + 2].toInt() and 0xFF)
-                        BranchOffset(index, code, offset)
+                        BranchOffset(index, code, bytes, offset)
                     }
 
                     CodeArgs.BYTE_VALUE -> {
                         val value = list[index + 1]
-                        ByteValue(index, code, value)
+                        ByteValue(index, code, bytes, value)
                     }
 
                     CodeArgs.SHORT_VALUE -> {
                         val value = (list[index + 1].toInt() shl 8 or (list[index + 2].toInt() and 0xFF)).toShort()
-                        ShortValue(index, code, value)
+                        ShortValue(index, code, bytes, value)
                     }
 
                     CodeArgs.INDEX_CONST -> {
                         val localVariableIndex = list[index + 1].toInt()
                         val constValue = list[index + 2].toInt()
-                        IndexConst(index, code, localVariableIndex, constValue)
+                        IndexConst(index, code, bytes, localVariableIndex, constValue)
                     }
 
                     CodeArgs.ARRAY_TYPE -> {
                         val arrayType = PrimitiveArrayType.fromByte(list[index + 1])
-                        ArrayType(index, code, arrayType)
+                        ArrayType(index, code, bytes, arrayType)
                     }
 
                     CodeArgs.LOOKUP_SWITCH -> {
@@ -319,6 +429,38 @@ sealed interface OpCodeEntry {
                         tableSwitchEntry
                     }
 
+                    CodeArgs.CONSTANT_POOL_INDEX_THEN_DIMENSIONS -> {
+                        val constantPoolIndex = list[index + 1].toInt() shl 8 or (list[index + 2].toInt() and 0xFF)
+                        val constantPoolEntry = constantPoolMap[constantPoolIndex]
+                            ?: throw IllegalArgumentException("Invalid constant pool index: $constantPoolIndex")
+                        val dimensions = list[index + 3].toInt()
+                        if (dimensions < 1) {
+                            throw IllegalArgumentException("Dimensions must be at least 1, but was $dimensions")
+                        }
+                        ConstantPoolIndexThenDimensions(index, code, bytes, constantPoolEntry, dimensions)
+                    }
+
+                    CodeArgs.WIDE -> {
+                        val wideCode = Code.fromByte(list[index + 1])
+                        when (wideCode) {
+                            Code.iload, Code.fload, Code.aload, Code.lload, Code.dload, Code.istore, Code.fstore, Code.astore, Code.dstore, Code.ret -> {
+                                val localVariableIndex =
+                                    ByteUtil.bytesToUShort(listOf(list[index + 2], list[index + 3])).toInt()
+                                WideEntryFormat1(index, code, bytes, localVariableIndex)
+                            }
+
+                            Code.iinc -> {
+                                val localVariableIndex =
+                                    ByteUtil.bytesToUShort(listOf(list[index + 2], list[index + 3])).toInt()
+                                val constValue =
+                                    ByteUtil.bytesToUShort(listOf(list[index + 4], list[index + 5])).toInt()
+                                WideEntryFormat2(index, code, bytes, localVariableIndex, constValue)
+                            }
+
+                            else -> throw UnsupportedOperationException("Unexpected wide code: $wideCode")
+                        }
+                    }
+
                     else -> throw UnsupportedOperationException("$code $codeArgs")
                 }
                 result.add(entry)
@@ -326,8 +468,5 @@ sealed interface OpCodeEntry {
             }
             return result
         }
-
-        private fun bytesToInt(bytes: List<Byte>): Int =
-            bytes.fold(0) { running, byte -> (running shl 8) or byte.toInt() }
     }
 }

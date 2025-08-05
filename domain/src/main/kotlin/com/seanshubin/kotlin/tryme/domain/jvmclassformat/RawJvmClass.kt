@@ -21,6 +21,26 @@ class RawJvmClass(
     val attributeCount: UShort,
     val attributes: List<AttributeInfo>
 ) {
+    fun toObject(): Map<String, Any> {
+        return mapOf(
+            "magic" to magic,
+            "minorVersion" to minorVersion,
+            "majorVersion" to majorVersion,
+            "constantPoolCountPlusOne" to constantPoolCountPlusOne,
+            "constantPool" to constantPool.map { it.toObject() },
+            "accessFlags" to accessFlags,
+            "thisClass" to thisClass,
+            "superClass" to superClass,
+            "interfacesCount" to interfacesCount,
+            "interfaces" to interfaces.map { it.toInt() },
+            "fieldCount" to fieldCount,
+            "fields" to fields.map { it.toObject() },
+            "methodCount" to methodCount,
+            "methods" to methods.map { it.toObject() },
+            "attributeCount" to attributeCount,
+            "attributes" to attributes.map { it.toObject() }
+        )
+    }
     companion object {
         fun fromDataInput(input: DataInput): RawJvmClass {
             val magic = input.readInt().toUInt()

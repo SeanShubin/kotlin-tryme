@@ -9,6 +9,15 @@ data class MethodInfo(
     val attributesCount: UShort,
     val attributes: List<AttributeInfo>
 ) {
+    fun toObject(): Map<String, Any> {
+        return mapOf(
+            "accessFlags" to accessFlags.toInt(),
+            "nameIndex" to nameIndex.toInt(),
+            "descriptorIndex" to descriptorIndex.toInt(),
+            "attributesCount" to attributesCount.toInt(),
+            "attributes" to attributes.map { it.toObject() }
+        )
+    }
     companion object {
         fun fromDataInput(input: DataInput): MethodInfo {
             val accessFlags = input.readUnsignedShort().toUShort()

@@ -53,21 +53,21 @@ enum class ConstantPoolTag(val tagName: String, val tagId: UByte, val entriesTak
         override fun load(input: DataInput, index: UShort): ConstantPoolInfo {
             val classIndex = input.readUnsignedShort().toUShort()
             val nameAndTypeIndex = input.readUnsignedShort().toUShort()
-            return ConstantPoolInfo.ConstantFieldRef(this, index, classIndex, nameAndTypeIndex)
+            return ConstantPoolInfo.ConstantFieldMethodInterfaceMethodRef(this, index, classIndex, nameAndTypeIndex)
         }
     },
     TagMethodref("Methodref", 10u, 1) {
         override fun load(input: DataInput, index: UShort): ConstantPoolInfo {
             val classIndex = input.readUnsignedShort().toUShort()
             val nameAndTypeIndex = input.readUnsignedShort().toUShort()
-            return ConstantPoolInfo.ConstantMethodRef(this, index, classIndex, nameAndTypeIndex)
+            return ConstantPoolInfo.ConstantFieldMethodInterfaceMethodRef(this, index, classIndex, nameAndTypeIndex)
         }
     },
     TagInterfaceMethodref("InterfaceMethodref", 11u, 1) {
         override fun load(input: DataInput, index: UShort): ConstantPoolInfo {
             val classIndex = input.readUnsignedShort().toUShort()
             val nameAndTypeIndex = input.readUnsignedShort().toUShort()
-            return ConstantPoolInfo.ConstantInterfaceMethodRef(this, index, classIndex, nameAndTypeIndex)
+            return ConstantPoolInfo.ConstantFieldMethodInterfaceMethodRef(this, index, classIndex, nameAndTypeIndex)
         }
     },
     TagNameAndType("NameAndType", 12u, 1) {
@@ -117,6 +117,13 @@ enum class ConstantPoolTag(val tagName: String, val tagId: UByte, val entriesTak
         }
     };
 
+    fun toObject():Map<String, Any>{
+        return mapOf(
+            "tagName" to tagName,
+            "tagId" to tagId.toInt(),
+            "entriesTaken" to entriesTaken
+        )
+    }
     abstract fun load(input: DataInput, index: UShort): ConstantPoolInfo;
     override fun toString(): String = "$tagName($tagId)"
 

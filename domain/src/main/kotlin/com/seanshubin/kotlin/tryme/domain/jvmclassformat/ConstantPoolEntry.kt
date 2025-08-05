@@ -127,38 +127,8 @@ interface ConstantPoolEntry {
         }
     }
 
-    data class ConstantPoolEntryFieldref(
-        override val raw: ConstantPoolInfo.ConstantFieldRef,
-        val classEntry: ConstantPoolEntryClass,
-        val nameAndTypeEntry: ConstantPoolEntryNameAndType
-    ) : ConstantPoolEntry {
-        override fun toObject(): Map<String, Any> {
-            return mapOf(
-                "index" to raw.index,
-                "tag" to raw.tag.toString(),
-                "class" to classEntry.toObject(),
-                "nameAndType" to nameAndTypeEntry.toObject()
-            )
-        }
-
-        companion object {
-            fun parse(raw: ConstantPoolInfo.ConstantFieldRef, lookup: ConstantPoolLookup): ConstantPoolEntry {
-                val classInfo = lookup.lookup(raw.classIndex) as ConstantPoolInfo.ConstantClass
-                val nameAndTypeInfo = lookup.lookup(raw.nameAndTypeIndex) as ConstantPoolInfo.ConstantNameAndType
-                val classEntry = ConstantPoolEntryClass.parse(classInfo, lookup) as ConstantPoolEntryClass
-                val nameAndTypeEntry =
-                    ConstantPoolEntryNameAndType.parse(nameAndTypeInfo, lookup) as ConstantPoolEntryNameAndType
-                return ConstantPoolEntryFieldref(
-                    raw,
-                    classEntry,
-                    nameAndTypeEntry
-                )
-            }
-        }
-    }
-
-    data class ConstantPoolEntryMethodref(
-        override val raw: ConstantPoolInfo.ConstantMethodRef,
+    data class ConstantPoolEntryFieldMethodInterfaceMethodRef(
+        override val raw: ConstantPoolInfo.ConstantFieldMethodInterfaceMethodRef,
         val classEntry: ConstantPoolEntryClass,
         val nameAndTypeEntry: ConstantPoolEntryNameAndType
     ) : ConstantPoolEntry {
@@ -179,50 +149,13 @@ interface ConstantPoolEntry {
         }
 
         companion object {
-            fun parse(raw: ConstantPoolInfo.ConstantMethodRef, lookup: ConstantPoolLookup): ConstantPoolEntryMethodref {
+            fun parse(raw: ConstantPoolInfo.ConstantFieldMethodInterfaceMethodRef, lookup: ConstantPoolLookup): ConstantPoolEntryFieldMethodInterfaceMethodRef {
                 val classInfo = lookup.lookup(raw.classIndex) as ConstantPoolInfo.ConstantClass
                 val nameAndTypeInfo = lookup.lookup(raw.nameAndTypeIndex) as ConstantPoolInfo.ConstantNameAndType
                 val classEntry = ConstantPoolEntryClass.parse(classInfo, lookup) as ConstantPoolEntryClass
                 val nameAndTypeEntry =
                     ConstantPoolEntryNameAndType.parse(nameAndTypeInfo, lookup) as ConstantPoolEntryNameAndType
-                return ConstantPoolEntryMethodref(
-                    raw,
-                    classEntry,
-                    nameAndTypeEntry
-                )
-            }
-        }
-    }
-
-    data class ConstantPoolEntryInterfaceMethodref(
-        override val raw: ConstantPoolInfo.ConstantInterfaceMethodRef,
-        val classEntry: ConstantPoolEntryClass,
-        val nameAndTypeEntry: ConstantPoolEntryNameAndType
-    ) : ConstantPoolEntry {
-        override fun toObject(): Map<String, Any> {
-            return mapOf(
-                "index" to raw.index,
-                "tag" to raw.tag.toString(),
-                "classIndex" to raw.classIndex,
-                "nameAndTypeIndex" to raw.nameAndTypeIndex
-            )
-        }
-
-        fun methodAddress(): String {
-            val className = classEntry.name.raw.value
-            val methodName = nameAndTypeEntry.nameEntry.raw.value
-            val descriptor = nameAndTypeEntry.descriptorEntry.raw.value
-            return "$className.$methodName$descriptor"
-        }
-
-        companion object {
-            fun parse(raw: ConstantPoolInfo.ConstantInterfaceMethodRef, lookup: ConstantPoolLookup): ConstantPoolEntry {
-                val classInfo = lookup.lookup(raw.classIndex) as ConstantPoolInfo.ConstantClass
-                val nameAndTypeInfo = lookup.lookup(raw.nameAndTypeIndex) as ConstantPoolInfo.ConstantNameAndType
-                val classEntry = ConstantPoolEntryClass.parse(classInfo, lookup) as ConstantPoolEntryClass
-                val nameAndTypeEntry =
-                    ConstantPoolEntryNameAndType.parse(nameAndTypeInfo, lookup) as ConstantPoolEntryNameAndType
-                return ConstantPoolEntryInterfaceMethodref(
+                return ConstantPoolEntryFieldMethodInterfaceMethodRef(
                     raw,
                     classEntry,
                     nameAndTypeEntry
@@ -259,7 +192,7 @@ interface ConstantPoolEntry {
     data class ConstantPoolEntryMethodHandle(
         override val raw: ConstantPoolInfo.ConstantMethodHandle,
         val referenceKind: ReferenceKind,
-        val referenceEntry: ConstantPoolEntryMethodref
+        val referenceEntry: ConstantPoolEntryFieldMethodInterfaceMethodRef
     ) : ConstantPoolEntry {
         override fun toObject(): Map<String, Any> {
             return mapOf(
@@ -273,8 +206,8 @@ interface ConstantPoolEntry {
         companion object {
             fun parse(raw: ConstantPoolInfo.ConstantMethodHandle, lookup: ConstantPoolLookup): ConstantPoolEntry {
                 val referenceKind = ReferenceKind.fromCode(raw.referenceKind)
-                val referenceInfo = lookup.lookup(raw.referenceIndex) as ConstantPoolInfo.ConstantMethodRef
-                val referenceEntry = ConstantPoolEntryMethodref.parse(referenceInfo, lookup)
+                val referenceInfo = lookup.lookup(raw.referenceIndex) as ConstantPoolInfo.ConstantFieldMethodInterfaceMethodRef
+                val referenceEntry = ConstantPoolEntryFieldMethodInterfaceMethodRef.parse(referenceInfo, lookup)
                 return ConstantPoolEntryMethodHandle(raw, referenceKind, referenceEntry)
             }
         }
@@ -408,9 +341,7 @@ interface ConstantPoolEntry {
                 is ConstantPoolInfo.ConstantDouble -> ConstantPoolEntryDouble.parse(raw, lookup)
                 is ConstantPoolInfo.ConstantClass -> ConstantPoolEntryClass.parse(raw, lookup)
                 is ConstantPoolInfo.ConstantString -> ConstantPoolEntryString.parse(raw, lookup)
-                is ConstantPoolInfo.ConstantFieldRef -> ConstantPoolEntryFieldref.parse(raw, lookup)
-                is ConstantPoolInfo.ConstantMethodRef -> ConstantPoolEntryMethodref.parse(raw, lookup)
-                is ConstantPoolInfo.ConstantInterfaceMethodRef -> ConstantPoolEntryInterfaceMethodref.parse(raw, lookup)
+                is ConstantPoolInfo.ConstantFieldMethodInterfaceMethodRef -> ConstantPoolEntryFieldMethodInterfaceMethodRef.parse(raw, lookup)
                 is ConstantPoolInfo.ConstantNameAndType -> ConstantPoolEntryNameAndType.parse(raw, lookup)
                 is ConstantPoolInfo.ConstantMethodHandle -> ConstantPoolEntryMethodHandle.parse(raw, lookup)
                 is ConstantPoolInfo.ConstantMethodType -> ConstantPoolEntryMethodType.parse(raw, lookup)

@@ -29,21 +29,21 @@ data class JvmClass(
                         Code.invokestatic -> {
                             opCode as OpCodeEntry.ConstantPoolIndex
                             val constantPoolEntry = opCode.constantPoolEntry
-                            constantPoolEntry as ConstantPoolEntry.ConstantPoolEntryMethodref
+                            constantPoolEntry as ConstantPoolEntry.ConstantPoolEntryFieldMethodInterfaceMethodRef
                             "(static   ) ${constantPoolEntry.methodAddress()}"
                         }
 
                         Code.invokespecial -> {
                             opCode as OpCodeEntry.ConstantPoolIndex
                             val constantPoolEntry = opCode.constantPoolEntry
-                            constantPoolEntry as ConstantPoolEntry.ConstantPoolEntryMethodref
+                            constantPoolEntry as ConstantPoolEntry.ConstantPoolEntryFieldMethodInterfaceMethodRef
                             "(special  ) ${constantPoolEntry.methodAddress()}"
                         }
 
                         Code.invokevirtual -> {
                             opCode as OpCodeEntry.ConstantPoolIndex
                             val constantPoolEntry =
-                                opCode.constantPoolEntry as ConstantPoolEntry.ConstantPoolEntryMethodref
+                                opCode.constantPoolEntry as ConstantPoolEntry.ConstantPoolEntryFieldMethodInterfaceMethodRef
                             "(virtual  ) ${constantPoolEntry.methodAddress()}"
                         }
 

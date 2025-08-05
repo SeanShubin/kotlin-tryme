@@ -60,11 +60,15 @@ class DebugDataInput(
     }
 
     override fun readFloat(): Float {
-        throw UnsupportedOperationException("Not Implemented!")
+        val value = delegate.readFloat()
+        debug("readFloat", value)
+        return value
     }
 
     override fun readDouble(): Double {
-        throw UnsupportedOperationException("Not Implemented!")
+        val value = delegate.readDouble()
+        debug("readDouble", value)
+        return value
     }
 
     override fun readLine(): String? {
@@ -81,6 +85,14 @@ class DebugDataInput(
 
     private fun debug(caption: String, value: Long) {
         emit(String.format("%-17s: %10d %10H", caption, value, value))
+    }
+
+    private fun debug(caption: String, value: Double) {
+        emit(String.format("%-17s: %10f %10H", caption, value, value))
+    }
+
+    private fun debug(caption: String, value: Float) {
+        emit(String.format("%-17s: %10f %10H", caption, value, value))
     }
 
     private fun debug(caption: String, value: ByteArray) {

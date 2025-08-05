@@ -51,7 +51,7 @@ object ParseStandardLibraryApp {
             RawJvmClass.fromDataInput(debugDataInput)
         }
         Files.write(dataPath, dataInputLines)
-        val json = JsonMappers.pretty.writeValueAsString(rawJvmClass)
+        val json = JsonMappers.pretty.writeValueAsString(rawJvmClass.toObject())
         Files.writeString(rawPath, json)
         val jvmClass = JvmClass.fromRawJvmClass(rawJvmClass)
         val jvmClassObject = jvmClass.toObject()
