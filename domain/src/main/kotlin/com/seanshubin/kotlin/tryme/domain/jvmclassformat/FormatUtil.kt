@@ -3,8 +3,9 @@ package com.seanshubin.kotlin.tryme.domain.jvmclassformat
 object FormatUtil {
     fun List<Byte>.toHex():List<String>{
         return this.map { byte ->
-            val unsignedByte = byte.toInt() and 0xFF
-            String.format("%02X", unsignedByte)
+            byte.toHex()
         }
     }
+
+    fun Byte.toHex():String = String.format("%02X", this.toInt() and 0xFF)
 }

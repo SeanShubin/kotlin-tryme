@@ -1,5 +1,7 @@
 package com.seanshubin.kotlin.tryme.domain.jvmclassformat
 
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.FormatUtil.toHex
+
 enum class Code(val opcode: UByte, val codeArgs: CodeArgs) {
     aaload(0x32u, CodeArgs.NONE),
     aastore(0x53u, CodeArgs.NONE),
@@ -213,9 +215,9 @@ enum class Code(val opcode: UByte, val codeArgs: CodeArgs) {
     }
 
     companion object {
-        fun fromByte(byte: Byte): Code {
+        fun fromByte(byte: Byte, index:Int, methodBytes:List<Byte>): Code {
             return entries.firstOrNull { it.opcode == byte.toUByte() }
-                ?: throw IllegalArgumentException(String.format("Unknown opcode: hex(%X) dec(%d)", byte, byte))
+                ?: throw IllegalArgumentException("Unknown opcode: 0x${byte.toHex()} index: $index, bytes[${methodBytes.size}]: ${methodBytes.toHex()}")
         }
     }
 }
