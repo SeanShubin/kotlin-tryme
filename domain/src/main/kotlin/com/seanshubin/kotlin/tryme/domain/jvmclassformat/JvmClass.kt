@@ -60,6 +60,13 @@ data class JvmClass(
                             "(dynamic  ) ${constantPoolEntry.methodAddress()}"
                         }
 
+                        Code.getstatic -> {
+                            opCode as OpCodeEntry.ConstantPoolIndex
+                            val constantPoolEntry = opCode.constantPoolEntry
+                            constantPoolEntry as ConstantPoolEntry.ConstantPoolEntryFieldMethodInterfaceMethodRef
+                            "(getstatic) ${constantPoolEntry.methodAddress()}"
+                        }
+
                         else -> null
                     }
                 }
@@ -97,8 +104,9 @@ data class JvmClass(
             val constantPoolMap = constantPool.associateBy { entry -> entry.raw.index.toInt() }
             val thisClass =
                 constantPoolMap.getValue(rawJvmClass.thisClass.toInt()) as ConstantPoolEntry.ConstantPoolEntryClass
+            val superClassValue = rawJvmClass.superClass.toInt()
             val superClass =
-                constantPoolMap.getValue(rawJvmClass.superClass.toInt()) as ConstantPoolEntry.ConstantPoolEntryClass
+                if (superClassValue == 0) null else constantPoolMap.getValue(rawJvmClass.superClass.toInt()) as ConstantPoolEntry.ConstantPoolEntryClass
             val interfaces =
                 rawJvmClass.interfaces.map { constantPoolMap.getValue(it.toInt()) as ConstantPoolEntry.ConstantPoolEntryClass }
             val fields = rawJvmClass.fields.map { FieldEntry.fromFieldInfo(it, constantPoolMap) }

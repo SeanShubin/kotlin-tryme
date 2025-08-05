@@ -12,7 +12,13 @@ object ParseStandardLibraryApp {
     @JvmStatic
     fun main(args: Array<String>) {
         val inputDir = Paths.get("generated", "jmods")
-        Files.walkFileTree(inputDir, ParseVisitor(inputDir))
+        var filesParsed = 0
+        val parsingFileEvent: (Path) -> Unit = { filePath ->
+            filesParsed++
+            println("Parsing $filePath ($filesParsed)")
+        }
+        Files.walkFileTree(inputDir, ParseVisitor(inputDir, parsingFileEvent))
+        println("Parsed $filesParsed files")
     }
 
     fun shouldParse(filePath: Path): Boolean {
@@ -30,15 +36,16 @@ object ParseStandardLibraryApp {
         }
     }
 
-    fun parseFile(inputDir: Path, filePath: Path) {
+    fun parseFile(inputDir: Path, filePath: Path, parsingFileEvent:(Path)->Unit) {
         if (!shouldParse(filePath)) {
             return
         }
-        println(filePath)
+        parsingFileEvent(filePath)
         val relativePath = inputDir.relativize(filePath)
         val parent = relativePath.parent
         val (baseName, extension) = splitExt(relativePath.fileName)
         val outputBase = outputDir.resolve(parent)
+        val methodDependencies = outputDir.resolve("method-dependencies.txt")
         Files.createDirectories(outputBase)
         val dataPath = outputBase.resolve("$baseName-data.txt")
         val rawPath = outputBase.resolve("$baseName-raw.json")
@@ -63,10 +70,11 @@ object ParseStandardLibraryApp {
             }
             listOf(methodMakingCall) + methodsBeingCalledLines
         }
+        Files.write(methodDependencies, methodDependencyLines, StandardOpenOption.APPEND, StandardOpenOption.CREATE)
         methodDependencyLines.forEach(::println)
     }
 
-    class ParseVisitor(private val inputDir: Path) : FileVisitor<Path> {
+    class ParseVisitor(private val inputDir: Path, private val parsingFileEvent:(path:Path)->Unit) : FileVisitor<Path> {
         override fun preVisitDirectory(
             dir: Path,
             attrs: BasicFileAttributes
@@ -78,7 +86,7 @@ object ParseStandardLibraryApp {
             file: Path,
             attrs: BasicFileAttributes
         ): FileVisitResult {
-            parseFile(inputDir, file)
+            parseFile(inputDir, file, parsingFileEvent)
             return FileVisitResult.CONTINUE
         }
 
