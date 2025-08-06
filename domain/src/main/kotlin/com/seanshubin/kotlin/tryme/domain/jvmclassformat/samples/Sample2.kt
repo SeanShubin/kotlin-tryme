@@ -1,23 +1,27 @@
-package com.seanshubin.kotlin.tryme.domain.jvmclassformat
+package com.seanshubin.kotlin.tryme.domain.jvmclassformat.samples
 
+import com.seanshubin.kotlin.tryme.domain.contract.FilesContract
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.Clock
 
-object SampleApp {
-    @JvmStatic
-    fun main(args: Array<String>) {
-        val clock = Clock.systemUTC()
+class Sample2(
+    private val clock: Clock,
+    private val files: FilesContract,
+    private val emit:(String)->Unit
+    ) {
+
+    fun run(args: Array<String>) {
         val startTime = clock.instant()
         val fileName = args[0]
         val path = Paths.get(fileName)
         val charset = Charsets.UTF_8
-        val target = Files.readString(path, charset)
+        val target = files.readString(path, charset)
         val greeting = "Hello, $target!"
-        System.out.println(greeting)
+        emit(greeting)
         val endTime = clock.instant()
         val duration = endTime.toEpochMilli() - startTime.toEpochMilli()
         val timeTakenMessage = "Took $duration milliseconds"
-        System.out.println(timeTakenMessage)
+        emit(timeTakenMessage)
     }
 }

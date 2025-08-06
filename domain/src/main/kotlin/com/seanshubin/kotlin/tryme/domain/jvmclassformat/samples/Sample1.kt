@@ -1,16 +1,16 @@
-package com.seanshubin.kotlin.tryme.domain.jvmclassformat
+package com.seanshubin.kotlin.tryme.domain.jvmclassformat.samples
 
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.Clock
 
-object SampleApp {
-    @JvmStatic
-    fun main(args: Array<String>) {
+class Sample1 {
+    fun run(args: Array<String>) {
         val clock = Clock.systemUTC()
         val startTime = clock.instant()
         val fileName = args[0]
         val path = Paths.get(fileName)
+        println(path.toAbsolutePath())
         val charset = Charsets.UTF_8
         val target = Files.readString(path, charset)
         val greeting = "Hello, $target!"
