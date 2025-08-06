@@ -2,7 +2,7 @@
 
 I have completed my prototype to determine the testability of individual files.
 It works by scanning opcodes in the methods for instances of `invokestatic` and `getstatic`.
-Each of these opcodes references a static method or a static field, respectively.
+Each of these opcodes references either a static method or a static field, respectively.
 For each of these opcodes, it checks if the thing referenced by that code is on the blacklist, on the whitelist, or not on either list.
 Then it applies the following rules:
 - If anything is found on the blacklist, it is flagged as "not testable"
@@ -52,4 +52,19 @@ class Sample2(
         emit(timeTakenMessage)
     }
 }
+```
+
+## Blacklist
+```text
+java/time/Clock:systemUTC:.*
+java/lang/System:out:.*
+java/nio/file/Files:.*:.*
+java/lang/System:out:.*
+```
+
+## Whitelist
+```text
+kotlin/jvm/internal/Intrinsics:.*:.*
+java/nio/file/Paths:get:.*
+kotlin/text/Charsets:.*:.*
 ```
