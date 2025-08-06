@@ -26,7 +26,7 @@ object ParseJvmClassApp {
         Files.write(dataPath, dataInputLines)
         val json = JsonMappers.pretty.writeValueAsString(rawJvmClass)
         Files.writeString(rawPath, json)
-        val jvmClass = JvmClass.fromRawJvmClass(rawJvmClass)
+        val jvmClass = JvmClass.fromRawJvmClass(rawJvmClass, Events.nop)
         val jvmClassObject = jvmClass.toObject()
         val jvmClassJson = JsonMappers.pretty.writeValueAsString(jvmClassObject)
         Files.writeString(interpretedPath, jvmClassJson)

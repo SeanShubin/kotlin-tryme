@@ -17,12 +17,12 @@ data class MethodEntry(
     }
 
     companion object {
-        fun fromMethodInfo(info: MethodInfo, constantPoolMap: Map<Int, ConstantPoolEntry>): MethodEntry {
+        fun fromMethodInfo(info: MethodInfo, constantPoolMap: Map<Int, ConstantPoolEntry>, events:Events): MethodEntry {
             val accessFlags = AccessFlag.fromMask(info.accessFlags.toInt())
             val name = constantPoolMap.getValue(info.nameIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
             val descriptor =
                 constantPoolMap.getValue(info.descriptorIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
-            val attributes = info.attributes.map { AttributeEntry.fromAttributeInfo(it, constantPoolMap) }
+            val attributes = info.attributes.map { AttributeEntry.fromAttributeInfo(it, constantPoolMap, events) }
             val codeAttribute = attributes.filterIsInstance<AttributeEntry.CodeEntry>().singleOrNull()
             return MethodEntry(
                 accessFlags = accessFlags,

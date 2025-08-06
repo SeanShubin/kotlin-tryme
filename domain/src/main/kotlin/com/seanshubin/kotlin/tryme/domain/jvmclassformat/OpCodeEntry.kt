@@ -1,7 +1,6 @@
 package com.seanshubin.kotlin.tryme.domain.jvmclassformat
 
 import com.seanshubin.kotlin.tryme.domain.jvmclassformat.ByteUtil.bytesToInt
-import com.seanshubin.kotlin.tryme.domain.jvmclassformat.FormatUtil.toHex
 
 sealed interface OpCodeEntry {
     val index: Int
@@ -339,7 +338,7 @@ sealed interface OpCodeEntry {
     }
 
     companion object {
-        fun fromBytes(methodBytes: List<Byte>, constantPoolMap: Map<Int, ConstantPoolEntry>): List<OpCodeEntry> {
+        fun fromBytes(methodBytes: List<Byte>, constantPoolMap: Map<Int, ConstantPoolEntry>, events:Events): List<OpCodeEntry> {
             val result = mutableListOf<OpCodeEntry>()
             var index = 0
             while (index < methodBytes.size) {
@@ -464,6 +463,7 @@ sealed interface OpCodeEntry {
                     else -> throw UnsupportedOperationException("$code $codeArgs")
                 }
                 result.add(entry)
+                events.opCodeParsed(entry)
                 index += size + 1
             }
             return result

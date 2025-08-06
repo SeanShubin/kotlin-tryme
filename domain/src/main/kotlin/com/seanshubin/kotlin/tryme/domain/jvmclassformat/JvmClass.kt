@@ -92,7 +92,7 @@ data class JvmClass(
     }
 
     companion object {
-        fun fromRawJvmClass(rawJvmClass: RawJvmClass): JvmClass {
+        fun fromRawJvmClass(rawJvmClass: RawJvmClass, events:Events): JvmClass {
             val magic = rawJvmClass.magic.toInt()
             val minorVersion = rawJvmClass.minorVersion.toInt()
             val majorVersion = rawJvmClass.majorVersion.toInt()
@@ -109,9 +109,9 @@ data class JvmClass(
                 if (superClassValue == 0) null else constantPoolMap.getValue(rawJvmClass.superClass.toInt()) as ConstantPoolEntry.ConstantPoolEntryClass
             val interfaces =
                 rawJvmClass.interfaces.map { constantPoolMap.getValue(it.toInt()) as ConstantPoolEntry.ConstantPoolEntryClass }
-            val fields = rawJvmClass.fields.map { FieldEntry.fromFieldInfo(it, constantPoolMap) }
-            val methods = rawJvmClass.methods.map { MethodEntry.fromMethodInfo(it, constantPoolMap) }
-            val attributes = rawJvmClass.attributes.map { AttributeEntry.fromAttributeInfo(it, constantPoolMap) }
+            val fields = rawJvmClass.fields.map { FieldEntry.fromFieldInfo(it, constantPoolMap, events) }
+            val methods = rawJvmClass.methods.map { MethodEntry.fromMethodInfo(it, constantPoolMap, events) }
+            val attributes = rawJvmClass.attributes.map { AttributeEntry.fromAttributeInfo(it, constantPoolMap, events) }
             return JvmClass(
                 magic = magic,
                 minorVersion = minorVersion,

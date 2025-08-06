@@ -1,5 +1,6 @@
 package com.seanshubin.kotlin.tryme.domain.jvmclassformat
 
+import com.seanshubin.kotlin.tryme.domain.format.DurationFormat
 import com.seanshubin.kotlin.tryme.domain.json.JsonMappers
 import java.io.DataInputStream
 import java.io.IOException
@@ -11,14 +12,37 @@ object ParseStandardLibraryApp {
 
     @JvmStatic
     fun main(args: Array<String>) {
+        val startTime = System.currentTimeMillis()
         val inputDir = Paths.get("generated", "jmods")
         var filesParsed = 0
-        val parsingFileEvent: (Path) -> Unit = { filePath ->
-            filesParsed++
-            println("Parsing $filePath ($filesParsed)")
+        val codeHistogram = mutableMapOf<Code, Int>()
+        Code.entries.forEach { code ->
+            codeHistogram[code] = 0
         }
-        Files.walkFileTree(inputDir, ParseVisitor(inputDir, parsingFileEvent))
+        var totalCodes = 0
+        val events = object : Events {
+            override fun opCodeParsed(opCode: OpCodeEntry) {
+                codeHistogram.merge(opCode.code, 1) { oldValue, newValue -> oldValue + newValue }
+                totalCodes++
+            }
+
+            override fun parsingFile(path: Path) {
+                filesParsed++
+                println("Parsing $path ($filesParsed)")
+            }
+        }
+        Files.walkFileTree(inputDir, ParseVisitor(inputDir, events))
         println("Parsed $filesParsed files")
+        println("Total codes: $totalCodes")
+        println("Code histogram:")
+        codeHistogram.entries.sortedByDescending { it.value }.forEach { (code, count) ->
+            println("  $code: $count")
+        }
+        val endTime = System.currentTimeMillis()
+        val durationMillis = endTime - startTime
+        DurationFormat.milliseconds.format(durationMillis).let {
+            println(it)
+        }
     }
 
     fun shouldParse(filePath: Path): Boolean {
@@ -36,11 +60,11 @@ object ParseStandardLibraryApp {
         }
     }
 
-    fun parseFile(inputDir: Path, filePath: Path, parsingFileEvent:(Path)->Unit) {
+    fun parseFile(inputDir: Path, filePath: Path, events:Events) {
         if (!shouldParse(filePath)) {
             return
         }
-        parsingFileEvent(filePath)
+        events.parsingFile(filePath)
         val relativePath = inputDir.relativize(filePath)
         val parent = relativePath.parent
         val (baseName, extension) = splitExt(relativePath.fileName)
@@ -60,7 +84,7 @@ object ParseStandardLibraryApp {
         Files.write(dataPath, dataInputLines)
         val json = JsonMappers.pretty.writeValueAsString(rawJvmClass.toObject())
         Files.writeString(rawPath, json)
-        val jvmClass = JvmClass.fromRawJvmClass(rawJvmClass)
+        val jvmClass = JvmClass.fromRawJvmClass(rawJvmClass, events)
         val jvmClassObject = jvmClass.toObject()
         val jvmClassJson = JsonMappers.pretty.writeValueAsString(jvmClassObject)
         Files.writeString(interpretedPath, jvmClassJson)
@@ -74,7 +98,7 @@ object ParseStandardLibraryApp {
         methodDependencyLines.forEach(::println)
     }
 
-    class ParseVisitor(private val inputDir: Path, private val parsingFileEvent:(path:Path)->Unit) : FileVisitor<Path> {
+    class ParseVisitor(private val inputDir: Path, private val events:Events) : FileVisitor<Path> {
         override fun preVisitDirectory(
             dir: Path,
             attrs: BasicFileAttributes
@@ -86,7 +110,7 @@ object ParseStandardLibraryApp {
             file: Path,
             attrs: BasicFileAttributes
         ): FileVisitResult {
-            parseFile(inputDir, file, parsingFileEvent)
+            parseFile(inputDir, file, events)
             return FileVisitResult.CONTINUE
         }
 

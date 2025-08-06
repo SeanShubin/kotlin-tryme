@@ -4,7 +4,7 @@ import java.io.DataInputStream
 
 enum class AttributeEnum {
     ConstantValue {
-        override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>): AttributeEntry {
+        override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>, events:Events): AttributeEntry {
             val name =
                 constantPoolMap.getValue(attributeInfo.attributeNameIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
             val input = DataInputStream(attributeInfo.info.toByteArray().inputStream())
@@ -14,25 +14,26 @@ enum class AttributeEnum {
         }
     },
     RuntimeInvisibleAnnotations {
-        override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>): AttributeEntry {
+        override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>, events:Events): AttributeEntry {
             return parseRuntimeAnnotations(attributeInfo, constantPoolMap)
         }
     },
     RuntimeVisibleAnnotations {
-        override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>): AttributeEntry {
+        override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>, events:Events): AttributeEntry {
             return parseRuntimeAnnotations(attributeInfo, constantPoolMap)
         }
     },
     RuntimeInvisibleParameterAnnotations {
         override fun parse(
             attributeInfo: AttributeInfo,
-            constantPoolMap: Map<Int, ConstantPoolEntry>
+            constantPoolMap: Map<Int, ConstantPoolEntry>,
+            events:Events
         ): AttributeEntry {
             return parseRuntimeParameterAnnotations(attributeInfo, constantPoolMap)
         }
     },
     Code {
-        override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>): AttributeEntry {
+        override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>, events:Events): AttributeEntry {
             val name =
                 constantPoolMap.getValue(attributeInfo.attributeNameIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
             val input = DataInputStream(attributeInfo.info.toByteArray().inputStream())
@@ -41,7 +42,7 @@ enum class AttributeEnum {
             val codeLength = input.readInt()
             val code = ByteArray(codeLength.toInt())
             input.readFully(code)
-            val opCodes = OpCodeEntry.fromBytes(code.toList(), constantPoolMap)
+            val opCodes = OpCodeEntry.fromBytes(code.toList(), constantPoolMap, events)
             val codeBlock = CodeBlock(opCodes)
             val exceptionTableLength = input.readUnsignedShort().toUShort()
             val exceptionTable = List(exceptionTableLength.toInt()) {
@@ -49,7 +50,7 @@ enum class AttributeEnum {
             }
             val attributesCount = input.readShort()
             val attributes = List(attributesCount.toInt()) {
-                AttributeEntry.fromAttributeInfo(AttributeInfo.fromDataInput(input), constantPoolMap)
+                AttributeEntry.fromAttributeInfo(AttributeInfo.fromDataInput(input), constantPoolMap, events)
             }
             return AttributeEntry.CodeEntry(
                 attributeInfo,
@@ -63,7 +64,7 @@ enum class AttributeEnum {
         }
     },
     LineNumberTable {
-        override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>): AttributeEntry {
+        override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>, events:Events): AttributeEntry {
             val name =
                 constantPoolMap.getValue(attributeInfo.attributeNameIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
             val input = DataInputStream(attributeInfo.info.toByteArray().inputStream())
@@ -75,7 +76,7 @@ enum class AttributeEnum {
         }
     },
     LocalVariableTable {
-        override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>): AttributeEntry {
+        override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>, events:Events): AttributeEntry {
             val name =
                 constantPoolMap.getValue(attributeInfo.attributeNameIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
             val input = DataInputStream(attributeInfo.info.toByteArray().inputStream())
@@ -87,7 +88,7 @@ enum class AttributeEnum {
         }
     },
     SourceFile {
-        override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>): AttributeEntry {
+        override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>, events:Events): AttributeEntry {
             val name =
                 constantPoolMap.getValue(attributeInfo.attributeNameIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
             val input = DataInputStream(attributeInfo.info.toByteArray().inputStream())
@@ -97,7 +98,7 @@ enum class AttributeEnum {
         }
     },
     BootstrapMethods {
-        override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>): AttributeEntry {
+        override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>, events:Events): AttributeEntry {
             val name =
                 constantPoolMap.getValue(attributeInfo.attributeNameIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
             val input = DataInputStream(attributeInfo.info.toByteArray().inputStream())
@@ -109,7 +110,7 @@ enum class AttributeEnum {
         }
     },
     Exceptions {
-        override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>): AttributeEntry {
+        override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>, events:Events): AttributeEntry {
             val name =
                 constantPoolMap.getValue(attributeInfo.attributeNameIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
             val input = DataInputStream(attributeInfo.info.toByteArray().inputStream())
@@ -124,7 +125,7 @@ enum class AttributeEnum {
         }
     },
     Signature {
-        override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>): AttributeEntry {
+        override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>, events:Events): AttributeEntry {
             val name =
                 constantPoolMap.getValue(attributeInfo.attributeNameIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
             val input = DataInputStream(attributeInfo.info.toByteArray().inputStream())
@@ -134,7 +135,7 @@ enum class AttributeEnum {
         }
     },
     EnclosingMethod {
-        override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>): AttributeEntry {
+        override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>, events:Events): AttributeEntry {
             val name =
                 constantPoolMap.getValue(attributeInfo.attributeNameIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
             val input = DataInputStream(attributeInfo.info.toByteArray().inputStream())
@@ -147,7 +148,7 @@ enum class AttributeEnum {
         }
     },
     NestHost {
-        override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>): AttributeEntry {
+        override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>, events:Events): AttributeEntry {
             val name =
                 constantPoolMap.getValue(attributeInfo.attributeNameIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
             val input = DataInputStream(attributeInfo.info.toByteArray().inputStream())
@@ -157,7 +158,7 @@ enum class AttributeEnum {
         }
     },
     InnerClasses {
-        override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>): AttributeEntry {
+        override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>, events:Events): AttributeEntry {
             val name =
                 constantPoolMap.getValue(attributeInfo.attributeNameIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
             val input = DataInputStream(attributeInfo.info.toByteArray().inputStream())
@@ -169,7 +170,7 @@ enum class AttributeEnum {
         }
     },
     LocalVariableTypeTable {
-        override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>): AttributeEntry {
+        override fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>, events:Events): AttributeEntry {
             val name =
                 constantPoolMap.getValue(attributeInfo.attributeNameIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
             val input = DataInputStream(attributeInfo.info.toByteArray().inputStream())
@@ -181,12 +182,13 @@ enum class AttributeEnum {
         }
     };
 
-    abstract fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>): AttributeEntry
+    abstract fun parse(attributeInfo: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>, events:Events): AttributeEntry
 
     companion object {
         fun fromAttributeInfo(
             attributeInfo: AttributeInfo,
-            constantPoolMap: Map<Int, ConstantPoolEntry>
+            constantPoolMap: Map<Int, ConstantPoolEntry>,
+            events:Events
         ): AttributeEntry {
             val attributeUtf8 =
                 constantPoolMap.getValue(attributeInfo.attributeNameIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
@@ -198,7 +200,7 @@ enum class AttributeEnum {
                 )
             }
             val attributeEnum = valueOf(attributeName)
-            val attributeEntry = attributeEnum.parse(attributeInfo, constantPoolMap)
+            val attributeEntry = attributeEnum.parse(attributeInfo, constantPoolMap, events)
             return attributeEntry
         }
 

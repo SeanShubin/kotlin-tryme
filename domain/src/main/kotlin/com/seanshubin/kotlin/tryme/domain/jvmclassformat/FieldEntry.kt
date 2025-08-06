@@ -16,12 +16,12 @@ data class FieldEntry(
     }
 
     companion object {
-        fun fromFieldInfo(info: FieldInfo, constantPoolMap: Map<Int, ConstantPoolEntry>): FieldEntry {
+        fun fromFieldInfo(info: FieldInfo, constantPoolMap: Map<Int, ConstantPoolEntry>, events:Events): FieldEntry {
             val accessFlags = AccessFlag.fromMask(info.accessFlags.toInt())
             val name = constantPoolMap.getValue(info.nameIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
             val descriptor =
                 constantPoolMap.getValue(info.descriptorIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
-            val attributes = info.attributes.map { AttributeEntry.fromAttributeInfo(it, constantPoolMap) }
+            val attributes = info.attributes.map { AttributeEntry.fromAttributeInfo(it, constantPoolMap, events) }
             return FieldEntry(
                 accessFlags = accessFlags,
                 name = name,

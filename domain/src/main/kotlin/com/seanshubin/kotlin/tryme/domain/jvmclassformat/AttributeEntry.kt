@@ -357,8 +357,8 @@ interface AttributeEntry {
     }
 
     companion object {
-        fun fromAttributeInfo(raw: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>): AttributeEntry {
-            val attributeEntry = AttributeEnum.Companion.fromAttributeInfo(raw, constantPoolMap)
+        fun fromAttributeInfo(raw: AttributeInfo, constantPoolMap: Map<Int, ConstantPoolEntry>, events:Events): AttributeEntry {
+            val attributeEntry = AttributeEnum.Companion.fromAttributeInfo(raw, constantPoolMap, events)
             return attributeEntry
         }
     }
