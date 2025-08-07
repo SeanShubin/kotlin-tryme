@@ -194,6 +194,15 @@ enum class AttributeEnum {
                 constantPoolMap.getValue(attributeInfo.attributeNameIndex.toInt()) as ConstantPoolEntry.ConstantPoolEntryUtf8
             val attributeName = attributeUtf8.raw.value
             if(!entries.map { it.name }.contains(attributeName)){
+                /*
+                    StackMapTable
+                    NestMembers
+                    MethodParameters
+                    PermittedSubclasses
+                    Deprecated
+                    AnnotationDefault
+                    Record
+                 */
                 return AttributeEntry.UnknownAttributeEntry(
                     attributeInfo,
                     attributeUtf8
