@@ -10,7 +10,6 @@ class Sample1 {
         val startTime = clock.instant()
         val fileName = args[0]
         val path = Paths.get(fileName)
-        println(path.toAbsolutePath())
         val charset = Charsets.UTF_8
         val target = Files.readString(path, charset)
         val greeting = "Hello, $target!"

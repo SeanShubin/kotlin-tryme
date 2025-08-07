@@ -76,7 +76,6 @@ object ParseSampleApp {
         val (baseName, extension) = splitExt(relativePath.fileName)
         val outputBase = outputDir.resolve(parent)
         Files.createDirectories(outputBase)
-        val reportPath = outputBase.resolve("$baseName-testability.json")
         val dataInputLines = mutableListOf<String>()
         val emit: (String) -> Unit = { dataInputLines.add(it) }
         val rawJvmClass = Files.newInputStream(filePath).use { inputStream ->
@@ -85,9 +84,15 @@ object ParseSampleApp {
             RawJvmClass.fromDataInput(debugDataInput)
         }
         val jvmClass = JvmClass.fromRawJvmClass(rawJvmClass, events)
+
+        val jvmJson = JsonMappers.pretty.writeValueAsString(jvmClass.toObject())
+        val jvmPath = outputBase.resolve("$baseName-class.json")
+        Files.writeString(jvmPath, jvmJson, StandardOpenOption.CREATE)
+
         val testabiltyReport = TestabilityReport.fromJvmClass(filePath,jvmClass,isOnBlackList, isOnWhiteList)
-        val json = JsonMappers.pretty.writeValueAsString(testabiltyReport)
-        Files.writeString(reportPath, json, StandardOpenOption.CREATE)
+        val testabilityJson = JsonMappers.pretty.writeValueAsString(testabiltyReport)
+        val reportPath = outputBase.resolve("$baseName-testability.json")
+        Files.writeString(reportPath, testabilityJson, StandardOpenOption.CREATE)
     }
 
     fun loadRegexPredicate(path:Path): (String)->Boolean{
