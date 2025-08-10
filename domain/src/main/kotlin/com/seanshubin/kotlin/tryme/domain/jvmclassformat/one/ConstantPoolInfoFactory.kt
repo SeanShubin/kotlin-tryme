@@ -3,7 +3,7 @@ package com.seanshubin.kotlin.tryme.domain.jvmclassformat.one
 import java.io.DataInput
 
 interface ConstantPoolInfoFactory {
-    fun fromDataInput(input: DataInput, index:Int, tag: ConstantPoolTag): ConstantPoolInfo
+    fun fromDataInput(input: DataInput, index: Int, tag: ConstantPoolTag): ConstantPoolInfo
 
     companion object {
         val constantPoolFactoryMap: Map<ConstantPoolTag, ConstantPoolInfoFactory> = mapOf(
@@ -26,7 +26,7 @@ interface ConstantPoolInfoFactory {
             ConstantPoolTag.PACKAGE to ConstantPoolInfoPackageFactory
         )
 
-        fun fromDataInput(input: DataInput, index:Int): ConstantPoolInfo {
+        fun fromDataInput(input: DataInput, index: Int): ConstantPoolInfo {
             val tag = ConstantPoolTag.fromDataInput(input)
             val factory = constantPoolFactoryMap[tag]
                 ?: throw UnsupportedOperationException("No factory for tag $tag")

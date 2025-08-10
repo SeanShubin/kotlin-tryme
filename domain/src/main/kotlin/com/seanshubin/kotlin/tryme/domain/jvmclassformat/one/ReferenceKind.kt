@@ -12,7 +12,9 @@ enum class ReferenceKind(val code: UByte) {
     INVOKESPECIAL(7u),
     NEWINVOKESPECIAL(8u),
     INVOKEINTERFACE(9u);
-fun line(): String = "${this.name}($code)"
+
+    fun line(): String = "${this.name}($code)"
+
     companion object {
         fun fromDataInput(input: DataInput): ReferenceKind {
             val code = input.readUnsignedByte().toUByte()

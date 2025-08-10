@@ -26,7 +26,7 @@ class JvmClassInfo(
             "minorVersion: $minorVersion",
             "majorVersion: $majorVersion",
             "constantPoolCountPlusOne: $constantPoolCountPlusOne"
-        ) + constantPoolLines().map{"  $it"} +
+        ) + constantPoolLines().map { "  $it" } +
                 listOf(
                     "constantPool: ${constantPool.joinToString("\n")}",
                     "accessFlags: $accessFlags",

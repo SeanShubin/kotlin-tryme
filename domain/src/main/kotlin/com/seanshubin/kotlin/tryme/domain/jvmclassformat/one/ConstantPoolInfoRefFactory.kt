@@ -3,9 +3,9 @@ package com.seanshubin.kotlin.tryme.domain.jvmclassformat.one
 import java.io.DataInput
 
 object ConstantPoolInfoRefFactory : ConstantPoolInfoFactory {
-    override fun fromDataInput(input: DataInput, index:Int, tag: ConstantPoolTag): ConstantPoolInfoRef {
+    override fun fromDataInput(input: DataInput, index: Int, tag: ConstantPoolTag): ConstantPoolInfoRef {
         val classIndex = input.readUnsignedShort().toUShort()
         val nameAndTypeIndex = input.readUnsignedShort().toUShort()
-        return ConstantPoolInfoRef(index,tag, classIndex, nameAndTypeIndex)
+        return ConstantPoolInfoRef(index, tag, classIndex, nameAndTypeIndex)
     }
 }

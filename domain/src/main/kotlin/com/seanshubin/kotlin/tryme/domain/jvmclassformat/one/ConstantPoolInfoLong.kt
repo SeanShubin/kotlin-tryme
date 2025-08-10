@@ -7,7 +7,7 @@ class ConstantPoolInfoLong(
     override val tag: ConstantPoolTag,
     val highBytes: List<Byte>,
     val lowBytes: List<Byte>
-) : ConstantPoolInfo{
+) : ConstantPoolInfo {
     override fun line(): String {
         return "[$index] ${tag.line()} highBytes=${bytesToLine(highBytes)} lowBytes=${bytesToLine(lowBytes)}"
     }

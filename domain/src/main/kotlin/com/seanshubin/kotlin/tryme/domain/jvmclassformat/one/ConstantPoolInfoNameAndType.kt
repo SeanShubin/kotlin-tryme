@@ -5,7 +5,7 @@ class ConstantPoolInfoNameAndType(
     override val tag: ConstantPoolTag,
     val nameIndex: UShort,
     val descriptorIndex: UShort
-) : ConstantPoolInfo{
+) : ConstantPoolInfo {
     override fun line(): String {
         return "[$index] ${tag.line()} nameIndex=$nameIndex descriptorIndex=$descriptorIndex"
     }

@@ -5,7 +5,7 @@ class ConstantPoolInfoDynamic(
     override val tag: ConstantPoolTag,
     val bootstrapMethodAttrIndex: UShort,
     val nameAndTypeIndex: UShort
-) : ConstantPoolInfo{
+) : ConstantPoolInfo {
     override fun line(): String {
         return "[$index] ${tag.line()} bootstrapMethodAttrIndex=$bootstrapMethodAttrIndex nameAndTypeIndex=$nameAndTypeIndex"
     }

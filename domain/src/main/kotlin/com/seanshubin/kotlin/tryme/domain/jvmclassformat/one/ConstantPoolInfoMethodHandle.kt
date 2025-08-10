@@ -5,7 +5,7 @@ class ConstantPoolInfoMethodHandle(
     override val tag: ConstantPoolTag,
     val referenceKind: ReferenceKind,
     val referenceIndex: UShort
-) : ConstantPoolInfo{
+) : ConstantPoolInfo {
     override fun line(): String {
         return "[$index] ${tag.line()} referenceKind=${referenceKind.line()} referenceIndex=$referenceIndex"
     }
