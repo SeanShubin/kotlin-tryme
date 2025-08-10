@@ -6,14 +6,31 @@ object FormatUtil {
         val asHex = bytesToHex(bytes)
         val asString = bytesToSanitizedString(bytes)
         return "$asHex $asString"
+    }
 
+    fun bytesToDisplay(bytes: ByteArray): String {
+        val asHex = bytesToHex(bytes)
+        val asString = bytesToSanitizedString(bytes)
+        return "$asHex $asString"
+    }
+
+    fun sanitizeString(s:String):String {
+        return s.map { sanitizeByte(it.code.toByte()) }.map { it.toInt().toChar() }.joinToString("")
     }
 
     fun bytesToSanitizedString(bytes: List<Byte>): String {
         return String(bytes.map(::sanitizeByte).toByteArray(), Charsets.UTF_8)
     }
 
+    fun bytesToSanitizedString(bytes: ByteArray): String {
+        return String(bytes.map(::sanitizeByte).toByteArray(), Charsets.UTF_8)
+    }
+
     fun bytesToHex(bytes: List<Byte>): String {
+        return bytes.joinToString("") { byteToHex(it) }
+    }
+
+    fun bytesToHex(bytes: ByteArray): String {
         return bytes.joinToString("") { byteToHex(it) }
     }
 

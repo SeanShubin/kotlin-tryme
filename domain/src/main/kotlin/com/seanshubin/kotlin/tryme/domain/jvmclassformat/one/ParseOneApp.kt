@@ -7,7 +7,7 @@ import java.nio.file.Paths
 object ParseOneApp {
     @JvmStatic
     fun main(args: Array<String>) {
-        val inputFile = Paths.get(
+        val inputDir = Paths.get(
             "domain",
             "target",
             "classes",
@@ -17,12 +17,10 @@ object ParseOneApp {
             "tryme",
             "domain",
             "jvmclassformat",
-            "samples",
-            "Sample1.class"
+            "samples"
         )
-        val jvmClassInfo = DataInputStream(Files.newInputStream(inputFile)).use { inputStream ->
-            JvmClassInfo.fromDataInput(inputStream)
-        }
-        jvmClassInfo.lines().forEach(::println)
+        val inputFile = inputDir.resolve("Sample1.class")
+        val outputDir = Paths.get("generated", "sample")
+        ParseUtil.parseFile(inputDir, outputDir, inputFile)
     }
 }

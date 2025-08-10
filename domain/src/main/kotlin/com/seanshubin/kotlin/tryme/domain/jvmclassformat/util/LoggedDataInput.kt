@@ -1,6 +1,8 @@
 package com.seanshubin.kotlin.tryme.domain.jvmclassformat.util
 
 import java.io.DataInput
+import java.io.DataInputStream
+import java.io.InputStream
 
 class LoggedDataInput(private val delegate: DataInput, private val dataInputEvents: DataInputEvents) : DataInput {
     override fun readFully(b: ByteArray) {
@@ -89,6 +91,13 @@ class LoggedDataInput(private val delegate: DataInput, private val dataInputEven
         val result = delegate.readUTF()
         dataInputEvents.readUTF(result)
         return result
+    }
+
+    companion object {
+        fun fromInputStream(inputStream: InputStream, events:DataInputEvents):LoggedDataInput{
+            val dataInputStream = DataInputStream(inputStream)
+            return LoggedDataInput(dataInputStream, events)
+        }
     }
 
     interface DataInputEvents {

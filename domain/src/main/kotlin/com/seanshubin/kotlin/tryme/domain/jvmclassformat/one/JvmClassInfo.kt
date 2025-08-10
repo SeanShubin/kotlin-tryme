@@ -31,7 +31,11 @@ class JvmClassInfo(
             "constantPoolCountPlusOne: $constantPoolCountPlusOne",
             "accessFlags: $accessFlags",
             "thisClass: ${thisClass.line()}",
-            "superClass: ${superClass?.line() ?: "null"}"
+            "superClass: ${superClass?.line() ?: "null"}",
+            "interfacesCount: $interfacesCount",
+            "fieldCount: $fieldCount",
+            "methodCount: $methodCount",
+            "attributeCount: $attributeCount"
         ) + constantPoolLines() + interfaceLines() + fieldLines() + methodLines() + attributeLines()
     }
 
