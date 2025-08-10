@@ -12,8 +12,10 @@ import java.nio.file.StandardOpenOption
 import java.nio.file.attribute.BasicFileAttributes
 
 object ParseUtil {
-    fun parseFile(inputDir:Path, outputDir:Path, inputFile:Path) {
+    fun parseFile(inputDir:Path, baseOutputDir:Path, inputFile:Path, events:Events) {
         val relativePath = inputDir.relativize(inputFile)
+        val outputDir = baseOutputDir.resolve(relativePath.parent)
+        events.parsingFile(inputFile, outputDir)
         val (fileNameWithoutExt, ext) = splitExt(relativePath)
         val dataFile = outputDir.resolve(fileNameWithoutExt + "-data.txt")
         Files.createDirectories(dataFile.parent)
@@ -31,8 +33,12 @@ object ParseUtil {
         Files.write(structureFile, jvmClassInfo.lines(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
     }
 
-    fun parseDir(inputDir: Path, outputDir:Path) {
-        Files.walkFileTree(inputDir, ParseVisitor(inputDir, outputDir))
+    fun parseDir(inputDir: Path, outputDir:Path, events:Events) {
+        val startTime = System.currentTimeMillis()
+        Files.walkFileTree(inputDir, ParseVisitor(inputDir, outputDir, events))
+        val endTime = System.currentTimeMillis()
+        val duration = endTime - startTime
+        events.timeTaken(duration)
     }
 
     fun splitExt(path: Path): Pair<String, String> {
@@ -45,7 +51,7 @@ object ParseUtil {
         }
     }
 
-    class ParseVisitor(private val inputDir: Path, private val outputDir:Path) : FileVisitor<Path> {
+    class ParseVisitor(private val inputDir: Path, private val outputDir:Path, private val events:Events) : FileVisitor<Path> {
         override fun preVisitDirectory(
             dir: Path,
             attrs: BasicFileAttributes
@@ -57,7 +63,9 @@ object ParseUtil {
             file: Path,
             attrs: BasicFileAttributes
         ): FileVisitResult {
-            parseFile(inputDir, outputDir, file)
+            if(file.toString().endsWith(".class")){
+                parseFile(inputDir, outputDir, file, events)
+            }
             return FileVisitResult.CONTINUE
         }
 
@@ -74,5 +82,9 @@ object ParseUtil {
         ): FileVisitResult {
             return FileVisitResult.CONTINUE
         }
+    }
+    interface Events{
+        fun timeTaken(millis: Long)
+        fun parsingFile(file: Path, outputDir:Path)
     }
 }

@@ -14,6 +14,7 @@ object ParseStandardLibraryApp {
     fun main(args: Array<String>) {
         val startTime = System.currentTimeMillis()
         val inputDir = Paths.get("generated", "jmods")
+        val summaryFile  = outputDir.resolve("summary.txt")
         var filesParsed = 0
         val codeHistogram = mutableMapOf<Code, Int>()
         Code.entries.forEach { code ->
@@ -41,6 +42,7 @@ object ParseStandardLibraryApp {
         val endTime = System.currentTimeMillis()
         val durationMillis = endTime - startTime
         DurationFormat.milliseconds.format(durationMillis).let {
+            Files.write(summaryFile, listOf("Time taken: $it"), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
             println(it)
         }
     }

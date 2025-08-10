@@ -1,71 +1,124 @@
 package com.seanshubin.kotlin.tryme.domain.jvmclassformat.util
 
-import com.seanshubin.kotlin.tryme.domain.jvmclassformat.one.ByteUtil.doubleToBytes
-import com.seanshubin.kotlin.tryme.domain.jvmclassformat.one.ByteUtil.intToBytes
-import com.seanshubin.kotlin.tryme.domain.jvmclassformat.one.ByteUtil.longToBytes
-import com.seanshubin.kotlin.tryme.domain.jvmclassformat.one.ByteUtil.shortToBytes
-import com.seanshubin.kotlin.tryme.domain.jvmclassformat.one.FormatUtil.bytesToDisplay
 import com.seanshubin.kotlin.tryme.domain.jvmclassformat.one.FormatUtil.bytesToHex
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.one.FormatUtil.bytesToSanitizedString
 import com.seanshubin.kotlin.tryme.domain.jvmclassformat.one.FormatUtil.sanitizeString
 
-class DataInputEventsLines(val emit:(String)->Unit): LoggedDataInput.DataInputEvents {
+class DataInputEventsLines(val emit: (String) -> Unit) : LoggedDataInput.DataInputEvents {
     override fun readFully(b: ByteArray) {
-        emit("readFully(size=${b.size}, bytes=0x${bytesToDisplay(b)})")
+        display("readFully", b)
     }
 
     override fun readFully(b: ByteArray, off: Int, len: Int) {
-        emit("readFully(off=$off, len=$len, size=${b.size}, bytes=0x${bytesToDisplay(b)})")
+        display("readFully", b, off, len)
     }
 
     override fun skipBytes(n: Int, result: Int) {
-        emit("skipBytes($n, $result)")
+        display("skipBytes", n, result)
     }
 
     override fun readBoolean(result: Boolean) {
-        emit("readBoolean($result)")
+        display("readBoolean", result)
     }
 
     override fun readByte(result: Byte) {
-        emit("readByte($result 0x${bytesToHex(listOf(result))})")
+        display("readByte", result)
     }
 
     override fun readUnsignedByte(result: Int) {
-        emit("readUnsignedByte($result 0x${bytesToHex(listOf(result.toByte()))})")
+        display("readUnsignedByte", result)
     }
 
     override fun readShort(result: Short) {
-        emit("readShort($result 0x${bytesToHex(shortToBytes(result))})")
+        display("readShort", result)
     }
 
     override fun readUnsignedShort(result: Int) {
-        emit("readUnsignedShort($result 0x${bytesToHex(shortToBytes(result.toShort()))})")
+        display("readUnsignedShort", result)
     }
 
     override fun readChar(result: Char) {
-        emit("readChar($result 0x${bytesToHex(listOf(result.code.toByte()))})")
+        display("readChar", result)
     }
 
     override fun readInt(result: Int) {
-        emit("readInt($result 0x${bytesToHex(intToBytes(result))})")
+        display("readInt", result)
     }
 
     override fun readLong(result: Long) {
-        emit("readLong($result 0x${bytesToHex(longToBytes(result))})")
+        display("readLong", result)
     }
 
     override fun readFloat(result: Float) {
-        emit("readFloat($result 0x${bytesToHex(doubleToBytes(result.toDouble()))})")
+        display("readFloat", result)
     }
 
     override fun readDouble(result: Double) {
-        emit("readDouble($result 0x${bytesToHex(doubleToBytes(result))})")
+        display("readDouble", result)
     }
 
     override fun readLine(result: String) {
-        emit("readLine(${result.length} '${sanitizeString(result)}')")
+        display("readLine", result)
     }
 
     override fun readUTF(result: String) {
-        emit("readUTF(${result.length} '${sanitizeString(result)}')")
+        display("readUTF", result)
     }
+
+    private fun display(caption: String, value: Int) {
+        emit(String.format("%-17s: %10d %10H", caption, value, value))
+    }
+
+    private fun display(caption: String, value: Long) {
+        emit(String.format("%-17s: %10d %10H", caption, value, value))
+    }
+
+    private fun display(caption: String, value: Double) {
+        emit(String.format("%-17s: %10f %10H", caption, value, value))
+    }
+
+    private fun display(caption: String, value: Char) {
+        emit(String.format("%-17s: %10s %10H", caption, value, value))
+    }
+
+    private fun display(caption: String, value: Byte) {
+        emit(String.format("%-17s: %10d %10H", caption, value, value))
+    }
+
+    private fun display(caption: String, value: Float) {
+        emit(String.format("%-17s: %10f %10H", caption, value, value))
+    }
+
+    private fun display(caption: String, value: Short) {
+        emit(String.format("%-17s: %10d %10H", caption, value, value))
+    }
+
+    private fun display(caption: String, value: Boolean) {
+        emit(String.format("%-17s: %10b %10H", caption, value, value))
+    }
+
+    private fun display(caption: String, value: String) {
+        val asHex = bytesToHex(value.toByteArray(Charsets.UTF_8))
+        val asString = sanitizeString(value)
+        emit(String.format("%-17s: %10s %10s", caption, asString, asHex))
+    }
+
+    private fun display(caption: String, value: ByteArray) {
+        val size = value.size
+        val asHex = bytesToHex(value)
+        val asString = bytesToSanitizedString(value)
+        emit(String.format("%-17s: [%d] %s %s", caption, size, asString, asHex))
+    }
+
+    private fun display(caption: String, value: ByteArray, off: Int, len: Int) {
+        val size = value.size
+        val asHex = bytesToHex(value)
+        val asString = bytesToSanitizedString(value)
+        emit(String.format("%-17s: [%d] %s %s off=%d len=%d", caption, size, asString, asHex, off, len))
+    }
+
+    private fun display(caption: String, n: Int, result: Int) {
+        emit(String.format("%-17s: n=%d result=%d", caption, n, result))
+    }
+
 }
