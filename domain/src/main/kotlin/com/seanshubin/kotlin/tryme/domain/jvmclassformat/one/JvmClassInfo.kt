@@ -1,8 +1,8 @@
-package com.seanshubin.kotlin.tryme.domain.jvmclassformat
+package com.seanshubin.kotlin.tryme.domain.jvmclassformat.one
 
 import java.io.DataInput
 
-class RawJvmClass(
+class JvmClassInfo(
     val magic: UInt,
     val minorVersion: UShort,
     val majorVersion: UShort,
@@ -20,28 +20,8 @@ class RawJvmClass(
     val attributeCount: UShort,
     val attributes: List<AttributeInfo>
 ) {
-    fun toObject(): Map<String, Any> {
-        return mapOf(
-            "magic" to magic,
-            "minorVersion" to minorVersion,
-            "majorVersion" to majorVersion,
-            "constantPoolCountPlusOne" to constantPoolCountPlusOne,
-            "constantPool" to constantPool.map { it.toObject() },
-            "accessFlags" to accessFlags,
-            "thisClass" to thisClass,
-            "superClass" to superClass,
-            "interfacesCount" to interfacesCount,
-            "interfaces" to interfaces.map { it.toInt() },
-            "fieldCount" to fieldCount,
-            "fields" to fields.map { it.toObject() },
-            "methodCount" to methodCount,
-            "methods" to methods.map { it.toObject() },
-            "attributeCount" to attributeCount,
-            "attributes" to attributes.map { it.toObject() }
-        )
-    }
     companion object {
-        fun fromDataInput(input: DataInput): RawJvmClass {
+        fun fromDataInput(input: DataInput): JvmClassInfo {
             val magic = input.readInt().toUInt()
             val minorVersion = input.readUnsignedShort().toUShort()
             val majorVersion = input.readUnsignedShort().toUShort()
@@ -59,7 +39,7 @@ class RawJvmClass(
             val attributeCount = input.readUnsignedShort().toUShort()
             val attributes = readAttributes(input, attributeCount)
             assertEndOfInput(input)
-            val rawJvmClass = RawJvmClass(
+            val rawJvmClass = JvmClassInfo(
                 magic,
                 minorVersion,
                 majorVersion,
@@ -81,20 +61,7 @@ class RawJvmClass(
         }
 
         fun readConstantPool(input: DataInput, constantPoolCount: UShort): List<ConstantPoolInfo> {
-            var index = 1
-            val result = mutableListOf<ConstantPoolInfo>()
-            while (index < constantPoolCount.toInt()) {
-                val constant = readConstant(input, index)
-                index += constant.entriesTaken()
-                result.add(constant)
-            }
-            return result
-        }
-
-        fun readConstant(input: DataInput, index: Int): ConstantPoolInfo {
-            val tagByte = input.readUnsignedByte()
-            val tag = ConstantPoolTag.fromByte(tagByte.toUByte())
-            return tag.load(input, index.toUShort())
+            return ConstantPoolInfoListFactory.fromDataInput(input, constantPoolCount)
         }
 
         fun readInterfaces(input: DataInput, interfacesCount: UShort): List<UShort> {

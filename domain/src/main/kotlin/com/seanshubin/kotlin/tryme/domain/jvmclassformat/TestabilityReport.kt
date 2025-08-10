@@ -1,7 +1,12 @@
 package com.seanshubin.kotlin.tryme.domain.jvmclassformat
 
 import java.nio.file.Path
-
+/*
+getstatic
+invokestatic
+putstatic
+new
+ */
 data class TestabilityReport(
     val testability:String,
     val path: Path,

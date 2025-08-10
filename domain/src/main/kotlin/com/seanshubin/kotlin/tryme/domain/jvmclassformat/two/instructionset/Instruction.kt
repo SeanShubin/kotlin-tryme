@@ -1,4 +1,4 @@
-package com.seanshubin.kotlin.tryme.domain.jvmclassformat.instructionset
+package com.seanshubin.kotlin.tryme.domain.jvmclassformat.two.instructionset
 
 sealed interface Instruction {
     val opCode: OpCode

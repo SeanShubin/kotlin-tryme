@@ -1,4 +1,4 @@
-package com.seanshubin.kotlin.tryme.domain.jvmclassformat.instructionset
+package com.seanshubin.kotlin.tryme.domain.jvmclassformat.two.instructionset
 
 enum class OpCode(val opcode: UByte, val opOpCodeArgs: OpCodeArgs) {
     aaload(0x32u, OpCodeArgs.NONE),

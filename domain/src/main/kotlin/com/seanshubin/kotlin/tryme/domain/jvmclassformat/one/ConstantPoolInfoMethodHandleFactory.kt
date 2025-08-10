@@ -1,0 +1,11 @@
+package com.seanshubin.kotlin.tryme.domain.jvmclassformat.one
+
+import java.io.DataInput
+
+object ConstantPoolInfoMethodHandleFactory : ConstantPoolInfoFactory {
+    override fun fromDataInput(input: DataInput, tag: ConstantPoolTag): ConstantPoolInfoMethodHandle {
+        val referenceKind = ReferenceKind.fromDataInput(input)
+        val referenceIndex = input.readUnsignedShort().toUShort()
+        return ConstantPoolInfoMethodHandle(tag, referenceKind, referenceIndex)
+    }
+}
