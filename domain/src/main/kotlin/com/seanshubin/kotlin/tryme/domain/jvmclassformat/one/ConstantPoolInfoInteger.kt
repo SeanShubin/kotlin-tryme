@@ -1,6 +1,7 @@
 package com.seanshubin.kotlin.tryme.domain.jvmclassformat.one
 
-import com.seanshubin.kotlin.tryme.domain.jvmclassformat.one.FormatUtil.bytesToLine
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.one.ByteUtil.bytesToInt
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.one.FormatUtil.bytesToHex
 
 class ConstantPoolInfoInteger(
     override val index: Int,
@@ -8,6 +9,8 @@ class ConstantPoolInfoInteger(
     val bytes: List<Byte>
 ) : ConstantPoolInfo {
     override fun line(): String {
-        return "[$index] ${tag.line()} bytes=${bytesToLine(bytes)}"
+        val bytesString = bytesToHex(bytes)
+        val asInt = bytesToInt(bytes)
+        return "[$index] ${tag.line()} bytes=$bytesString asInt=$asInt"
     }
 }

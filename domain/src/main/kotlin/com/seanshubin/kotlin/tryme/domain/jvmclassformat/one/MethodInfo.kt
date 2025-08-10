@@ -8,6 +8,16 @@ data class MethodInfo(
     val descriptorIndex: UShort,
     val attributes: List<AttributeInfo>
 ) {
+    fun lines():List<String>{
+        return listOf(
+            "accessFlags: $accessFlags",
+            "nameIndex: $nameIndex",
+            "descriptorIndex: $descriptorIndex",
+            "attributesCount: ${attributes.size}"
+        ) + attributes.mapIndexed { index, attributeInfo ->
+            "attribute[$index]:" + attributeInfo.line()
+        }
+    }
     companion object {
         fun fromDataInput(input: DataInput): MethodInfo {
             val accessFlags = AccessFlag.fromDataInput(input)

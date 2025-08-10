@@ -1,6 +1,7 @@
 package com.seanshubin.kotlin.tryme.domain.jvmclassformat.one
 
-import com.seanshubin.kotlin.tryme.domain.jvmclassformat.one.FormatUtil.bytesToLine
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.one.ByteUtil.bytesToDouble
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.one.FormatUtil.bytesToHex
 
 class ConstantPoolInfoDouble(
     override val index: Int,
@@ -9,6 +10,9 @@ class ConstantPoolInfoDouble(
     val lowBytes: List<Byte>
 ) : ConstantPoolInfo {
     override fun line(): String {
-        return "[$index] ${tag.line()} highBytes=${bytesToLine(highBytes)} lowBytes=${bytesToLine(lowBytes)}"
+        val highBytesString = bytesToHex(highBytes)
+        val lowBytesString = bytesToHex(lowBytes)
+        val asDouble = bytesToDouble(highBytes + lowBytes)
+        return "[$index] ${tag.line()} highBytes=$highBytesString lowBytes=$lowBytesString asDouble=$asDouble"
     }
 }

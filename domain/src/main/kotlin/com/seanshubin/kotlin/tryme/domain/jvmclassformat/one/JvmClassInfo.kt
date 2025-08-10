@@ -1,5 +1,8 @@
 package com.seanshubin.kotlin.tryme.domain.jvmclassformat.one
 
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.one.ByteUtil.intToBytes
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.one.FormatUtil.bytesToHex
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.one.FormatUtil.indent
 import java.io.DataInput
 
 class JvmClassInfo(
@@ -8,11 +11,11 @@ class JvmClassInfo(
     val majorVersion: UShort,
     val constantPoolCountPlusOne: UShort,
     val constantPool: List<ConstantPoolInfo>,
-    val accessFlags: UShort,
-    val thisClass: UShort,
-    val superClass: UShort,
+    val accessFlags: Set<AccessFlag>,
+    val thisClass: ConstantPoolInfoClass,
+    val superClass: ConstantPoolInfoClass?,
     val interfacesCount: UShort,
-    val interfaces: List<UShort>,
+    val interfaces: List<ConstantPoolInfoClass>,
     val fieldCount: UShort,
     val fields: List<FieldInfo>,
     val methodCount: UShort,
@@ -22,29 +25,48 @@ class JvmClassInfo(
 ) {
     fun lines(): List<String> {
         return listOf(
-            "magic: $magic",
+            "magic: ${bytesToHex(intToBytes(magic.toInt()))}",
             "minorVersion: $minorVersion",
             "majorVersion: $majorVersion",
-            "constantPoolCountPlusOne: $constantPoolCountPlusOne"
-        ) + constantPoolLines().map { "  $it" } +
-                listOf(
-                    "constantPool: ${constantPool.joinToString("\n")}",
-                    "accessFlags: $accessFlags",
-                    "thisClass: $thisClass",
-                    "superClass: $superClass",
-                    "interfacesCount: $interfacesCount",
-                    "interfaces: ${interfaces.joinToString(", ")}",
-                    "fieldCount: $fieldCount",
-                    "fields: ${fields.joinToString("\n")}",
-                    "methodCount: $methodCount",
-                    "methods: ${methods.joinToString("\n")}",
-                    "attributeCount: $attributeCount",
-                    "attributes: ${attributes.joinToString("\n")}"
-                )
+            "constantPoolCountPlusOne: $constantPoolCountPlusOne",
+            "accessFlags: $accessFlags",
+            "thisClass: ${thisClass.line()}",
+            "superClass: ${superClass?.line() ?: "null"}"
+        ) + constantPoolLines() + interfaceLines() + fieldLines() + methodLines() + attributeLines()
     }
 
     private fun constantPoolLines(): List<String> {
-        return constantPool.map { it.line() }
+        val header = "constant pool(${constantPool.size}):"
+        val body = constantPool.map { it.line() }.map(indent)
+        return listOf(header) + body
+    }
+
+    private fun interfaceLines(): List<String> {
+        val header = "interfaces(${interfaces.size}):"
+        val body = interfaces.map { it.line() }.map(indent)
+        return listOf(header) + body
+    }
+
+    private fun methodLines():List<String>{
+        val header = "methods(${methods.size}):"
+        val body = methods.flatMapIndexed { index, methodInfo ->
+            listOf("method[$index]:") + methodInfo.lines().map(indent)
+        }.map(indent)
+        return listOf(header) + body
+    }
+
+    private fun fieldLines(): List<String> {
+        val header = "fields(${fields.size}):"
+        val body = fields.flatMapIndexed { index, fieldInfo ->
+            listOf("field[$index]:") + fieldInfo.lines()
+        }
+        return listOf(header) + body
+    }
+
+    private fun attributeLines():List<String>{
+        return attributes.flatMapIndexed { index, attributeInfo ->
+            listOf("attribute[$index]:") + attributeInfo.line()
+        }
     }
 
     companion object {
@@ -54,11 +76,15 @@ class JvmClassInfo(
             val majorVersion = input.readUnsignedShort().toUShort()
             val constantPoolCount = input.readUnsignedShort().toUShort()
             val constantPool = readConstantPool(input, constantPoolCount)
-            val accessFlags = input.readUnsignedShort().toUShort()
-            val thisClass = input.readUnsignedShort().toUShort()
-            val superClass = input.readUnsignedShort().toUShort()
+            val constantsByIndex = constantPool.associateBy { it.index }
+            val accessFlags = AccessFlag.fromDataInput(input)
+            val thisClass = constantsByIndex.getValue(input.readUnsignedShort()) as ConstantPoolInfoClass
+            val superClassIndex = input.readUnsignedShort()
+            val superClass = if(superClassIndex==0) null else {
+                constantsByIndex.getValue(superClassIndex) as ConstantPoolInfoClass
+            }
             val interfacesCount = input.readUnsignedShort().toUShort()
-            val interfaces = readInterfaces(input, interfacesCount)
+            val interfaces = readInterfaces(input, interfacesCount, constantsByIndex)
             val fieldsCount = input.readUnsignedShort().toUShort()
             val fields = readFields(input, fieldsCount)
             val methodCount = input.readUnsignedShort().toUShort()
@@ -91,8 +117,11 @@ class JvmClassInfo(
             return ConstantPoolInfoListFactory.fromDataInput(input, constantPoolCount)
         }
 
-        fun readInterfaces(input: DataInput, interfacesCount: UShort): List<UShort> {
-            return (0 until interfacesCount.toInt()).map { input.readUnsignedShort().toUShort() }
+        fun readInterfaces(input: DataInput, interfacesCount: UShort, constantsByIndex:Map<Int, ConstantPoolInfo>): List<ConstantPoolInfoClass> {
+            return (0 until interfacesCount.toInt()).map {
+                val index = input.readUnsignedShort()
+                constantsByIndex[index] as ConstantPoolInfoClass
+            }
         }
 
         fun readFields(input: DataInput, fieldsCount: UShort): List<FieldInfo> {

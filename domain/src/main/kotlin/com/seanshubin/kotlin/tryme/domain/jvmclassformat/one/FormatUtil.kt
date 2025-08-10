@@ -1,10 +1,20 @@
 package com.seanshubin.kotlin.tryme.domain.jvmclassformat.one
 
 object FormatUtil {
-    fun bytesToLine(bytes: List<Byte>): String {
-        val compactHex = bytes.joinToString("") { byteToHex(it) }
-        val sanitizedString = String(bytes.map(::sanitizeByte).toByteArray(), Charsets.UTF_8)
-        return "$compactHex $sanitizedString"
+    val indent:(String)->String = { "  $it" }
+    fun bytesToDisplay(bytes: List<Byte>): String {
+        val asHex = bytesToHex(bytes)
+        val asString = bytesToSanitizedString(bytes)
+        return "$asHex $asString"
+
+    }
+
+    fun bytesToSanitizedString(bytes: List<Byte>): String {
+        return String(bytes.map(::sanitizeByte).toByteArray(), Charsets.UTF_8)
+    }
+
+    fun bytesToHex(bytes: List<Byte>): String {
+        return bytes.joinToString("") { byteToHex(it) }
     }
 
     fun byteToHex(byte: Byte): String {
@@ -18,10 +28,4 @@ object FormatUtil {
             '.'.code.toByte()
         }
     }
-//    fun toqHexString(byte: Byte): String {
-//        return String.format("%02x", byte)
-//    }
-//    fun toqHexString(bytes: List<Byte>): String {
-//        return bytes.joinToString("") { bytesToLine(it) }
-//    }
 }

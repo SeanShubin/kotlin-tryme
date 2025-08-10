@@ -9,6 +9,16 @@ data class FieldInfo(
     val attributesCount: UShort,
     val attributes: List<AttributeInfo>
 ) {
+    fun lines(): List<String> {
+        return listOf(
+            "accessFlags: $accessFlags",
+            "nameIndex: $nameIndex",
+            "descriptorIndex: $descriptorIndex",
+            "attributesCount: $attributesCount"
+        ) + attributes.mapIndexed { index, attributeInfo ->
+            "attribute[$index]:" + attributeInfo.line()
+        }
+    }
     companion object {
         fun fromDataInput(input: DataInput): FieldInfo {
             val accessFlags = input.readUnsignedShort().toUShort()
