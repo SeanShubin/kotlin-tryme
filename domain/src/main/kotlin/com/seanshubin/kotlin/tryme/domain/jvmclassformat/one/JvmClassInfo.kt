@@ -59,14 +59,16 @@ class JvmClassInfo(
         val header = "fields(${fields.size}):"
         val body = fields.flatMapIndexed { index, fieldInfo ->
             listOf("field[$index]:") + fieldInfo.lines()
-        }
+        }.map(indent)
         return listOf(header) + body
     }
 
     private fun attributeLines():List<String>{
-        return attributes.flatMapIndexed { index, attributeInfo ->
-            listOf("attribute[$index]:") + attributeInfo.line()
-        }
+        val header = "attributes(${attributes.size}):"
+        val body = attributes.flatMapIndexed { index, attributeInfo ->
+            listOf("attribute[$index]:") + indent(attributeInfo.line())
+        }.map(indent)
+        return listOf(header) + body
     }
 
     companion object {
