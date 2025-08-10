@@ -20,6 +20,33 @@ class JvmClassInfo(
     val attributeCount: UShort,
     val attributes: List<AttributeInfo>
 ) {
+    fun lines(): List<String> {
+        return listOf(
+            "magic: $magic",
+            "minorVersion: $minorVersion",
+            "majorVersion: $majorVersion",
+            "constantPoolCountPlusOne: $constantPoolCountPlusOne"
+        ) + constantPoolLines().map{"  $it"} +
+                listOf(
+                    "constantPool: ${constantPool.joinToString("\n")}",
+                    "accessFlags: $accessFlags",
+                    "thisClass: $thisClass",
+                    "superClass: $superClass",
+                    "interfacesCount: $interfacesCount",
+                    "interfaces: ${interfaces.joinToString(", ")}",
+                    "fieldCount: $fieldCount",
+                    "fields: ${fields.joinToString("\n")}",
+                    "methodCount: $methodCount",
+                    "methods: ${methods.joinToString("\n")}",
+                    "attributeCount: $attributeCount",
+                    "attributes: ${attributes.joinToString("\n")}"
+                )
+    }
+
+    private fun constantPoolLines(): List<String> {
+        return constantPool.map { it.line() }
+    }
+
     companion object {
         fun fromDataInput(input: DataInput): JvmClassInfo {
             val magic = input.readInt().toUInt()

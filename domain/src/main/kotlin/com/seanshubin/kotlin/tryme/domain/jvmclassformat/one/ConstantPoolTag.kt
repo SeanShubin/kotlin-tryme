@@ -20,7 +20,7 @@ enum class ConstantPoolTag(val value: UByte, val entriesTaken: Int) {
     INVOKEDYNAMIC(18u, 1),
     MODULE(19u, 1),
     PACKAGE(20u, 1);
-
+    fun line():String = "${this.name}($value)"
     companion object {
         fun fromDataInput(input: DataInput): ConstantPoolTag {
             val value = input.readUnsignedByte().toUByte()

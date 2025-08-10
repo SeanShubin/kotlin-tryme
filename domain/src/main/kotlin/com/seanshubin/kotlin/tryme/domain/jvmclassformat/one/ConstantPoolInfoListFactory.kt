@@ -7,7 +7,7 @@ object ConstantPoolInfoListFactory {
         var index = 1
         val result = mutableListOf<ConstantPoolInfo>()
         while (index < constantPoolCount.toInt()) {
-            val constant = ConstantPoolInfoFactory.fromDataInput(input)
+            val constant = ConstantPoolInfoFactory.fromDataInput(input, index)
             index += constant.entriesTaken
             result.add(constant)
         }

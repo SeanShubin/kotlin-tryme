@@ -23,5 +23,6 @@ object ParseOneApp {
         val jvmClassInfo = DataInputStream(Files.newInputStream(inputFile)).use { inputStream ->
             JvmClassInfo.fromDataInput(inputStream)
         }
+        jvmClassInfo.lines().forEach(::println)
     }
 }
