@@ -15,6 +15,11 @@ object ParseStandardLibraryApp {
         val startTime = System.currentTimeMillis()
         val inputDir = Paths.get("generated", "jmods")
         val summaryFile  = outputDir.resolve("summary.txt")
+        Files.deleteIfExists(summaryFile)
+        fun emitSummary(line: String) {
+            Files.write(summaryFile, listOf(line), StandardOpenOption.CREATE, StandardOpenOption.APPEND)
+            println(line)
+        }
         var filesParsed = 0
         val codeHistogram = mutableMapOf<Code, Int>()
         Code.entries.forEach { code ->
@@ -33,17 +38,16 @@ object ParseStandardLibraryApp {
             }
         }
         Files.walkFileTree(inputDir, ParseVisitor(inputDir, events))
-        println("Parsed $filesParsed files")
-        println("Total codes: $totalCodes")
-        println("Code histogram:")
+        emitSummary("Parsed $filesParsed files")
+        emitSummary("Total codes: $totalCodes")
+        emitSummary("Code histogram:")
         codeHistogram.entries.sortedByDescending { it.value }.forEach { (code, count) ->
             println("  $code: $count")
         }
         val endTime = System.currentTimeMillis()
         val durationMillis = endTime - startTime
         DurationFormat.milliseconds.format(durationMillis).let {
-            Files.write(summaryFile, listOf("Time taken: $it"), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
-            println(it)
+            emitSummary("Time taken: $it")
         }
     }
 

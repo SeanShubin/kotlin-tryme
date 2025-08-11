@@ -12,13 +12,16 @@ object ParseOneJavaLibraryApp {
         val inputDir = Paths.get("generated", "jmods")
         val outputDir = Paths.get("generated", "jmod-report2")
         val summaryFile  = outputDir.resolve("summary.txt")
+        val summary = Summary()
         val events = object:Parser.Events{
             override fun parsingFile(file: Path, outputDir:Path) {
-//                println("Parsing $file -> $outputDir")
+                println("Parsing $file -> $outputDir")
+                summary.parsingFile(file)
             }
 
             override fun finishedDir(profiler: Profiler) {
                 Files.write(summaryFile,profiler.lines(), StandardOpenOption.CREATE, StandardOpenOption.APPEND)
+                Files.write(summaryFile, summary.lines(), StandardOpenOption.CREATE, StandardOpenOption.APPEND)
             }
         }
         val profiler = Profiler()
