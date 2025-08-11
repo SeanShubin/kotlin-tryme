@@ -1,5 +1,6 @@
 package com.seanshubin.kotlin.tryme.domain.jvmclassformat.one
 
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.util.Profiler
 import java.io.DataInput
 
 object ConstantPoolInfoUtf8Factory : ConstantPoolInfoFactory {
@@ -7,6 +8,8 @@ object ConstantPoolInfoUtf8Factory : ConstantPoolInfoFactory {
         val length = input.readUnsignedShort()
         val bytes = ByteArray(length)
         input.readFully(bytes)
-        return ConstantPoolInfoUtf8(index, tag, length.toUShort(), bytes.toList())
+        val lengthUShort = length.toUShort()
+        val bytesList = bytes.toList()
+        return ConstantPoolInfoUtf8(index, tag, lengthUShort, bytesList)
     }
 }

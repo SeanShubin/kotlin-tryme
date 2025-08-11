@@ -77,15 +77,13 @@ class JvmClassInfo(
     }
 
     companion object {
-        fun fromDataInput(input: DataInput, profiler: Profiler): JvmClassInfo {
+        fun fromDataInput(input: DataInput): JvmClassInfo {
             val magic = input.readInt().toUInt()
             val minorVersion = input.readUnsignedShort().toUShort()
             val majorVersion = input.readUnsignedShort().toUShort()
             val constantPoolCount = input.readUnsignedShort().toUShort()
-            val constantPool = profiler.measure("readConstantPool") {
-                readConstantPool(input, constantPoolCount, profiler)
-            }
-            val constantsByIndex = profiler.measure("associateBy") { constantPool.associateBy { it.index } }
+            val constantPool = readConstantPool(input, constantPoolCount)
+            val constantsByIndex = constantPool.associateBy { it.index }
             val accessFlags = AccessFlag.fromDataInput(input)
             val thisClass = constantsByIndex.getValue(input.readUnsignedShort()) as ConstantPoolInfoClass
             val superClassIndex = input.readUnsignedShort()
@@ -93,18 +91,15 @@ class JvmClassInfo(
                 constantsByIndex.getValue(superClassIndex) as ConstantPoolInfoClass
             }
             val interfacesCount = input.readUnsignedShort().toUShort()
-            val interfaces =
-                profiler.measure("readInterfaces") {
-                    readInterfaces(input, interfacesCount, constantsByIndex)
-                }
+            val interfaces =readInterfaces(input, interfacesCount, constantsByIndex)
             val fieldsCount = input.readUnsignedShort().toUShort()
-            val fields = profiler.measure("readFields") { readFields(input, fieldsCount) }
+            val fields = readFields(input, fieldsCount)
             val methodCount = input.readUnsignedShort().toUShort()
-            val methods = profiler.measure("readMethods") { readMethods(input, methodCount) }
+            val methods = readMethods(input, methodCount)
             val attributeCount = input.readUnsignedShort().toUShort()
-            val attributes = profiler.measure("readAttributes") { readAttributes(input, attributeCount) }
-            profiler.measure("assertEndOfInput") { assertEndOfInput(input) }
-            val rawJvmClass = profiler.measure("constructor") {
+            val attributes = readAttributes(input, attributeCount)
+            assertEndOfInput(input)
+            val rawJvmClass =
                 JvmClassInfo(
                     magic,
                     minorVersion,
@@ -123,12 +118,11 @@ class JvmClassInfo(
                     attributeCount,
                     attributes
                 )
-            }
             return rawJvmClass
         }
 
-        fun readConstantPool(input: DataInput, constantPoolCount: UShort, profiler: Profiler): List<ConstantPoolInfo> {
-            return ConstantPoolInfoListFactory.fromDataInput(input, constantPoolCount, profiler)
+        fun readConstantPool(input: DataInput, constantPoolCount: UShort): List<ConstantPoolInfo> {
+            return ConstantPoolInfoListFactory.fromDataInput(input, constantPoolCount)
         }
 
         fun readInterfaces(

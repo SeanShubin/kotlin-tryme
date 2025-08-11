@@ -15,8 +15,7 @@ import java.nio.file.attribute.BasicFileAttributes
 class Parser(
     private val inputDir:Path,
     private val baseOutputDir:Path,
-    private val events: Events,
-    private val profiler: Profiler
+    private val events: Events
 ) {
     fun parseFile(inputFile:Path) {
         val relativePath = inputDir.relativize(inputFile)
@@ -33,19 +32,14 @@ class Parser(
         val dataEvents = DataInputEventsLines(emitToDataFile)
         val jvmClassInfo = Files.newInputStream(inputFile).use { inputStream ->
             val loggedDataInput = LoggedDataInput(DataInputStream(inputStream), dataEvents)
-            profiler.measure("JvmClassInfo.fromDataInput"){
-                JvmClassInfo.fromDataInput(loggedDataInput, profiler)
-            }
+                JvmClassInfo.fromDataInput(loggedDataInput)
         }
         Files.createDirectories(structureFile.parent)
         Files.write(structureFile, jvmClassInfo.lines(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
     }
 
     fun parseDir() {
-        profiler.measure("parseDir"){
-            Files.walkFileTree(inputDir, ParseVisitor(inputDir, baseOutputDir, events))
-        }
-        events.finishedDir(profiler)
+        Files.walkFileTree(inputDir, ParseVisitor(inputDir, baseOutputDir, events))
     }
 
     fun splitExt(path: Path): Pair<String, String> {
@@ -92,6 +86,6 @@ class Parser(
     }
     interface Events{
         fun parsingFile(file: Path, outputDir:Path)
-        fun finishedDir(profiler: Profiler)
+        fun finishedApp(startTime:Long, endTime:Long)
     }
 }

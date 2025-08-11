@@ -30,16 +30,12 @@ object ParseOneApp {
                 println("Parsing $file -> $outputDir")
             }
 
-            override fun finishedDir(profiler: Profiler) {
-                Files.write(
-                    summaryFile,
-                    profiler.lines(),
-                    StandardOpenOption.CREATE, StandardOpenOption.APPEND
-                )
+            override fun finishedApp(startTime: Long, endTime: Long) {
+                throw UnsupportedOperationException("Not Implemented!")
             }
         }
         val profiler = Profiler()
-        val parser = Parser(inputDir, outputDir, events, profiler)
+        val parser = Parser(inputDir, outputDir, events)
         parser.parseFile(inputFile)
     }
 }

@@ -4,12 +4,12 @@ import com.seanshubin.kotlin.tryme.domain.jvmclassformat.util.Profiler
 import java.io.DataInput
 
 object ConstantPoolInfoListFactory {
-    fun fromDataInput(input: DataInput, constantPoolCount: UShort, profiler: Profiler): List<ConstantPoolInfo> {
+    fun fromDataInput(input: DataInput, constantPoolCount: UShort): List<ConstantPoolInfo> {
         val count = constantPoolCount.toInt()
         var index = 1
         val result = mutableListOf<ConstantPoolInfo>()
         while (index < count) {
-            val constant = ConstantPoolInfoFactory.fromDataInput(input, index, profiler)
+            val constant = ConstantPoolInfoFactory.fromDataInput(input, index)
             index += constant.entriesTaken
             result.add(constant)
         }

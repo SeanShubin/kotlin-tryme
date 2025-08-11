@@ -27,11 +27,11 @@ interface ConstantPoolInfoFactory {
             ConstantPoolTag.PACKAGE to ConstantPoolInfoPackageFactory
         )
 
-        fun fromDataInput(input: DataInput, index: Int, profiler: Profiler): ConstantPoolInfo {
+        fun fromDataInput(input: DataInput, index: Int): ConstantPoolInfo {
             val tag = ConstantPoolTag.fromDataInput(input)
             val factory = constantPoolFactoryMap[tag]
                 ?: throw UnsupportedOperationException("No factory for tag $tag")
-            return profiler.measure("tag.${tag.name}"){ factory.fromDataInput(input, index, tag)}
+            return factory.fromDataInput(input, index, tag)
         }
     }
 }

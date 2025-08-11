@@ -1,5 +1,6 @@
 package com.seanshubin.kotlin.tryme.domain.jvmclassformat.one
 
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.util.Profiler
 import java.io.DataInput
 
 object ConstantPoolInfoFloatFactory : ConstantPoolInfoFactory {
