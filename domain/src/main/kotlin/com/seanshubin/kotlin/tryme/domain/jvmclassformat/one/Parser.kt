@@ -2,6 +2,7 @@ package com.seanshubin.kotlin.tryme.domain.jvmclassformat.one
 
 import com.seanshubin.kotlin.tryme.domain.jvmclassformat.util.DataInputEventsLines
 import com.seanshubin.kotlin.tryme.domain.jvmclassformat.util.LoggedDataInput
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.util.Profiler
 import java.io.DataInputStream
 import java.io.IOException
 import java.nio.file.FileVisitResult
@@ -11,8 +12,13 @@ import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 import java.nio.file.attribute.BasicFileAttributes
 
-object ParseUtil {
-    fun parseFile(inputDir:Path, baseOutputDir:Path, inputFile:Path, events:Events) {
+class Parser(
+    private val inputDir:Path,
+    private val baseOutputDir:Path,
+    private val events: Events,
+    private val profiler: Profiler
+) {
+    fun parseFile(inputFile:Path) {
         val relativePath = inputDir.relativize(inputFile)
         val outputDir = baseOutputDir.resolve(relativePath.parent)
         events.parsingFile(inputFile, outputDir)
@@ -27,18 +33,19 @@ object ParseUtil {
         val dataEvents = DataInputEventsLines(emitToDataFile)
         val jvmClassInfo = Files.newInputStream(inputFile).use { inputStream ->
             val loggedDataInput = LoggedDataInput(DataInputStream(inputStream), dataEvents)
-            JvmClassInfo.fromDataInput(loggedDataInput)
+            profiler.measure("JvmClassInfo.fromDataInput"){
+                JvmClassInfo.fromDataInput(loggedDataInput, profiler)
+            }
         }
         Files.createDirectories(structureFile.parent)
         Files.write(structureFile, jvmClassInfo.lines(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
     }
 
-    fun parseDir(inputDir: Path, outputDir:Path, events:Events) {
-        val startTime = System.currentTimeMillis()
-        Files.walkFileTree(inputDir, ParseVisitor(inputDir, outputDir, events))
-        val endTime = System.currentTimeMillis()
-        val duration = endTime - startTime
-        events.timeTaken(duration)
+    fun parseDir() {
+        profiler.measure("parseDir"){
+            Files.walkFileTree(inputDir, ParseVisitor(inputDir, baseOutputDir, events))
+        }
+        events.finishedDir(profiler)
     }
 
     fun splitExt(path: Path): Pair<String, String> {
@@ -51,7 +58,7 @@ object ParseUtil {
         }
     }
 
-    class ParseVisitor(private val inputDir: Path, private val outputDir:Path, private val events:Events) : FileVisitor<Path> {
+    inner class ParseVisitor(private val inputDir: Path, private val outputDir:Path, private val events:Events) : FileVisitor<Path> {
         override fun preVisitDirectory(
             dir: Path,
             attrs: BasicFileAttributes
@@ -64,7 +71,7 @@ object ParseUtil {
             attrs: BasicFileAttributes
         ): FileVisitResult {
             if(file.toString().endsWith(".class")){
-                parseFile(inputDir, outputDir, file, events)
+                parseFile(file)
             }
             return FileVisitResult.CONTINUE
         }
@@ -84,7 +91,7 @@ object ParseUtil {
         }
     }
     interface Events{
-        fun timeTaken(millis: Long)
         fun parsingFile(file: Path, outputDir:Path)
+        fun finishedDir(profiler: Profiler)
     }
 }

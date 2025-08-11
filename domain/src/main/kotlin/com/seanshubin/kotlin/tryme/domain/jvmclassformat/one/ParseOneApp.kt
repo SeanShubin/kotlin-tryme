@@ -1,7 +1,7 @@
 package com.seanshubin.kotlin.tryme.domain.jvmclassformat.one
 
 import com.seanshubin.kotlin.tryme.domain.format.DurationFormat
-import java.io.DataInputStream
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.util.Profiler
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
@@ -23,20 +23,23 @@ object ParseOneApp {
         )
         val inputFile = inputDir.resolve("Sample1.class")
         val outputDir = Paths.get("generated", "sample")
-        val events = object : ParseUtil.Events {
-            override fun timeTaken(millis: Long) {
-                val formattedTime = DurationFormat.milliseconds.format(millis)
-                Files.write(
-                    outputDir.resolve("summary.txt"),
-                    listOf("Time taken: $formattedTime"),
-                    StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING
-                )
-            }
-
+        val summaryFile = outputDir.resolve("summary.txt")
+        Files.deleteIfExists(summaryFile)
+        val events = object : Parser.Events {
             override fun parsingFile(file: java.nio.file.Path, outputDir: java.nio.file.Path) {
                 println("Parsing $file -> $outputDir")
             }
+
+            override fun finishedDir(profiler: Profiler) {
+                Files.write(
+                    summaryFile,
+                    profiler.lines(),
+                    StandardOpenOption.CREATE, StandardOpenOption.APPEND
+                )
+            }
         }
-        ParseUtil.parseFile(inputDir, outputDir, inputFile, events)
+        val profiler = Profiler()
+        val parser = Parser(inputDir, outputDir, events, profiler)
+        parser.parseFile(inputFile)
     }
 }

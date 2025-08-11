@@ -1,5 +1,6 @@
 package com.seanshubin.kotlin.tryme.domain.jvmclassformat.one
 
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.util.Profiler
 import java.io.DataInput
 
 interface ConstantPoolInfoFactory {
@@ -26,11 +27,11 @@ interface ConstantPoolInfoFactory {
             ConstantPoolTag.PACKAGE to ConstantPoolInfoPackageFactory
         )
 
-        fun fromDataInput(input: DataInput, index: Int): ConstantPoolInfo {
+        fun fromDataInput(input: DataInput, index: Int, profiler: Profiler): ConstantPoolInfo {
             val tag = ConstantPoolTag.fromDataInput(input)
             val factory = constantPoolFactoryMap[tag]
                 ?: throw UnsupportedOperationException("No factory for tag $tag")
-            return factory.fromDataInput(input, index, tag)
+            return profiler.measure("tag.${tag.name}"){ factory.fromDataInput(input, index, tag)}
         }
     }
 }
