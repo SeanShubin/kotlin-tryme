@@ -35,7 +35,7 @@ object FormatUtil {
     }
 
     fun byteToHex(byte: Byte): String {
-        return String.format("%02x", byte)
+        return String.format("%02X", byte)
     }
 
     fun sanitizeByte(byte: Byte): Byte {

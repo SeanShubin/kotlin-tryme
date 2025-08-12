@@ -29,7 +29,8 @@ class Parser(
         val emitToDataFile:(String)->Unit = { line ->
             Files.writeString(dataFile, line + System.lineSeparator(), StandardOpenOption.CREATE, StandardOpenOption.APPEND)
         }
-        val dataEvents = DataInputEventsLines(emitToDataFile)
+        val dataEvents: LoggedDataInput.DataInputEvents = DataInputEventsLines(emitToDataFile)
+//        val dataEvents: LoggedDataInput.DataInputEvents = LoggedDataInput.DataInputEvents.nop
         val jvmClassInfo = Files.newInputStream(inputFile).use { inputStream ->
             val loggedDataInput = LoggedDataInput(DataInputStream(inputStream), dataEvents)
                 JvmClassInfo.fromDataInput(loggedDataInput)
