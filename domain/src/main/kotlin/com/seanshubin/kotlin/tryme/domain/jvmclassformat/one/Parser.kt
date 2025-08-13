@@ -15,7 +15,8 @@ import java.nio.file.attribute.BasicFileAttributes
 class Parser(
     private val inputDir:Path,
     private val baseOutputDir:Path,
-    private val events: Events
+    private val events: Events,
+    private val profiler:Profiler
 ) {
     fun parseFile(inputFile:Path) {
         val relativePath = inputDir.relativize(inputFile)
@@ -26,17 +27,19 @@ class Parser(
         Files.createDirectories(dataFile.parent)
         Files.deleteIfExists(dataFile)
         val structureFile = outputDir.resolve(fileNameWithoutExt + "-structure.txt")
-        val emitToDataFile:(String)->Unit = { line ->
-            Files.writeString(dataFile, line + System.lineSeparator(), StandardOpenOption.CREATE, StandardOpenOption.APPEND)
+        val dataLines = mutableListOf<String>()
+        val emitToDataLine:(String)->Unit = { line ->
+            dataLines.add(line)
         }
-        val dataEvents: LoggedDataInput.DataInputEvents = DataInputEventsLines(emitToDataFile)
+        val dataEvents: LoggedDataInput.DataInputEvents = DataInputEventsLines(emitToDataLine)
 //        val dataEvents: LoggedDataInput.DataInputEvents = LoggedDataInput.DataInputEvents.nop
         val jvmClassInfo = Files.newInputStream(inputFile).use { inputStream ->
-            val loggedDataInput = LoggedDataInput(DataInputStream(inputStream), dataEvents)
+            val loggedDataInput = LoggedDataInput(DataInputStream(inputStream), dataEvents, profiler)
                 JvmClassInfo.fromDataInput(loggedDataInput)
         }
         Files.createDirectories(structureFile.parent)
         Files.write(structureFile, jvmClassInfo.lines(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
+        Files.write(dataFile, dataLines, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
     }
 
     fun parseDir() {

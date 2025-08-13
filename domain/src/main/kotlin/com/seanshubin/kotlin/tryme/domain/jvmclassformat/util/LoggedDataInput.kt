@@ -4,99 +4,133 @@ import java.io.DataInput
 import java.io.DataInputStream
 import java.io.InputStream
 
-class LoggedDataInput(private val delegate: DataInput, private val dataInputEvents: DataInputEvents) : DataInput {
+class LoggedDataInput(
+    private val delegate: DataInput,
+    private val dataInputEvents: DataInputEvents,
+    private val profiler:Profiler
+) : DataInput {
     override fun readFully(b: ByteArray) {
-        delegate.readFully(b)
-        dataInputEvents.readFully(b)
+        profiler.measure("readFully") {
+            delegate.readFully(b)
+            dataInputEvents.readFully(b)
+        }
     }
 
     override fun readFully(b: ByteArray, off: Int, len: Int) {
-        delegate.readFully(b, off, len)
-        dataInputEvents.readFully(b, off, len)
+        profiler.measure("readFully") {
+            delegate.readFully(b, off, len)
+            dataInputEvents.readFully(b, off, len)
+        }
     }
 
     override fun skipBytes(n: Int): Int {
-        val result = delegate.skipBytes(n)
-        dataInputEvents.skipBytes(n, result)
-        return result
+        return profiler.measure("skipBytes") {
+            val result = delegate.skipBytes(n)
+            dataInputEvents.skipBytes(n, result)
+            result
+        }
     }
 
     override fun readBoolean(): Boolean {
-        val result = delegate.readBoolean()
-        dataInputEvents.readBoolean(result)
-        return result
+        return profiler.measure("readBoolean") {
+            val result = delegate.readBoolean()
+            dataInputEvents.readBoolean(result)
+            result
+        }
     }
 
     override fun readByte(): Byte {
-        val result = delegate.readByte()
-        dataInputEvents.readByte(result)
-        return result
+        return profiler.measure("readByte") {
+            val result = delegate.readByte()
+            dataInputEvents.readByte(result)
+            result
+        }
     }
 
     override fun readUnsignedByte(): Int {
-        val result = delegate.readUnsignedByte()
-        dataInputEvents.readUnsignedByte(result)
-        return result
+        return profiler.measure("readUnsignedByte") {
+            val result = delegate.readUnsignedByte()
+            dataInputEvents.readUnsignedByte(result)
+            result
+        }
     }
 
     override fun readShort(): Short {
-        val result = delegate.readShort()
-        dataInputEvents.readShort(result)
-        return result
+        return profiler.measure("readShort") {
+            val result = delegate.readShort()
+            dataInputEvents.readShort(result)
+            result
+        }
     }
 
     override fun readUnsignedShort(): Int {
-        val result = delegate.readUnsignedShort()
-        dataInputEvents.readUnsignedShort(result)
-        return result
+        return profiler.measure("readUnsignedShort") {
+            val result = delegate.readUnsignedShort()
+            dataInputEvents.readUnsignedShort(result)
+            result
+        }
     }
 
     override fun readChar(): Char {
-        val result = delegate.readChar()
-        dataInputEvents.readChar(result)
-        return result
+        return profiler.measure("readChar") {
+            val result = delegate.readChar()
+            dataInputEvents.readChar(result)
+            result
+        }
     }
 
     override fun readInt(): Int {
-        val result = delegate.readInt()
-        dataInputEvents.readInt(result)
-        return result
+        return profiler.measure("readInt") {
+            val result = delegate.readInt()
+            dataInputEvents.readInt(result)
+            result
+        }
     }
 
     override fun readLong(): Long {
-        val result = delegate.readLong()
-        dataInputEvents.readLong(result)
-        return result
+        return profiler.measure("readLong") {
+            val result = delegate.readLong()
+            dataInputEvents.readLong(result)
+            result
+        }
     }
 
     override fun readFloat(): Float {
-        val result = delegate.readFloat()
-        dataInputEvents.readFloat(result)
-        return result
+        return profiler.measure("readFloat") {
+            val result = delegate.readFloat()
+            dataInputEvents.readFloat(result)
+            result
+        }
     }
 
     override fun readDouble(): Double {
-        val result = delegate.readDouble()
-        dataInputEvents.readDouble(result)
-        return result
+        return profiler.measure("readDouble") {
+            val result = delegate.readDouble()
+            dataInputEvents.readDouble(result)
+            result
+        }
     }
 
     override fun readLine(): String? {
-        val result = delegate.readLine()
-        dataInputEvents.readLine(result ?: "")
-        return result
+        return profiler.measure("readLine") {
+            val result = delegate.readLine()
+            dataInputEvents.readLine(result ?: "")
+            result
+        }
     }
 
     override fun readUTF(): String {
-        val result = delegate.readUTF()
-        dataInputEvents.readUTF(result)
-        return result
+        return profiler.measure("readUTF") {
+            val result = delegate.readUTF()
+            dataInputEvents.readUTF(result)
+            result
+        }
     }
 
     companion object {
-        fun fromInputStream(inputStream: InputStream, events:DataInputEvents):LoggedDataInput{
+        fun fromInputStream(inputStream: InputStream, events:DataInputEvents, profiler:Profiler):LoggedDataInput{
             val dataInputStream = DataInputStream(inputStream)
-            return LoggedDataInput(dataInputStream, events)
+            return LoggedDataInput(dataInputStream, events, profiler)
         }
     }
 

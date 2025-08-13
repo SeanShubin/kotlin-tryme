@@ -35,7 +35,7 @@ object ParseOneApp {
             }
         }
         val profiler = Profiler()
-        val parser = Parser(inputDir, outputDir, events)
+        val parser = Parser(inputDir, outputDir, events, profiler)
         parser.parseFile(inputFile)
     }
 }

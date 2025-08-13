@@ -1,6 +1,7 @@
 package com.seanshubin.kotlin.tryme.domain.jvmclassformat.one
 
 import com.seanshubin.kotlin.tryme.domain.format.DurationFormat
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.util.Profiler
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -9,11 +10,14 @@ import java.nio.file.StandardOpenOption
 object ParseOneJavaLibraryApp {
     @JvmStatic
     fun main(args: Array<String>) {
+        val profiler = Profiler()
         val startTime = System.currentTimeMillis()
-        val inputDir = Paths.get("generated", "jmods")
+        val inputDir = Paths.get("generated", "jmods", "java.base.jmod")
         val outputDir = Paths.get("generated", "jmod-report2")
         val summaryFile  = outputDir.resolve("summary.txt")
+        val profilerFile  = outputDir.resolve("profiler.txt")
         Files.deleteIfExists(summaryFile)
+        Files.deleteIfExists(profilerFile)
         val summary = Summary()
         val events = object:Parser.Events{
             override fun parsingFile(file: Path, outputDir:Path) {
@@ -27,10 +31,11 @@ object ParseOneJavaLibraryApp {
                 val durationFormatted = DurationFormat.milliseconds.format(duration)
                 val timeTakenLine = "Parsed ${summary.filesParsed} files in $durationFormatted"
                 Files.write(summaryFile, listOf(timeTakenLine), StandardOpenOption.CREATE, StandardOpenOption.APPEND)
+                Files.write(profilerFile, profiler.lines(), StandardOpenOption.CREATE, StandardOpenOption.APPEND)
                 println(timeTakenLine)
             }
         }
-        val parser = Parser(inputDir, outputDir, events)
+        val parser = Parser(inputDir, outputDir, events, profiler)
         parser.parseDir()
         val endTime = System.currentTimeMillis()
         events.finishedApp(startTime, endTime)

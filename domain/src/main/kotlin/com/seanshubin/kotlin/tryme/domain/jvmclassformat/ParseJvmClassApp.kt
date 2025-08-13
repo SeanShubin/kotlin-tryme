@@ -1,6 +1,7 @@
 package com.seanshubin.kotlin.tryme.domain.jvmclassformat
 
 import com.seanshubin.kotlin.tryme.domain.json.JsonMappers
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.util.Profiler
 import java.io.DataInputStream
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -8,6 +9,7 @@ import java.nio.file.Paths
 object ParseJvmClassApp {
     @JvmStatic
     fun main(args: Array<String>) {
+        val profiler = Profiler()
         val inputDir = Paths.get("domain", "target")
         val relativeFilePath =
             Paths.get("classes", "com", "seanshubin", "kotlin", "tryme", "domain", "jvmclassformat", "SampleApp.class")
@@ -20,7 +22,7 @@ object ParseJvmClassApp {
         val emit: (String) -> Unit = { dataInputLines.add(it) }
         val rawJvmClass = Files.newInputStream(filePath).use { inputStream ->
             val dataInput = DataInputStream(inputStream)
-            val debugDataInput = DebugDataInput(dataInput, emit)
+            val debugDataInput = DebugDataInput(dataInput, emit, profiler)
             RawJvmClass.fromDataInput(debugDataInput)
         }
         Files.write(dataPath, dataInputLines)

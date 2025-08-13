@@ -1,14 +1,18 @@
 package com.seanshubin.kotlin.tryme.domain.jvmclassformat
 
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.util.Profiler
 import java.io.DataInput
 
 class DebugDataInput(
     private val delegate: DataInput,
-    private val emit: (String) -> Unit
+    private val emit: (String) -> Unit,
+    private val profiler: Profiler
 ) : DataInput {
     override fun readFully(b: ByteArray) {
-        delegate.readFully(b)
-        debug("readFully", b)
+        profiler.measure("readFully") {
+            delegate.readFully(b)
+            debug("readFully", b)
+        }
     }
 
     override fun readFully(b: ByteArray, off: Int, len: Int) {
@@ -28,9 +32,11 @@ class DebugDataInput(
     }
 
     override fun readUnsignedByte(): Int {
-        val value = delegate.readUnsignedByte()
-        debug("readUnsignedByte", value)
-        return value
+        return profiler.measure("readUnsignedByte") {
+            val value = delegate.readUnsignedByte()
+            debug("readUnsignedByte", value)
+            value
+        }
     }
 
     override fun readShort(): Short {
@@ -38,9 +44,11 @@ class DebugDataInput(
     }
 
     override fun readUnsignedShort(): Int {
-        val value = delegate.readUnsignedShort()
-        debug("readUnsignedShort", value)
-        return value
+        return profiler.measure("readUnsignedShort") {
+            val value = delegate.readUnsignedShort()
+            debug("readUnsignedShort", value)
+            value
+        }
     }
 
     override fun readChar(): Char {
@@ -48,27 +56,35 @@ class DebugDataInput(
     }
 
     override fun readInt(): Int {
-        val value = delegate.readInt()
-        debug("readInt", value)
-        return value
+        return profiler.measure("readInt") {
+            val value = delegate.readInt()
+            debug("readInt", value)
+            value
+        }
     }
 
     override fun readLong(): Long {
-        val value = delegate.readLong()
-        debug("readLong", value)
-        return value
+        return profiler.measure("readLong") {
+            val value = delegate.readLong()
+            debug("readLong", value)
+            value
+        }
     }
 
     override fun readFloat(): Float {
-        val value = delegate.readFloat()
-        debug("readFloat", value)
-        return value
+        return profiler.measure("readFloat") {
+            val value = delegate.readFloat()
+            debug("readFloat", value)
+            value
+        }
     }
 
     override fun readDouble(): Double {
-        val value = delegate.readDouble()
-        debug("readDouble", value)
-        return value
+        return profiler.measure("readDouble") {
+            val value = delegate.readDouble()
+            debug("readDouble", value)
+            value
+        }
     }
 
     override fun readLine(): String? {

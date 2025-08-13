@@ -2,11 +2,11 @@ package com.seanshubin.kotlin.tryme.domain.jvmclassformat
 
 import com.seanshubin.kotlin.tryme.domain.format.DurationFormat
 import com.seanshubin.kotlin.tryme.domain.json.JsonMappers
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.util.Profiler
 import java.io.DataInputStream
 import java.io.IOException
 import java.nio.file.*
 import java.nio.file.attribute.BasicFileAttributes
-import java.util.function.Predicate
 
 object ParseSampleApp {
     val outputDir = Paths.get("generated", "sample-app")
@@ -14,6 +14,7 @@ object ParseSampleApp {
 
     @JvmStatic
     fun main(args: Array<String>) {
+        val profiler = Profiler()
         val startTime = System.currentTimeMillis()
 
         val inputDir = Paths.get(
@@ -39,10 +40,10 @@ object ParseSampleApp {
             }
         }
         val isOnBlacklist = loadRegexPredicate(
-           resourceDir.resolve( "blacklist.txt")
+            resourceDir.resolve("blacklist.txt")
         )
         val isOnWhitelist = loadRegexPredicate(resourceDir.resolve("whitelist.txt"))
-        Files.walkFileTree(inputDir, ParseVisitor(inputDir,isOnBlacklist, isOnWhitelist, events))
+        Files.walkFileTree(inputDir, ParseVisitor(inputDir, isOnBlacklist, isOnWhitelist, events, profiler))
         println("Parsed $filesParsed files")
         val endTime = System.currentTimeMillis()
         val durationMillis = endTime - startTime
@@ -66,7 +67,14 @@ object ParseSampleApp {
         }
     }
 
-    fun parseFile(inputDir: Path, filePath: Path, isOnBlackList:(String)->Boolean, isOnWhiteList:(String)->Boolean, events: Events) {
+    fun parseFile(
+        inputDir: Path,
+        filePath: Path,
+        isOnBlackList: (String) -> Boolean,
+        isOnWhiteList: (String) -> Boolean,
+        events: Events,
+        profiler: Profiler
+    ) {
         if (!shouldParse(filePath)) {
             return
         }
@@ -80,7 +88,7 @@ object ParseSampleApp {
         val emit: (String) -> Unit = { dataInputLines.add(it) }
         val rawJvmClass = Files.newInputStream(filePath).use { inputStream ->
             val dataInput = DataInputStream(inputStream)
-            val debugDataInput = DebugDataInput(dataInput, emit)
+            val debugDataInput = DebugDataInput(dataInput, emit, profiler)
             RawJvmClass.fromDataInput(debugDataInput)
         }
         val jvmClass = JvmClass.fromRawJvmClass(rawJvmClass, events)
@@ -89,21 +97,24 @@ object ParseSampleApp {
         val jvmPath = outputBase.resolve("$baseName-class.json")
         Files.writeString(jvmPath, jvmJson, StandardOpenOption.CREATE)
 
-        val testabiltyReport = TestabilityReport.fromJvmClass(filePath,jvmClass,isOnBlackList, isOnWhiteList)
+        val testabiltyReport = TestabilityReport.fromJvmClass(filePath, jvmClass, isOnBlackList, isOnWhiteList)
         val testabilityJson = JsonMappers.pretty.writeValueAsString(testabiltyReport)
         val reportPath = outputBase.resolve("$baseName-testability.json")
         Files.writeString(reportPath, testabilityJson, StandardOpenOption.CREATE)
     }
 
-    fun loadRegexPredicate(path:Path): (String)->Boolean{
+    fun loadRegexPredicate(path: Path): (String) -> Boolean {
         val patterns = Files.readAllLines(path).map { it.trim() }.filter { it.isNotEmpty() }
         return AcceptList.fromPatterns(patterns)
     }
 
-    class ParseVisitor(private val inputDir: Path,
-                       private val isOnBlackList:(String)->Boolean,
-                       private val isOnWhiteList:(String)->Boolean,
-                       private val events: Events) : FileVisitor<Path> {
+    class ParseVisitor(
+        private val inputDir: Path,
+        private val isOnBlackList: (String) -> Boolean,
+        private val isOnWhiteList: (String) -> Boolean,
+        private val events: Events,
+        private val profiler: Profiler
+    ) : FileVisitor<Path> {
         override fun preVisitDirectory(
             dir: Path,
             attrs: BasicFileAttributes
@@ -115,7 +126,7 @@ object ParseSampleApp {
             file: Path,
             attrs: BasicFileAttributes
         ): FileVisitResult {
-            parseFile(inputDir, file, isOnBlackList, isOnWhiteList, events)
+            parseFile(inputDir, file, isOnBlackList, isOnWhiteList, events, profiler)
             return FileVisitResult.CONTINUE
         }
 

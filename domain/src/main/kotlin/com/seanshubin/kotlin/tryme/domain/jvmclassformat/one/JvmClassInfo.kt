@@ -98,7 +98,6 @@ class JvmClassInfo(
             val methods = readMethods(input, methodCount)
             val attributeCount = input.readUnsignedShort().toUShort()
             val attributes = readAttributes(input, attributeCount)
-            assertEndOfInput(input)
             val rawJvmClass =
                 JvmClassInfo(
                     magic,
@@ -146,15 +145,6 @@ class JvmClassInfo(
 
         fun readAttributes(input: DataInput, attributeCount: UShort): List<AttributeInfo> {
             return (0 until attributeCount.toInt()).map { AttributeInfo.fromDataInput(input) }
-        }
-
-        fun assertEndOfInput(input: DataInput) {
-            try {
-                input.readByte()
-                throw RuntimeException("Expected end of input, but found more data")
-            } catch (e: Exception) {
-                // do nothing
-            }
         }
     }
 }

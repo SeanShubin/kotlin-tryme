@@ -2,6 +2,7 @@ package com.seanshubin.kotlin.tryme.domain.jvmclassformat
 
 import com.seanshubin.kotlin.tryme.domain.format.DurationFormat
 import com.seanshubin.kotlin.tryme.domain.json.JsonMappers
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.util.Profiler
 import java.io.DataInputStream
 import java.io.IOException
 import java.nio.file.*
@@ -12,10 +13,13 @@ object ParseStandardLibraryApp {
 
     @JvmStatic
     fun main(args: Array<String>) {
+        val profiler = Profiler()
         val startTime = System.currentTimeMillis()
-        val inputDir = Paths.get("generated", "jmods")
+        val inputDir = Paths.get("generated", "jmods", "java.base.jmod")
         val summaryFile  = outputDir.resolve("summary.txt")
+        val profilerFile = outputDir.resolve("profiler.txt")
         Files.deleteIfExists(summaryFile)
+        Files.deleteIfExists(profilerFile)
         fun emitSummary(line: String) {
             Files.write(summaryFile, listOf(line), StandardOpenOption.CREATE, StandardOpenOption.APPEND)
             println(line)
@@ -37,10 +41,11 @@ object ParseStandardLibraryApp {
                 println("Parsing $path ($filesParsed)")
             }
         }
-        Files.walkFileTree(inputDir, ParseVisitor(inputDir, events))
+        Files.walkFileTree(inputDir, ParseVisitor(inputDir, events, profiler))
         emitSummary("Parsed $filesParsed files")
         emitSummary("Total codes: $totalCodes")
         emitSummary("Code histogram:")
+        Files.write(profilerFile, profiler.lines(), StandardOpenOption.CREATE, StandardOpenOption.APPEND)
         codeHistogram.entries.sortedByDescending { it.value }.forEach { (code, count) ->
             println("  $code: $count")
         }
@@ -53,7 +58,7 @@ object ParseStandardLibraryApp {
 
     fun shouldParse(filePath: Path): Boolean {
         val fileName = filePath.fileName.toString()
-        return fileName.endsWith(".class") && !fileName.startsWith("module-info")
+        return fileName.endsWith(".class")
     }
 
     fun splitExt(path: Path): Pair<String, String> {
@@ -66,7 +71,7 @@ object ParseStandardLibraryApp {
         }
     }
 
-    fun parseFile(inputDir: Path, filePath: Path, events:Events) {
+    fun parseFile(inputDir: Path, filePath: Path, events:Events, profiler:Profiler) {
         if (!shouldParse(filePath)) {
             return
         }
@@ -84,7 +89,7 @@ object ParseStandardLibraryApp {
         val emit: (String) -> Unit = { dataInputLines.add(it) }
         val rawJvmClass = Files.newInputStream(filePath).use { inputStream ->
             val dataInput = DataInputStream(inputStream)
-            val debugDataInput = DebugDataInput(dataInput, emit)
+            val debugDataInput = DebugDataInput(dataInput, emit, profiler)
             RawJvmClass.fromDataInput(debugDataInput)
         }
         Files.write(dataPath, dataInputLines)
@@ -104,7 +109,10 @@ object ParseStandardLibraryApp {
         methodDependencyLines.forEach(::println)
     }
 
-    class ParseVisitor(private val inputDir: Path, private val events:Events) : FileVisitor<Path> {
+    class ParseVisitor(
+        private val inputDir: Path,
+        private val events:Events,
+        private val profiler:Profiler) : FileVisitor<Path> {
         override fun preVisitDirectory(
             dir: Path,
             attrs: BasicFileAttributes
@@ -116,7 +124,7 @@ object ParseStandardLibraryApp {
             file: Path,
             attrs: BasicFileAttributes
         ): FileVisitResult {
-            parseFile(inputDir, file, events)
+            parseFile(inputDir, file, events, profiler)
             return FileVisitResult.CONTINUE
         }
 
