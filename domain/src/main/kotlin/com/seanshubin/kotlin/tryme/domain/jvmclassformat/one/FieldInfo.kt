@@ -3,7 +3,7 @@ package com.seanshubin.kotlin.tryme.domain.jvmclassformat.one
 import java.io.DataInput
 
 data class FieldInfo(
-    val accessFlags: UShort,
+    val accessFlags: Set<AccessFlag>,
     val nameIndex: UShort,
     val descriptorIndex: UShort,
     val attributesCount: UShort,
@@ -21,7 +21,7 @@ data class FieldInfo(
     }
     companion object {
         fun fromDataInput(input: DataInput): FieldInfo {
-            val accessFlags = input.readUnsignedShort().toUShort()
+            val accessFlags = AccessFlag.fromDataInput(input)
             val nameIndex = input.readUnsignedShort().toUShort()
             val descriptorIndex = input.readUnsignedShort().toUShort()
             val attributesCount = input.readUnsignedShort().toUShort()

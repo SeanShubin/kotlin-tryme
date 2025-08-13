@@ -2,7 +2,24 @@ package com.seanshubin.kotlin.tryme.domain.jvmclassformat.two.factory
 
 import com.seanshubin.kotlin.tryme.domain.jvmclassformat.one.*
 import com.seanshubin.kotlin.tryme.domain.jvmclassformat.two.api.*
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.two.constant.factory.ConstantPoolClassApiFactory
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.two.constant.factory.ConstantPoolDoubleApiFactory
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.two.constant.factory.ConstantPoolDynamicApiFactory
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.two.constant.factory.ConstantPoolFactory
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.two.constant.factory.ConstantPoolFloatApiFactory
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.two.constant.factory.ConstantPoolIntegerApiFactory
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.two.constant.factory.ConstantPoolLongApiFactory
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.two.constant.factory.ConstantPoolMethodHandleApiFactory
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.two.constant.factory.ConstantPoolMethodTypeApiFactory
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.two.constant.factory.ConstantPoolModuleApiFactory
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.two.constant.factory.ConstantPoolNameAndTypeApiFactory
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.two.constant.factory.ConstantPoolPackageApiFactory
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.two.constant.factory.ConstantPoolRefApiFactory
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.two.constant.factory.ConstantPoolStringApiFactory
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.two.constant.factory.ConstantPoolUtf8ApiFactory
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.two.field.factory.FieldFactory
 import com.seanshubin.kotlin.tryme.domain.jvmclassformat.two.impl.JvmClass
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.two.method.factory.MethodFactory
 
 object JvmClassFactory {
     fun fromJvmClassInfo(jvmClassInfo: JvmClassInfo): JvmClassApi {
@@ -65,11 +82,23 @@ object JvmClassFactory {
     }
 
     private fun adaptFields(fields: List<FieldInfo>, constantPoolMap: Map<Int, ConstantPoolApi>): List<FieldApi> {
-        throw UnsupportedOperationException("not implemented")
+        return fields.map { fieldInfo ->
+            adaptField(fieldInfo, constantPoolMap)
+        }
+    }
+
+    private fun adaptField(fieldInfo: FieldInfo, constantPoolMap: Map<Int, ConstantPoolApi>): FieldApi {
+        return FieldFactory.create(fieldInfo, constantPoolMap)
     }
 
     private fun adaptMethods(methods: List<MethodInfo>, constantPoolMap: Map<Int, ConstantPoolApi>): List<MethodApi> {
-        throw UnsupportedOperationException("not implemented")
+        return methods.map { methodInfo ->
+            adaptMethod(methodInfo, constantPoolMap)
+        }
+    }
+
+    private fun adaptMethod(methodInfo: MethodInfo, constantPoolMap: Map<Int, ConstantPoolApi>): MethodApi {
+        return MethodFactory.create(methodInfo, constantPoolMap)
     }
 
     private fun adaptAttributes(attributes: List<Any>, constantPoolMap: Map<Int, ConstantPoolApi>): List<AttributeApi> {

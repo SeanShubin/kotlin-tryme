@@ -6,6 +6,7 @@ data class MethodInfo(
     val accessFlags: Set<AccessFlag>,
     val nameIndex: UShort,
     val descriptorIndex: UShort,
+    val attributesCount: UShort,
     val attributes: List<AttributeInfo>
 ) {
     fun lines():List<String>{
@@ -13,7 +14,7 @@ data class MethodInfo(
             "accessFlags: $accessFlags",
             "nameIndex: $nameIndex",
             "descriptorIndex: $descriptorIndex",
-            "attributesCount: ${attributes.size}"
+            "attributesCount: $attributesCount"
         ) + attributes.mapIndexed { index, attributeInfo ->
             "attribute[$index]:" + attributeInfo.line()
         }
@@ -30,6 +31,7 @@ data class MethodInfo(
                 accessFlags = accessFlags,
                 nameIndex = nameIndex,
                 descriptorIndex = descriptorIndex,
+                attributesCount = attributesCount,
                 attributes = attributes
             )
         }
