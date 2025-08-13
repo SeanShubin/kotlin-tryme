@@ -1,27 +1,82 @@
 package com.seanshubin.kotlin.tryme.domain.jvmclassformat.two.api
 
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.one.ConstantPoolTag
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.one.ReferenceKind
+
 interface ConstantPoolApi {
     val tag: ConstantPoolTag
-    fun entriesConsumed(): UShort
+    val index: Int
+    fun line():String
+    fun makeLine(s:String):String {
+        return "${tag.line()}[$index] $s"
+    }
     interface ClassApi : ConstantPoolApi {
-        val name:String
+        val name: String
     }
-    interface FieldrefApi : ConstantPoolApi {
 
+    interface RefApi : ConstantPoolApi {
+        val className: String
+        val methodName: String
+        val methodDescriptor: String
     }
-    interface MethodrefApi : ConstantPoolApi {}
-    interface InterfaceMethodrefApi : ConstantPoolApi {}
-    interface StringApi : ConstantPoolApi {}
-    interface IntegerApi : ConstantPoolApi {}
-    interface FloatApi : ConstantPoolApi {}
-    interface LongApi : ConstantPoolApi {}
-    interface DoubleApi : ConstantPoolApi {}
-    interface NameAndTypeApi : ConstantPoolApi {}
-    interface Utf8Api : ConstantPoolApi {}
-    interface MethodHandleApi : ConstantPoolApi {}
-    interface MethodTypeApi : ConstantPoolApi {}
-    interface DynamicApi : ConstantPoolApi {}
-    interface InvokeDynamicApi : ConstantPoolApi {}
-    interface ModuleApi : ConstantPoolApi {}
-    interface PackageApi : ConstantPoolApi {}
+
+    interface StringApi : ConstantPoolApi {
+        val value: String
+    }
+
+    interface IntegerApi : ConstantPoolApi {
+        val value: Int
+    }
+
+    interface FloatApi : ConstantPoolApi {
+        val value: Float
+    }
+
+    interface LongApi : ConstantPoolApi {
+        val value: Long
+    }
+
+    interface DoubleApi : ConstantPoolApi {
+        val value: Double
+    }
+
+    interface NameAndTypeApi : ConstantPoolApi {
+        val name: String
+        val descriptor: String
+    }
+
+    interface Utf8Api : ConstantPoolApi {
+        val value: String
+    }
+
+    interface MethodHandleApi : ConstantPoolApi {
+        val referenceKind: ReferenceKind
+        val className: String
+        val methodName: String
+        val methodDescriptor: String
+    }
+
+    interface MethodTypeApi : ConstantPoolApi {
+        val descriptor: String
+    }
+
+    interface DynamicApi : ConstantPoolApi {
+        val bootstrapMethodAttrIndex: UShort
+        val name: String
+        val descriptor: String
+    }
+
+    interface InvokeDynamicApi : ConstantPoolApi {
+        val bootstrapMethodAttrIndex: UShort
+        val name: String
+        val descriptor: String
+    }
+
+    interface ModuleApi : ConstantPoolApi {
+        val name: String
+    }
+
+    interface PackageApi : ConstantPoolApi {
+        val name: String
+    }
 }

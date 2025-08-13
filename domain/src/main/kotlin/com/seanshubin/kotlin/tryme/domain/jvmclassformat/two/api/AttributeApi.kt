@@ -2,7 +2,10 @@ package com.seanshubin.kotlin.tryme.domain.jvmclassformat.two.api
 
 interface AttributeApi {
     val name: ConstantPoolApi.Utf8Api
-    interface ConstantValueApi : AttributeApi
+    fun lines():List<String>
+    interface ConstantValueApi : AttributeApi{
+        val value:ConstantPoolApi
+    }
     interface CodeApi : AttributeApi
     interface StackMapTableApi : AttributeApi
     interface ExceptionsApi : AttributeApi

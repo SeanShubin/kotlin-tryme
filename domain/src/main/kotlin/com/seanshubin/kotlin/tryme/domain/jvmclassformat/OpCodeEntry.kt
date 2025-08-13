@@ -1,6 +1,7 @@
 package com.seanshubin.kotlin.tryme.domain.jvmclassformat
 
-import com.seanshubin.kotlin.tryme.domain.jvmclassformat.ByteUtil.bytesToInt
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.util.ByteUtil
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.util.ByteUtil.bytesToInt
 
 sealed interface OpCodeEntry {
     val index: Int

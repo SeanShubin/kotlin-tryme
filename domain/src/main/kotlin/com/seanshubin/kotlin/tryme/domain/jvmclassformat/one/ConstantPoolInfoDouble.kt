@@ -1,7 +1,7 @@
 package com.seanshubin.kotlin.tryme.domain.jvmclassformat.one
 
-import com.seanshubin.kotlin.tryme.domain.jvmclassformat.one.ByteUtil.bytesToDouble
 import com.seanshubin.kotlin.tryme.domain.jvmclassformat.one.FormatUtil.bytesToHex
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.util.ByteUtil.bytesToDouble
 
 class ConstantPoolInfoDouble(
     override val index: Int,

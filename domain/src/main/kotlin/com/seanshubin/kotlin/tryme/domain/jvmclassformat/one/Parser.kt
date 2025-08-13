@@ -1,5 +1,7 @@
 package com.seanshubin.kotlin.tryme.domain.jvmclassformat.one
 
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.two.factory.JvmClassFactory
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.two.impl.JvmClass
 import com.seanshubin.kotlin.tryme.domain.jvmclassformat.util.DataInputEventsLines
 import com.seanshubin.kotlin.tryme.domain.jvmclassformat.util.LoggedDataInput
 import com.seanshubin.kotlin.tryme.domain.jvmclassformat.util.Profiler
@@ -27,19 +29,21 @@ class Parser(
         Files.createDirectories(dataFile.parent)
         Files.deleteIfExists(dataFile)
         val structureFile = outputDir.resolve(fileNameWithoutExt + "-structure.txt")
+        val classFile = outputDir.resolve(fileNameWithoutExt + "-class.txt")
         val dataLines = mutableListOf<String>()
         val emitToDataLine:(String)->Unit = { line ->
             dataLines.add(line)
         }
         val dataEvents: LoggedDataInput.DataInputEvents = DataInputEventsLines(emitToDataLine)
-//        val dataEvents: LoggedDataInput.DataInputEvents = LoggedDataInput.DataInputEvents.nop
         val jvmClassInfo = Files.newInputStream(inputFile).use { inputStream ->
             val loggedDataInput = LoggedDataInput(DataInputStream(inputStream), dataEvents, profiler)
                 JvmClassInfo.fromDataInput(loggedDataInput)
         }
+        val jvmClass = JvmClassFactory.fromJvmClassInfo(jvmClassInfo)
         Files.createDirectories(structureFile.parent)
         Files.write(structureFile, jvmClassInfo.lines(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
         Files.write(dataFile, dataLines, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
+        Files.write(classFile, jvmClass.lines(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
     }
 
     fun parseDir() {

@@ -1,9 +1,8 @@
 package com.seanshubin.kotlin.tryme.domain.jvmclassformat.one
 
-import com.seanshubin.kotlin.tryme.domain.jvmclassformat.one.ByteUtil.intToBytes
 import com.seanshubin.kotlin.tryme.domain.jvmclassformat.one.FormatUtil.bytesToHex
 import com.seanshubin.kotlin.tryme.domain.jvmclassformat.one.FormatUtil.indent
-import com.seanshubin.kotlin.tryme.domain.jvmclassformat.util.Profiler
+import com.seanshubin.kotlin.tryme.domain.jvmclassformat.util.ByteUtil.intToBytes
 import java.io.DataInput
 
 class JvmClassInfo(
