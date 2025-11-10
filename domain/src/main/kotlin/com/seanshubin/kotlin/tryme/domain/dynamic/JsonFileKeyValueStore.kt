@@ -57,7 +57,6 @@ class JsonFileKeyValueStore(val path: Path, val files: FilesContract) : KeyValue
         }
     }
 
-
     companion object {
         private val jsonCharset = StandardCharsets.UTF_8
         private val defaultJsonText = "{}"
