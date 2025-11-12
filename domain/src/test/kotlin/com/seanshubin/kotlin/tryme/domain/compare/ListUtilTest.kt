@@ -8,8 +8,8 @@ class ListUtilTest {
     @Test
     fun breakIntoGroups() {
         val sample = "abc-?123def456hij-kjl"
-        val predicates: List<(Char) -> Boolean> = listOf(Character::isLetter, Character::isDigit)
-        val actual = sample.toList().splitByContiguousBlocks(predicates).map { it.joinToString("") }
+        val predicates: Array<(Char) -> Boolean> = arrayOf(Character::isLetter, Character::isDigit)
+        val actual = sample.toList().splitByContiguousBlocks(*predicates).map { it.joinToString("") }
         val expected = listOf(
             "abc",
             "-?",
