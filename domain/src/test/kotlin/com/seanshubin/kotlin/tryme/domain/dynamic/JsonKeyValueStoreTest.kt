@@ -3,7 +3,6 @@ package com.seanshubin.kotlin.tryme.domain.dynamic
 import com.seanshubin.kotlin.tryme.domain.contract.FilesDelegate
 import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.Paths
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -11,7 +10,7 @@ class JsonKeyValueStoreTest {
     @Test
     fun intValue(){
         withTemporaryFile { path ->
-            val keyValueStore = JsonFileKeyValueStore(path, FilesDelegate)
+            val keyValueStore = FixedPathJsonFileKeyValueStore(path, FilesDelegate)
             val documentationPrefix = listOf("documentation")
             val keyValueStoreWithDocumentation = KeyValueStoreWithDocumentationDelegate(keyValueStore, documentationPrefix)
             val key = listOf("a", "b", "c")
@@ -33,7 +32,7 @@ class JsonKeyValueStoreTest {
     @Test
     fun arrays(){
         withTemporaryFile { path ->
-            val keyValueStore = JsonFileKeyValueStore(path, FilesDelegate)
+            val keyValueStore = FixedPathJsonFileKeyValueStore(path, FilesDelegate)
             keyValueStore.store(listOf("the-array", 0, "name"), "a")
             keyValueStore.store(listOf("the-array", 0, "value"), 1)
             keyValueStore.store(listOf("the-array", 1, "name"), "b")

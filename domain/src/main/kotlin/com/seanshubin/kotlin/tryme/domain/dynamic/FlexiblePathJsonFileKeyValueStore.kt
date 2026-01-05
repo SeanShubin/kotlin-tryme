@@ -6,36 +6,36 @@ import com.seanshubin.kotlin.tryme.domain.json.JsonMappers
 import java.nio.charset.StandardCharsets
 import java.nio.file.Path
 
-class JsonFileKeyValueStore(val path: Path, val files: FilesContract) : KeyValueStore {
-    override fun load(key: List<Any>): Any? {
+class FlexiblePathJsonFileKeyValueStore(val files: FilesContract):PathKeyValueStore {
+    override fun load(path: Path, key: List<Any>): Any? {
         assertKeyValid(key)
-        val jsonObject = loadJsonObject()
+        val jsonObject = loadJsonObject(path)
         return DynamicUtil.get(jsonObject, key)
     }
 
-    override fun store(key: List<Any>, value: Any?) {
+    override fun store(path: Path, key: List<Any>, value: Any?) {
         assertKeyValid(key)
-        val jsonObject = loadJsonObject()
+        val jsonObject = loadJsonObject(path)
         val newJsonObject = DynamicUtil.set(jsonObject, key, value)
         val newJsonText = JsonMappers.pretty.writeValueAsString(newJsonObject)
         files.writeString(path, newJsonText, jsonCharset)
     }
 
-    override fun exists(key: List<Any>): Boolean {
+    override fun exists(path: Path, key: List<Any>): Boolean {
         assertKeyValid(key)
         if (!files.exists(path)) return false
-        val jsonObject = loadJsonObject()
+        val jsonObject = loadJsonObject(path)
         return DynamicUtil.exists(jsonObject, key)
     }
 
-    override fun arraySize(key: List<Any>): Int {
+    override fun arraySize(path: Path, key: List<Any>): Int {
         assertKeyValid(key)
-        val jsonObject = loadJsonObject()
+        val jsonObject = loadJsonObject(path)
         val array = DynamicUtil.get(jsonObject, key) as List<*>
         return array.size
     }
 
-    private fun loadJsonObject(): Any? {
+    private fun loadJsonObject(path: Path): Any? {
         val text = if(files.exists(path)) {
             files.readString(path, jsonCharset)
         } else {
@@ -57,7 +57,7 @@ class JsonFileKeyValueStore(val path: Path, val files: FilesContract) : KeyValue
         }
     }
 
-    companion object {
+    companion object Companion {
         private val jsonCharset = StandardCharsets.UTF_8
         private val defaultJsonText = "{}"
     }
