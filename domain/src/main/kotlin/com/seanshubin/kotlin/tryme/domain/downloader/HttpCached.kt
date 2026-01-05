@@ -2,7 +2,7 @@ package com.seanshubin.kotlin.tryme.domain.downloader
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.seanshubin.kotlin.tryme.domain.contract.FilesContract
-import com.seanshubin.kotlin.tryme.domain.json.JsonMappers
+import com.seanshubin.kotlin.tryme.domain.dynamic.JsonMappers
 import java.net.URI
 import java.nio.file.Path
 import java.nio.file.Paths

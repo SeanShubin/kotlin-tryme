@@ -1,7 +1,7 @@
 package com.seanshubin.kotlin.tryme.domain.downloader
 
-import com.seanshubin.kotlin.tryme.domain.config.JsonFileConfiguration
 import com.seanshubin.kotlin.tryme.domain.contract.FilesDelegate
+import com.seanshubin.kotlin.tryme.domain.dynamic.FixedPathJsonFileKeyValueStore
 import java.net.URI
 import java.net.URISyntaxException
 import java.net.http.HttpClient
@@ -16,24 +16,24 @@ object DownloaderSampleApp {
         val configurationPathName = args.getOrNull(0) ?: "downloader-config.json"
         val configurationPath = Paths.get(configurationPathName)
         val files = FilesDelegate
-        val configuration = JsonFileConfiguration(files, configurationPath)
-        val site = URI(configuration.stringAt("site to scan", listOf("site")).load())
-        val cacheDir = Paths.get(configuration.stringAt("generated/cache", listOf("cacheDir")).load())
-        val reportDir = Paths.get(configuration.stringAt("generated/report", listOf("reportDir")).load())
-        val username = configuration.stringAt("username", listOf("username")).load()
-        val password = configuration.stringAt("password", listOf("password")).load()
+        val configuration = FixedPathJsonFileKeyValueStore(files, configurationPath)
+        val site = URI(configuration.loadOrDefault(listOf("site"), "site to scan") as String)
+        val cacheDir = Paths.get(configuration.loadOrDefault(listOf("cacheDir"), "generated/cache") as String)
+        val reportDir = Paths.get(configuration.loadOrDefault(listOf("reportDir"), "generated/report") as String)
+        val username = configuration.loadOrDefault(listOf("username"), "username") as String
+        val password = configuration.loadOrDefault(listOf("password"), "password") as String
         val downloadDir =
-            Paths.get(configuration.stringAt("generated/download", listOf("downloadDir")).load())
+            Paths.get(configuration.loadOrDefault(listOf("downloadDir"), "generated/download") as String)
         val httpClient = HttpClient.newHttpClient()
         val httpContract = HttpDelegate(httpClient)
         val clock = Clock.systemUTC()
         val httpCached = HttpCached(httpContract, clock, cacheDir, files)
         val persistence = PersistenceToFile(reportDir, files)
         val linkParser = LinkParserHtml(::uriSyntaxException, ::uriPathIsNull)
-        val followPatternsInclude = configuration.stringListAt(listOf(""".*"""), listOf("patterns", "follow", "include")).load()
-        val followPatternsExclude = configuration.stringListAt(emptyList<String>(), listOf("patterns", "follow", "exclude")).load()
-        val downloadPatternsInclude = configuration.stringListAt(emptyList<String>(), listOf("patterns", "download", "include")).load()
-        val downloadPatternsExclude = configuration.stringListAt(emptyList<String>(), listOf("patterns", "download", "exclude")).load()
+        val followPatternsInclude = configuration.loadOrDefault(listOf("patterns", "follow", "include"), listOf(""".*""")) as List<String>
+        val followPatternsExclude = configuration.loadOrDefault(listOf("patterns", "follow", "exclude"), emptyList<String>()) as List<String>
+        val downloadPatternsInclude = configuration.loadOrDefault(listOf("patterns", "download", "include"), emptyList<String>()) as List<String>
+        val downloadPatternsExclude = configuration.loadOrDefault(listOf("patterns", "download", "exclude"), emptyList<String>()) as List<String>
         val uriPolicies = listOf(
             PatternMatcher("follow", followPatternsInclude, followPatternsExclude),
             PatternMatcher("download", downloadPatternsInclude, downloadPatternsExclude)

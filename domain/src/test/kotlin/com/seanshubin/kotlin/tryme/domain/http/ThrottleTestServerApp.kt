@@ -1,6 +1,6 @@
 package com.seanshubin.kotlin.tryme.domain.http
 
-import com.seanshubin.kotlin.tryme.domain.json.JsonMappers
+import com.seanshubin.kotlin.tryme.domain.dynamic.JsonMappers
 import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpHandler
 import com.sun.net.httpserver.HttpServer

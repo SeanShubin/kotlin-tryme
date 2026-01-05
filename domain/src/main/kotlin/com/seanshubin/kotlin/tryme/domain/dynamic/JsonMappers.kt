@@ -1,4 +1,4 @@
-package com.seanshubin.kotlin.tryme.domain.json
+package com.seanshubin.kotlin.tryme.domain.dynamic
 
 import com.fasterxml.jackson.core.StreamReadFeature
 import com.fasterxml.jackson.databind.ObjectMapper

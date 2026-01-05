@@ -1,6 +1,5 @@
 package com.seanshubin.kotlin.tryme.domain.dynamic
 
-import com.seanshubin.kotlin.tryme.domain.json.JsonMappers
 import kotlin.random.Random
 
 object RandomDataApp {

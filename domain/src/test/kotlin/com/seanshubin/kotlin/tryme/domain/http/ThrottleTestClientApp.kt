@@ -1,6 +1,6 @@
 package com.seanshubin.kotlin.tryme.domain.http
 
-import com.seanshubin.kotlin.tryme.domain.json.JsonMappers
+import com.seanshubin.kotlin.tryme.domain.dynamic.JsonMappers
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest

@@ -10,7 +10,7 @@ class JsonKeyValueStoreTest {
     @Test
     fun intValue(){
         withTemporaryFile { path ->
-            val keyValueStore = FixedPathJsonFileKeyValueStore(path, FilesDelegate)
+            val keyValueStore = FixedPathJsonFileKeyValueStore(FilesDelegate, path)
             val documentationPrefix = listOf("documentation")
             val keyValueStoreWithDocumentation = KeyValueStoreWithDocumentationDelegate(keyValueStore, documentationPrefix)
             val key = listOf("a", "b", "c")
@@ -32,7 +32,7 @@ class JsonKeyValueStoreTest {
     @Test
     fun arrays(){
         withTemporaryFile { path ->
-            val keyValueStore = FixedPathJsonFileKeyValueStore(path, FilesDelegate)
+            val keyValueStore = FixedPathJsonFileKeyValueStore(FilesDelegate, path)
             keyValueStore.store(listOf("the-array", 0, "name"), "a")
             keyValueStore.store(listOf("the-array", 0, "value"), 1)
             keyValueStore.store(listOf("the-array", 1, "name"), "b")

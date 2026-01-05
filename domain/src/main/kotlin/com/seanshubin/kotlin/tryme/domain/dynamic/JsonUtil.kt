@@ -3,7 +3,6 @@ package com.seanshubin.kotlin.tryme.domain.dynamic
 import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.seanshubin.kotlin.tryme.domain.json.JsonMappers
 
 object JsonUtil {
     fun parseCsvLine(line: String): List<String> {

@@ -2,11 +2,10 @@ package com.seanshubin.kotlin.tryme.domain.dynamic
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.seanshubin.kotlin.tryme.domain.contract.FilesContract
-import com.seanshubin.kotlin.tryme.domain.json.JsonMappers
 import java.nio.charset.StandardCharsets
 import java.nio.file.Path
 
-class FixedPathJsonFileKeyValueStore(val path: Path, val files: FilesContract) : KeyValueStore {
+class FixedPathJsonFileKeyValueStore(val files: FilesContract, val path: Path) : KeyValueStore {
     override fun load(key: List<Any>): Any? {
         assertKeyValid(key)
         val jsonObject = loadJsonObject()

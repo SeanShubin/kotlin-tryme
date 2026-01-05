@@ -8,7 +8,7 @@ object JsonFileKeyValueStorePrototypeApp {
     fun main(args: Array<String>) {
         val pathName = "generated/json-file-key-value-store.json"
         val path = Paths.get(pathName)
-        val keyValueStore = FixedPathJsonFileKeyValueStore(path, FilesDelegate)
+        val keyValueStore = FixedPathJsonFileKeyValueStore(FilesDelegate, path)
         keyValueStore.store(listOf("key1", "key2", "key3"), "value1")
     }
 }
